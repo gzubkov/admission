@@ -159,7 +159,7 @@ $('#edudoc_typeradio').children('input').hide()
 <?php
 $msl = new dMysql();
 
-if (!$_SESSION['applicant_id']) {
+if (!isset($_SESSION['applicant_id'])) {
    print "<h2>Вход в систему</h2>";
 } else {
    print "<h2></h2>";
@@ -168,7 +168,7 @@ if (!$_SESSION['applicant_id']) {
   <div class="content"><form accept-charset="UTF-8" method="post" id="user-login-form">
 <div>
 <?php
-if (!$_SESSION['applicant_id']) {
+if (!isset($_SESSION['applicant_id'])) {
    print "<div class=\"form-item\" id=\"edit-name-wrapper\">";
    print "<label for=\"edit-name\">E-mail: <span class=\"form-required\" title=\"This field is required.\">*</span></label>
           <input maxlength=\"60\" name=\"name\" id=\"edit-name\" size=\"15\" class=\"validate[required,custom[email]] text-input\" type=\"text\"></div>";
@@ -205,7 +205,11 @@ if (!$_SESSION['applicant_id']) {
             <div id="first-time">
 
 <?php
-$step_num = 0 + $_SESSION['step_num'];
+if (isset($_SESSION['step_num'])) {
+    $step_num = 0 + $_SESSION['step_num'];
+} else {
+    $step_num = 0;
+}
    
 class FormFields2 extends FormFields 
 {
@@ -214,6 +218,9 @@ class FormFields2 extends FormFields
     }
 
     public function __destruct() {
+        if (!isset($_SESSION['step_num'])) {
+	    $_SESSION['step_num'] = 0;
+	}
         switch($_SESSION['step_num']) {
             case 0:
 	        print "<INPUT type=\"submit\" value=\"Я согласен\" class=\"submit\"></DIV>";
@@ -234,14 +241,14 @@ class FormFields2 extends FormFields
             default:
 	        print "<TR><TD align=\"center\" width=\"100%\"><INPUT type=\"submit\" class=\"submit\" value=\"Отправить\">";
 	        print "</TD></TR></FORM>\n";
-        }
+	}
     }
 }
 
 print '<H1 class="title">Шаг '.($step_num+1).' из 5</H1><DIV id="output"></DIV>';
 
 if ($step_num == 0) {
-   if ($_REQUEST['global_sid'] > 0) {
+   if (isset($_REQUEST['global_sid'])) {
        $_SESSION['global_sid'] = $_REQUEST['global_sid'];
    }
 
@@ -250,10 +257,10 @@ if ($step_num == 0) {
    $form = new FormFields2('insert.php','formular', 93, 0);
 
    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-   $form->tdBox( 'text', 'Фамилия',          'surname',  200, 60, K ); 
-   $form->tdBox( 'text', 'Имя',              'name',     200, 60, K ); 
+   $form->tdBox( 'text', 'Фамилия',          'surname',  200, 60, 'K' ); 
+   $form->tdBox( 'text', 'Имя',              'name',     200, 60, 'K' ); 
    $form->tdBox( 'text', 'Отчество (при наличии)',         'second_name', 200, 60, 0 ); 
-   $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, E ); 
+   $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, 'E' ); 
 
    print "</TBODY></TABLE></DIV>\n\n"; 
    print "<P>В соответствии с требованиями Федерального закона <A href=\"http://www.mami.ru/pk/files/152-FZ.pdf\" target=\"_blank\">«О персональных данных» от 27.07.2006 №152-ФЗ</A>  даю согласие на сбор и обработку моих персональных данных (далее – ПД) на срок с момента подписания согласия до 31.12.2012 в необходимом для зачисления в МГТУ «МАМИ» объеме.</P>
@@ -276,7 +283,7 @@ if ($step_num == 1) {
    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 
    $form->tdRadio(   'Пол',              'sex',         array('M'=>'Мужской','F'=>'Женский'), 0, 1);
-   $form->tdDateBox( 'Дата рождения',    'birthday',        1950, date('Y')-16, D );
+   $form->tdDateBox( 'Дата рождения',    'birthday',        1950, date('Y')-16, 'D' );
 
 //   $rval = getarray("SELECT * FROM reg_citizenry");
 //   foreach($rval as $key => $val) $tval[$val['id']] = $val['name'];
@@ -291,11 +298,11 @@ if ($step_num == 1) {
    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
 
    print "<INPUT type=\"hidden\" name=\"doc_type\" value=1>\n";
-   $form->tdBox( 'text', array('Серия','Номер'), array('doc_serie','doc_number'),    array(45,70), array(4,6), array(N,N) ); 
-   $form->tdBox( 'text', 'Кем выдан',         'doc_issued',  200, 200, A ); 
+   $form->tdBox( 'text', array('Серия','Номер'), array('doc_serie','doc_number'),    array(45,70), array(4,6), array('N','N') ); 
+   $form->tdBox( 'text', 'Кем выдан',         'doc_issued',  200, 200, 'A' ); 
    $form->tdBox( 'text', 'Код подразделения', 'doc_code',    100, 8, 'Okodp' ); 
-   $form->tdDateBox( 'Дата выдачи',           'doc_date',    1990, date('Y'), D );
-   $form->tdBox( 'text', 'Место рождения',    'birthplace',  200, 100, A ); 
+   $form->tdDateBox( 'Дата выдачи',           'doc_date',    1990, date('Y'), 'D' );
+   $form->tdBox( 'text', 'Место рождения',    'birthplace',  200, 100, 'A' ); 
   
    print "</TBODY></TABLE></DIV>";
 
@@ -303,12 +310,12 @@ if ($step_num == 1) {
    print "<h3>Адрес проживания</h3>";
    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 
-   $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress-index', 100, 6, N ); 
+   $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress-index', 100, 6, 'N' ); 
 
    $aspec = $msl->getArrayById("SELECT id,CONCAT(id,' - ',name) as name FROM `reg_rf_subject` ORDER BY id ASC",'id','name');
    $form->tdSelect(  'Субъект РФ', 'homeaddress-region', $aspec, 77, 1);
 
-   $form->tdBox( 'text', 'Населенный пункт',  'homeaddress-city', 200, 50, K );
+   $form->tdBox( 'text', 'Населенный пункт',  'homeaddress-city', 200, 50, 'K' );
    $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress-street', 200, 60, 0 );
    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array(A,0,0) );
 
@@ -320,11 +327,11 @@ if ($step_num == 1) {
    print "<h3>Адрес регистрации</h3>";
    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 
-   $form->tdBox( 'text', 'Почтовый индекс',  'regaddress-index', 100, 6, ON ); 
+   $form->tdBox( 'text', 'Почтовый индекс',  'regaddress-index', 100, 6, 'ON' ); 
 
    $form->tdSelect(  'Субъект РФ', 'regaddress-region', $aspec, 77, 0);
 
-   $form->tdBox( 'text', 'Населенный пункт',  'regeaddress-city', 200, 50, OK );
+   $form->tdBox( 'text', 'Населенный пункт',  'regeaddress-city', 200, 50, 'OK' );
    $form->tdBox( 'text', 'Улица (квартал)',  'regaddress-street', 200, 60, 0 );
    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress-home','regaddress-building','regaddress-flat'), array(25,25,25), array(5,4,4), array(0,0,0) );
    print "</TBODY></TABLE></DIV></DIV>";
@@ -348,8 +355,8 @@ if ($step_num == 1) {
 
 if (0) {
    $form->tdRadio(   'Тип документа об образовании', 'edudoc_type',  array('1'=>'аттестат','2'=>'диплом'), 0, 1);
-   $form->tdBox( 'text', array('Серия','№'),  array('edudoc[serie]','edudoc[number]'), array(45,65), array(10,10), array(A,N) );
-   $form->tdDateBox( 'Дата выдачи',           'edudoc_date',    1990, date('Y'), D );
+   $form->tdBox( 'text', array('Серия','№'),  array('edudoc[serie]','edudoc[number]'), array(45,65), array(10,10), array('A','N') );
+   $form->tdDateBox( 'Дата выдачи',           'edudoc_date',    1990, date('Y'), 'D' );
    $form->tdRadio(   'Подаю копию', 'edudoc_copy',  array('1'=>'да','0'=>'нет'), 1, 1);
 }   
 
@@ -448,9 +455,9 @@ function nextStep() {
    $bdoc = $msl->getarrayById("SELECT id,name FROM `reg_edu_doc`",'id','name');
    $form->tdSelect(  'Тип загружаемого документа', 'doctype', $bdoc, 0, 1);
 
-   $form->tdBox( 'text', array('Серия','№'),  array('docserie','docnumber'), array(45,65), array(10,10), array(A,N) );
-   $form->tdDateBox( 'Дата выдачи',           'docdate',    1990, date('Y'), D );
-   $form->tdBox( 'text', 'Наименование учреждения, выдавшего документ',  'docinstitution', 150, 300, A );
+   $form->tdBox( 'text', array('Серия','№'),  array('docserie','docnumber'), array(45,65), array(10,10), array('A','N') );
+   $form->tdDateBox( 'Дата выдачи',           'docdate',    1990, date('Y'), 'D' );
+   $form->tdBox( 'text', 'Наименование учреждения, выдавшего документ',  'docinstitution', 150, 300, 'A' );
    $form->tdBox( 'text', 'Специальность',  'docspecialty', 150, 60, 0 );
    
    print "<TR><TD><input type=\"button\" id=\"button1\" class=\"button\" value=\"Загрузить файлы\"></TD></TR>";

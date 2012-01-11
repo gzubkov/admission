@@ -84,13 +84,13 @@ $.ajaxSetup({
 <?php 
 class Student{
     public function isLogin() {
-        if (is_numeric($_SESSION['student_id'])) {
-	    return true;
-	} else { 
-            return false;
-	}
+        if (isset($_SESSION['student_id'])) {
+            if (is_numeric($_SESSION['student_id'])) {
+	        return true;
+	    } 
+	} 
+        return false;
     }
-      
 }
 
 $student = new Student();

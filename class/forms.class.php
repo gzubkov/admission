@@ -84,7 +84,8 @@ class FormFields
             case "remark":
                 print "<TR><TD colspan=2 style=\"font-size: 7pt; line-height: 12px;\">".$name."</TD></TR>";
                 break;
-            case "phone":
+            
+	    case "phone":
 	        $this->_leftColumn( $name, $r );
                 print "<TD>(<INPUT maxlength=\"".$maxlength[0]."\" name=\"".$qname."_code\"  id=\"edit-".$qname."_code\" class=\"";
 	        if ($r) print "validate[required,custom[onlyNumber]]";
@@ -92,23 +93,27 @@ class FormFields
                 if ($r) print "validate[required,custom[onlyNumber]]";
                 print "text-input\" style=\"width: ".$size[1]."px;\" type=\"text\" value=\"".$val[1]."\">.</TD>\n";
                 break;
+
             case "static":
 	        $this->_leftColumn( $name, 0 );
                 print "<TD>".$qname.".</TD>\n";
                 break;
+
             default: 
           
          
-         if (is_array( $name ) && is_array( $qname )){
+        if (is_array( $name ) && is_array( $qname )){
             $this->_leftColumn( $name[0], $r[0] );
             print "<TD>";
             for ($i = 0; $i < count($qname); $i++){
-		    if ($i > 0) {
+	        if ($i > 0) {
 		    print " ".$name[$i].$this->_required( $r, $i );
-		    }
-	            print " <INPUT maxlength=\"".$maxlength[$i]."\" name=\"".$qname[$i]."\" id=\"edit-".$qname[$i]."\" style=\"width: ".$size[$i]."px;\" class=\"";
-		    print $this->_getValidate($r[$i]);
-		    print "text-input\" type=\"text\" value='".$val[$i]."'>";
+		}
+	        print " <INPUT maxlength=\"".$maxlength[$i]."\" name=\"".$qname[$i]."\" id=\"edit-".$qname[$i]."\" style=\"width: ".$size[$i]."px;\" class=\"";
+		print $this->_getValidate($r[$i]);
+		print "text-input\" type=\"text\"";
+		if (isset($val[$i])) print " value='".$val[$i]."'";
+		print ">";
 	    }
             print ".</TD>";
          } 

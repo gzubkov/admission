@@ -28,8 +28,10 @@ class Catalog
 			     "%basicsemestr%" => ($v['basicsemestr'] == 1) ? "(новый)" : "");
 
 	    $catalogs[$v['id']] = strtr($string, $replace);
-	    if ($v['archive'] > 0 && $archivetext != "") {
-	        $catalogs[$v['id']] .= " (".$archivetext.")"; 
+	    if (isset($v['archive'])) {
+	        if ($v['archive'] > 0 && $archivetext != "") {
+	            $catalogs[$v['id']] .= " (".$archivetext.")"; 
+	        }
 	    }
 	}
 	return $catalogs;
@@ -121,7 +123,7 @@ class Catalog
 			     "%qualify%" => $v['qualify']);
 
 	    $catalogs[$v['id']] = strtr($string, $replace);
-	    if ($v['archive'] > 0 && $archivetext != "") {
+	    if (isset($v['archive']) && $v['archive'] > 0 && $archivetext != "") {
 	        $catalogs[$v['id']] .= " (".$archivetext.")"; 
 	    }
 	}

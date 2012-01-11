@@ -258,9 +258,9 @@ $form = new FormFields('get.php','dialog-message2form', 250, 0, 'Добавит�
    $form->hidden('aid',  '');
    $form->tdSelect(  'Документ', 'doctype', $bdoc, 0, 1);
 
-   $form->tdBox( 'text', array('Серия','№'),  array('docserie','docnumber'), array(45,65), array(10,10), array(A,N) );
-   $form->tdDateBox( 'Дата выдачи',           'docdate',    1990, date('Y'), D );
-   $form->tdBox( 'text', 'Кем выдан',  'docinstitution', 150, 300, A );
+   $form->tdBox( 'text', array('Серия','№'),  array('docserie','docnumber'), array(45,65), array(10,10), array('A','N') );
+   $form->tdDateBox( 'Дата выдачи',           'docdate',    1990, date('Y'), 'D' );
+   $form->tdBox( 'text', 'Кем выдан',  'docinstitution', 150, 300, 'A' );
    $form->tdBox( 'text', 'Специальность',  'docspecialty', 150, 60, 0 );
 /*
 print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=attachDoc&aid=".$id."&doctype='+$('#doctype option:selected').val()+'$docserie='+$('#docserie').val()+'&catalog='+$('#catalog".$val['id']." option:selected').val(), beforeSend: function() {\$.blockUI({ centerY: 0, css: { top: '10px', left: '', right: '10px' }, message: 'Ваш запрос обрабатывается...' })}, success: function(msg) {\$.unblockUI(); $('#dialog-message').dialog('close'); if (msg != 1){alert(msg)}}})\">Добавить документ</A>"; */

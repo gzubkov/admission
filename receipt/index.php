@@ -48,8 +48,7 @@ print "<BR>\n";
    print "<FORM action=\"kvit.php\" method=\"POST\" target=\"_blank\">";
    print "<TABLE border=0 cellspacing=3 cellpadding=3 id=example class=display><TBODY style=\"border: none;\">";
 
-//$_SESSION['joomlaregion'] =43;
-if ($_SESSION['joomlaregion'] == 0) {
+if (!isset($_SESSION['joomlaregion'])) {
    $region = 2;
    print "<TR><TD>Тарифная зона:</TD><TD>";
    print "<SELECT name=\"region_id\">

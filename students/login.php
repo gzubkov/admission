@@ -2,6 +2,7 @@
 require_once('../../conf.php');
         
 $_POST = $_REQUEST;
+if (isset($_POST['act'])) {
 switch($_POST['act']) 
 {
     case "exit":
@@ -20,5 +21,6 @@ switch($_POST['act'])
       	} else {
             print "wrondpwd";
         }
+}
 }
 ?>
