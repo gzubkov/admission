@@ -21,12 +21,16 @@ class Verification
     }
 }
 
-if (is_numeric($_REQUEST['mid']) && $_REQUEST['mhash'] == md5(md5('moodle.ins-iit.rudddddsdsd'.$_REQUEST['mid']))) {
+if (isset($_REQUEST['mid'])) {
+    if ($_REQUEST['mhash'] == md5(md5('moodle.ins-iit.rudddddsdsd'.$_REQUEST['mid']))) {
         $student_id = $_REQUEST['mid'];
-    }  else {
-if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
-    $student_id = $_REQUEST['student'];
-    if (!is_numeric($_REQUEST['student'])) $student_id = $_SESSION['student_id'];
+    }
+} else {
+if (isset($_SESSION['rights']) && isset($_SESSION['md_rights'])) {
+    if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
+        $student_id = $_REQUEST['student'];
+    	if (!is_numeric($_REQUEST['student'])) $student_id = $_SESSION['student_id'];
+    }
 } else {
     $student_id = $_SESSION['student_id'];
 }

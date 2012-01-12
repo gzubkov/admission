@@ -4,6 +4,9 @@ require_once('../../modules/mysql.php');
 
 $msl = new dMysql();
 $_POST = $_REQUEST;
+if (!isset($_POST['act'])) {
+    $_POST['act'] = "";
+}
 switch($_POST['act']) 
 {
 case "exit":

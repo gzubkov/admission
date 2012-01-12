@@ -4,7 +4,7 @@ require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
 require_once('../class/price.class.php');
 
-if ($_REQUEST['format'] != 'html') $_REQUEST['format'] = 'pdf';
+if (!isset($_REQUEST['format']) || $_REQUEST['format'] != 'html') $_REQUEST['format'] = 'pdf';
 
 class Receipt
 {
@@ -144,7 +144,7 @@ class Receipt
 if ($_REQUEST['count'] < 1) $_REQUEST['count'] = 1;
 if (!is_numeric($_REQUEST['purpose'])) $_REQUEST['purpose'] = 1;
 
-if ($_REQUEST['mid'] > 0) {
+if (isset($_REQUEST['mid'])) {
     if ($_REQUEST['mhash'] == md5(md5("moodle.ins-iit.rudddddsdsd".$_REQUEST['mid'])) || $_SERVER['REMOTE_ADDR'] == $CFG_trustedip) {
         $_REQUEST['student'] = $_REQUEST['mid'];
     } else {

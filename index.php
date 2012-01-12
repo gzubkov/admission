@@ -317,7 +317,7 @@ if ($step_num == 1) {
 
    $form->tdBox( 'text', 'Населенный пункт',  'homeaddress-city', 200, 50, 'K' );
    $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress-street', 200, 60, 0 );
-   $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array(A,0,0) );
+   $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array('A',0,0) );
 
    print "<TR><TD colspan=\"2\"><LABEL><INPUT type=\"checkbox\" id=\"regaddressashome\" name=\"regaddressashome\" value=\"1\" checked onclick=\"javascript: $('#regaddress_form').toggle();\">Совпадает с адресом регистрации.</LABEL>";
    print "</TBODY></TABLE></DIV>";
@@ -491,14 +491,14 @@ $cat = new Catalog();
 
 //$bval = $cat->getAvailableByPgid(1);
 $bval = $cat->getAvailableSpecialtiesByPgid(1);
-$form->tdSelect(  'Выбранная образовательная программа', 'catalog', $bval, ($_SESSION['global_sid'] > 0 ? $_SESSION['global_sid']:0), 1);
+$form->tdSelect(  'Выбранная образовательная программа', 'catalog', $bval, (isset($_SESSION['global_sid']) ? $_SESSION['global_sid'] : 0), 1);
    
 print "</TBODY></TABLE></DIV>";
 
 
 print "<DIV id=\"ege_fields\">";
 
-if ($_SESSIONS['global_sid'] > 0) {
+if ($_SESSION['global_sid'] > 0) {
     $_POST['catalog']=$_SESSION['global_sid'];
 } else {
     foreach($bval as $key=>$val) {

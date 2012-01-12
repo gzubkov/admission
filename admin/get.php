@@ -136,7 +136,7 @@ WHERE a.id ='".$id."'");
       $spc = $cat->getInfo($val['catalog'], $val['profile']);
       
       print mb_strtoupper(mb_substr($spc['type'], 0, 1)) . mb_strtolower(mb_substr($spc['type'], 1, mb_strlen($spc['type'])))." ".$spc['spec_code']." \"".$spc['name']."\":</h3>";
-      if ($spc['profile'] != '') {
+      if (isset($spc['profile'])) {
           print "(профиль - ".$spc['profile'].")";
       }
       print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
@@ -260,8 +260,10 @@ WHERE a.id ='".$id."'");
       print "</UL>\n";
     }
     print "<A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=sendrequestdocs&id=".$id."'})\">Запросить копию паспорта и документов об образовании</A><BR>\n"; 
-    print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=createmoodleuser&rid=".$val['id']."'})\">Создать пользователя в Moodle и назначить на тест</A><BR>\n"; 
-    print "Номер личного дела в БД <INPUT type=\"text\" maxlength=5 value=\"".$reg['num']."\" id=\"num".$val['id']."\" style=\"width: 40px;\"> <A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=savebdindex&index='+$('#num".$val['id']."').val()+'&id=".$id."'})\">Сохранить</A><BR>\n"; 
+    if (isset($val)) {
+        print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=createmoodleuser&rid=".$val['id']."'})\">Создать пользователя в Moodle и назначить на тест</A><BR>\n"; 
+    	print "Номер личного дела в БД <INPUT type=\"text\" maxlength=5 value=\"".$reg['num']."\" id=\"num".$val['id']."\" style=\"width: 40px;\"> <A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=savebdindex&index='+$('#num".$val['id']."').val()+'&id=".$id."'})\">Сохранить</A><BR>\n"; 
+    }
     print "<A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=deleteapplicant&id=".$id."'})\">Удалить абитуриента</A><BR>\n"; 
 }
 

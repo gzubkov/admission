@@ -200,7 +200,7 @@ if ($student->isLogin()) {
 
     $form->tdSelect(  'Сессия', 'date', $sessions, 0, 1);
 
-    $form->tdBox( 'text', 'Количество пересдач',        'count', 20, 2, O, 1 ); 
+    $form->tdBox( 'text', 'Количество пересдач',        'count', 20, 2, 'O', 1 ); 
     $form->hidden( 'student', $student_id );
 
     unset($form);

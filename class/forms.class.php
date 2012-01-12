@@ -89,9 +89,9 @@ class FormFields
 	        $this->_leftColumn( $name, $r );
                 print "<TD>(<INPUT maxlength=\"".$maxlength[0]."\" name=\"".$qname."_code\"  id=\"edit-".$qname."_code\" class=\"";
 	        if ($r) print "validate[required,custom[onlyNumber]]";
-                print "text-input\" style=\"width: ".$size[0]."px;\" type=\"text\" value=\"".$val[0]."\">) <INPUT maxlength=\"".$maxlength[1]."\" name=\"".$qname."\"  id=\"edit-".$qname."\" class=\"";
+                print "text-input\" style=\"width: ".$size[0]."px;\" type=\"text\" value=\"".(isset($val[0])?$val[0]:"")."\">) <INPUT maxlength=\"".$maxlength[1]."\" name=\"".$qname."\"  id=\"edit-".$qname."\" class=\"";
                 if ($r) print "validate[required,custom[onlyNumber]]";
-                print "text-input\" style=\"width: ".$size[1]."px;\" type=\"text\" value=\"".$val[1]."\">.</TD>\n";
+                print "text-input\" style=\"width: ".$size[1]."px;\" type=\"text\" value=\"".(isset($val[1])?$val[1]:"")."\">.</TD>\n";
                 break;
 
             case "static":
@@ -162,7 +162,9 @@ name = \$('#".$qname."radio".$key."').attr('name');
             } 
         }
 
-        print "</DIV>".$str."</TD></TR>\n"; 
+        print "</DIV>";
+	if (isset($str)) print $str;
+	print "</TD></TR>\n"; 
 	return 0;
       }
 
