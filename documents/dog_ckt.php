@@ -45,7 +45,7 @@ $pdf->AddPage();
 $pdf->useTemplate($pdf->_tplIdx);
 
 $pdf->SetFont("times", "I", 13);
-$pdf->Text(55, 110, $r['surname']." ".$r['name']." ".$r['second_name']);
+$pdf->Text(55, 114, $r['surname']." ".$r['name']." ".$r['second_name']);
 
 $catalog = new Catalog();
 $rval = $catalog->getInfo($req['catalog'], $req['profile']);
@@ -62,30 +62,27 @@ if ($rval['typen'] == 2) {
 */
 if ($rval['typen'] == 1) { 
     $rval['name'] = "специальности ".$rval['name'];
-    $pdf->Text(140.2, 188, "5 лет"); // специальность - нормативный срок
-    $pdf->Text(167, 192.8, $rval['term']." лет"); // специальность - срок
+    $pdf->Text(140.2, 192, "5 лет"); // специальность - нормативный срок
+    $pdf->Text(167, 196.8, $rval['term']." лет"); // специальность - срок
 } else {
     $rval['name'] = "направлению подготовки ".$rval['name'];
 /*    if ($rval['profile'] != '') {
         $rval['name'] .= " (профиль - ".$rval['profile'].")";
     } */
-    $pdf->Text(140.2, 188, "4 года"); 
-    $pdf->Text(167, 192.8, floor($rval['term'])." года ".(12*($rval['term'] - floor($rval['term'])))." мес"); // специальность - срок
+    $pdf->Text(140.2, 192, "4 года"); 
+    $pdf->Text(167, 196.8, floor($rval['term'])." года ".(12*($rval['term'] - floor($rval['term'])))." мес"); // специальность - срок
 }
 
 
 $pdf->SetFont("times", "I", 13);
 $arr = splitstring($rval['name'], 85, 1); 
-$pdf->Text(22, 162.8, $arr[0]); 
-$pdf->Text(22, 167.8, $arr[1]); 
+$pdf->Text(22, 166.8, $arr[0]); 
+if (isset($arr[1])) $pdf->Text(22, 171.8, $arr[1]); 
 
+$pdf->Text(166.2, 211.6, $rval['qualify']); // специальность - квалификация
 
-//$pdf->Text(167, 192.8, $rval['term']." лет"); // специальность - срок
-
-$pdf->Text(166.2, 207.6, $rval['qualify']); // специальность - квалификация
-
-$pdf->Text(164.8, 264.8, $req['semestr']); // семестр
-$pdf->Text(190, 264.8, ceil($req['semestr']/2)); // курс
+$pdf->Text(75.8, 264.1, $req['semestr']); // семестр
+$pdf->Text(101, 264.1, ceil($req['semestr']/2)); // курс
 
 $pdf->addPage(); 
 $pdf->useTemplate($pdf->importPage(2));

@@ -203,7 +203,7 @@ function unloginA() {
 print "<BR>\n";
       
 
-if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
+if (isset($_SESSION['rights']) && $_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
    print "<A onclick=\"unloginA();\">Выйти</A>\n";
 
    print "<DIV style=\"border: 1px solid #d3d3d3; background-color: #ffffff; width: 98%; margin:0 auto;\">";

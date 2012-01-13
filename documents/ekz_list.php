@@ -55,7 +55,7 @@ if ($rval['typen'] == 1) {
 }
 $arr = splitstring($rval['type']." \"".$rval['name']."\"", 66, 1);
 $pdf->Text(30, 47, $arr[0]); 
-$pdf->Text(30, 57, $arr[1]); 
+if (isset($arr[1])) $pdf->Text(30, 57, $arr[1]); 
 
 $pdf->Text(52, 68.2, $r['surname']);
 $pdf->Text(40, 77.6, $r['name']);

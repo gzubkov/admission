@@ -141,8 +141,8 @@ class Receipt
     }
 }
 
-if ($_REQUEST['count'] < 1) $_REQUEST['count'] = 1;
-if (!is_numeric($_REQUEST['purpose'])) $_REQUEST['purpose'] = 1;
+if (!isset($_REQUEST['count'])) $_REQUEST['count'] = 1;
+if (!isset($_REQUEST['purpose'])) $_REQUEST['purpose'] = 1;
 
 if (isset($_REQUEST['mid'])) {
     if ($_REQUEST['mhash'] == md5(md5("moodle.ins-iit.rudddddsdsd".$_REQUEST['mid'])) || $_SERVER['REMOTE_ADDR'] == $CFG_trustedip) {
@@ -152,14 +152,14 @@ if (isset($_REQUEST['mid'])) {
     }
 }
 
-if ($_REQUEST['student'] > 0) {
+if (isset($_REQUEST['student'])) {
     if (!is_numeric($_REQUEST['purpose'])) {
          $_REQUEST['purpose'] = 2;
     }
     $receipt = new Receipt($_REQUEST['student'], $_REQUEST['date']);
     $student = $receipt->getStudent($_REQUEST['purpose'], $_REQUEST['count']);
 
-} else if ($_REQUEST['applicant'] > 0) {
+} else if (isset($_REQUEST['applicant'])) {
     /*if ($_SESSION['joomlaregion'] > 0 && $_REQUEST['region_id'] != $_SESSION['joomlaregion']) {
         exit(0);
     }*/
@@ -167,7 +167,7 @@ if ($_REQUEST['student'] > 0) {
     $receipt = new Receipt($_REQUEST['applicant'], $_REQUEST['date']);
     $student = $receipt->getApplicant($_REQUEST['purpose'], $_REQUEST['count']);
     
-} else if ($_REQUEST['request_id'] > 0) {
+} else if (isset($_REQUEST['request_id'])) {
     $receipt = new Receipt($_REQUEST['request_id']);
     $student = $receipt->getSelfApplicant($_REQUEST['purpose'], $_REQUEST['count']);
     

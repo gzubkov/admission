@@ -30,7 +30,7 @@ $pdf->AddPage();
 $pdf->useTemplate($pdf->importPage(1));
 
 $pdf->SetFont("times", "I", 12);
-$pdf->Text(34.6, 74.8, $r['surname']." ".$r['name']." ".$r['second_name']);
+$pdf->Text(34.6, 71, $r['surname']." ".$r['name']." ".$r['second_name']);
 
 $cat = new Catalog();
 $rval = $cat->getInfo($req['catalog']);
@@ -42,8 +42,8 @@ unset($price);
 unset($cat);
 
 
-$pdf->Text(15, 110.8, $rval['name']); // специальность - название
-$pdf->Text(155.2, 97.4, $rval['term']); // специальность - срок
+$pdf->Text(15, 107, $rval['name']); // специальность - название
+$pdf->Text(155.2, 93.6, $rval['term']); // специальность - срок
 
 $pdf->addPage(); 
 $pdf->useTemplate($pdf->importPage(2));
@@ -57,19 +57,21 @@ $pdf->addPage();
 $pdf->useTemplate($pdf->importPage(4));
 
 $pdf->SetFont("times", "", 11);
-$pdf->Text(53.2, 16.5, $r['surname']." ".$r['name']." ".$r['second_name'].";");
+$pdf->Text(53.2, 16.6, $r['surname']." ".$r['name']." ".$r['second_name'].";");
 
 // паспорт
 $arr = splitstring("паспорт: серия ".$r['doc_serie']." № ".$r['doc_number'].", выдан ".date('d.m.Y', strtotime($r['doc_date'])).", ".$r['doc_issued'].";", 108, 1); 
-$pdf->Text(10, 21.2, $arr[0]);
-$pdf->Text(10, 26, $arr[1]);
+$pdf->Text(10, 21.3, $arr[0]);
+if (isset($arr[1])) {
+    $pdf->Text(10, 26.1, $arr[1]);
+}
 
-$pdf->Text(10, 30.8, "зарегистрирован по адресу: ".$r['regaddress'].".");
+$pdf->Text(10, 30.9, "зарегистрирован по адресу: ".$r['regaddress'].".");
 
 if ($r['second_name'] != "") {
-    $pdf->Text(158.8, 71.5, substr($r['name'],0,2).".".substr($r['second_name'],0,2).". ".$r['surname']);
+    $pdf->Text(158.8, 71.6, substr($r['name'],0,2).".".substr($r['second_name'],0,2).". ".$r['surname']);
 } else {
-    $pdf->Text(158.8, 71.5, substr($r['name'],0,2).". ".$r['surname']);
+    $pdf->Text(158.8, 71.6, substr($r['name'],0,2).". ".$r['surname']);
 }
 
 
