@@ -1,30 +1,9 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
 require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
 require_once('../class/catalog.class.php');
-
-class PDF extends FPDI {
-    /**
-     * "Remembers" the template id of the imported page
-     */
-    var $_tplIdx;
-    
-    /**
-     * include a background template for every page
-     */
-    function Header() {
-        if (is_null($this->_tplIdx)) {
-            $this->setSourceFile('dog_ckt.pdf');
-            $this->_tplIdx = $this->importPage(1);
-        }
-    }
-    
-    function Footer() {}
-}
+require_once('../class/pdf.class.php');
 
 $req = getarray("SELECT * FROM reg_request 
 WHERE id = ".$_REQUEST['request_id'].";");
@@ -39,10 +18,10 @@ WHERE reg_applicant.id = ".$applicant_id.";");
 $pdf = new PDF();
 $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
 $pdf->SetAutoPageBreak(true, 0);
-
+$pdf->setSourceFile('dog_ckt.pdf');
 // add a page
 $pdf->AddPage();
-$pdf->useTemplate($pdf->_tplIdx);
+$pdf->useTemplate($pdf->importPage(1));
 
 $pdf->SetFont("times", "I", 13);
 $pdf->Text(55, 114, $r['surname']." ".$r['name']." ".$r['second_name']);
@@ -66,18 +45,13 @@ if ($rval['typen'] == 1) {
     $pdf->Text(167, 196.8, $rval['term']." лет"); // специальность - срок
 } else {
     $rval['name'] = "направлению подготовки ".$rval['name'];
-/*    if ($rval['profile'] != '') {
-        $rval['name'] .= " (профиль - ".$rval['profile'].")";
-    } */
     $pdf->Text(140.2, 192, "4 года"); 
     $pdf->Text(167, 196.8, floor($rval['term'])." года ".(12*($rval['term'] - floor($rval['term'])))." мес"); // специальность - срок
 }
 
 
 $pdf->SetFont("times", "I", 13);
-$arr = splitstring($rval['name'], 85, 1); 
-$pdf->Text(22, 166.8, $arr[0]); 
-if (isset($arr[1])) $pdf->Text(22, 171.8, $arr[1]); 
+$pdf->splitText($rval['name'], array(array(22,166.8),array(22,171.8)), 85, 1);
 
 $pdf->Text(166.2, 211.6, $rval['qualify']); // специальность - квалификация
 
@@ -103,11 +77,7 @@ $pdf->Text(160, 92.2, date('d.m.Y', strtotime($r['birthday'])));
 $pdf->Text(58.2, 99.6, $r['doc_serie']."           ".$r['doc_number']);
 $pdf->Text(137, 99.6, date('d.m.Y', strtotime($r['doc_date'])));
 
-$arr = splitstring($r['doc_issued'], 68, 1); 
-
-$pdf->Text(16, 104, $arr[0]);
-$pdf->Text(16, 111.2, $arr[1]);
-
+$pdf->splitText($r['doc_issued'], array(array(16,104),array(16,111.2)), 68, 1); 
 
 $rval = getarray("SELECT name FROM reg_rf_subject WHERE reg_rf_subject.id='".$r['homeaddress-region']."'");
 
@@ -117,15 +87,8 @@ $string .= $r['homeaddress-home'];
 if ($r['homeaddress-building'] != '') $string .= "/".$r['homeaddress-building'];
 if ($r['homeaddress-flat'] != '' && $r['homeaddress-flat'] != 0) $string .= ", ".$r['homeaddress-flat'];
 
-$arr = splitstring($r['regaddress'], 55, 1); 
-
-$pdf->Text(75.4, 118.2, $arr[0]);
-$pdf->Text(16, 125, $arr[1]);
-
-$arr = splitstring($string, 58, 1); 
-$pdf->Text(61, 132, $arr[0]);
-$pdf->Text(16, 139, $arr[1]);
-
+$pdf->splitText($r['regaddress'], array(array(75.4,118.2),array(16,125)), 53, 1);
+$pdf->splitText($string, array(array(61,132),array(16,139)), 58, 1);
 
 $pdf->SetXY(63, 141.8); 
 if ($r['homephone_code'] != 0) {

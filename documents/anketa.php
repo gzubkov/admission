@@ -1,31 +1,9 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
 require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
 require_once('../class/catalog.class.php');
-
-
-class PDF extends FPDI {
-    /**
-     * "Remembers" the template id of the imported page
-     */
-    var $_tplIdx;
-    
-    /**
-     * include a background template for every page
-     */
-    function Header() {
-        if (is_null($this->_tplIdx)) {
-            $this->setSourceFile('document.pdf');
-            $this->_tplIdx = $this->importPage(1);
-        }
-    }
-    
-    function Footer() {}
-}
+require_once('../class/pdf.class.php');
 
 if (!is_numeric($_REQUEST['request'])) exit(0);
 $request_id = $_REQUEST['request'];
@@ -47,10 +25,10 @@ WHERE reg_applicant.id = ".$applicant_id." LIMIT 1;");
 $pdf = new PDF();
 $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
 $pdf->SetAutoPageBreak(true, 0);
-
+$pdf->setSourceFile('document.pdf');
 // add a page
 $pdf->AddPage();
-$pdf->useTemplate($pdf->_tplIdx);
+$pdf->useTemplate($pdf->importPage(1));
 
 $pdf->SetFont("times", "B", 13);
 $pdf->SetXY(190.5, 7.8); // номер анкеты
@@ -91,13 +69,8 @@ $pdf->SetFont("times", "", 13);
 $pdf->SetXY(48, 173.1); // дата рождения
 $pdf->Write(0, date('d      m         y', strtotime($r['birthday'])));
 
-$arr = splitstring($r['birthplace'], 30, 1); 
-
 $pdf->SetFont("times", "", 12);
-$pdf->SetXY(41, 180.3); // место рождения
-$pdf->Write(0, $arr[0]);
-$pdf->SetXY(9, 185.3); // место рождения2
-$pdf->Write(0, $arr[1]);
+$pdf->splitText($r['birthplace'], array(array(41.6,184.3),array(10,189.6)), 30, 1);
 
 // ||||||||||||||||||||||||||||||||||||||||||||||||||||
 
@@ -122,12 +95,8 @@ $pdf->Write(0, $r['doc_serie']);
 $pdf->SetXY(155, 164); // паспорт-номер
 $pdf->Write(0, $r['doc_number']);
 
-$arr = splitstring($r['doc_issued'], 32);
 $pdf->SetFont("times", "", 12);
-$pdf->SetXY(128, 171); // паспорт-кем выдан
-$pdf->Write(0, $arr[0]);
-$pdf->SetXY(106, 177.3); // паспорт-кем выдан2
-$pdf->Write(0, $arr[1]);
+$pdf->splitText($r['doc_issued'], array(array(128,175.4),array(106.8,181.3)), 32, 1);
 
 $pdf->SetXY(144, 184.1); // код подразделения
 $pdf->Write(0, $r['doc_code']);
@@ -216,19 +185,19 @@ switch ($r['language']) {
 
 // тип учебного заведения
 switch($r['edu_base']) {
-   case 1:
+    case 1:
    	$pdf->SetXY(9.7, 239.1); // общеобразовательное
    	$pdf->Write(0, "X");
 	break;
-   case 3:
+    case 3:
    	$pdf->SetXY(106.5, 239.1); // начальное профессиональное образование
 	$pdf->Write(0, "X");
 	break;
-   case 2:
+    case 2:
    	$pdf->SetXY(9.7, 244); // среднее профессиональное образование
 	$pdf->Write(0, "X");
 	break;
-   default:
+    default:
    	$pdf->SetXY(106.5, 244); // другое
 	$pdf->Write(0, "X");
 }
@@ -272,7 +241,7 @@ $cat = new Catalog();
 $rval = $cat->getInfo($req['catalog'], $req['profile']);
 unset($cat);
 
-if ($rval['profile'] != '') $rval['name'] .= " (".$rval['profile'].")";
+if (isset($rval['profile'])) $rval['name'] .= " (".$rval['profile'].")";
 
 $pdf->SetFont("times", "", 12);
 $pdf->SetXY(10.5, 41.6); // специальность - код

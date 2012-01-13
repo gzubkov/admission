@@ -1,24 +1,10 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
-require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
 require_once('../class/catalog.class.php');
+require_once('../class/pdf.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
-
-class PDF extends FPDI {
-    function Header() {
-        $this->setSourceFile('perez.pdf');
-    }
-    
-    function Footer() {}
-}
-
-
-
 $applicant_id = $_REQUEST['applicant_id'];
 
 // --- Базовый запрос (сведения об абитуриенте) --- //
@@ -29,6 +15,7 @@ WHERE reg_applicant.id = ".$applicant_id.";");
 $pdf = new PDF();
 $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
 $pdf->SetAutoPageBreak(true, 0);
+$pdf->setSourceFile('perez.pdf');
 
 // add a page
 $pdf->AddPage();

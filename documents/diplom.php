@@ -1,34 +1,11 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
 require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
 require_once('../class/catalog.class.php');
+require_once('../class/pdf.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
-
-class PDF extends FPDI {
-    /**
-     * "Remembers" the template id of the imported page
-     */
-    var $_tplIdx;
-    
-    /**
-     * include a background template for every page
-     */
-    function Header() {
-        if (is_null($this->_tplIdx)) {
-            $this->setSourceFile('diplom.pdf');
-            $this->_tplIdx = $this->importPage(1);
-        }
-    }
-    
-    function Footer() {}
-}
-
-
 
 $applicant_id = $_REQUEST['applicant_id'];
 
@@ -40,10 +17,11 @@ WHERE reg_applicant.id = ".$applicant_id.";");
 $pdf = new PDF();
 $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
 $pdf->SetAutoPageBreak(true, 0);
+$pdf->setSourceFile('diplom.pdf');
 
 // add a page
 $pdf->AddPage();
-$pdf->useTemplate($pdf->_tplIdx);
+$pdf->useTemplate($pdf->importPage(1));
 
 $pdf->SetFont("times", "", 13);
 
@@ -59,27 +37,18 @@ $pdf->Text(109.8, 62.4, $spc['type']);
 
 $pdf->SetFont("times", "", 13);
 
-$arr = splitstring($spc['name'], 50);
-$pdf->Text(110, 69.4, $arr[0]);
-$pdf->Text(110, 76.4, $arr[1]);
-
+$pdf->splitText($spc['name'], array(array(110,69.4),array(110,76.4)), 50, 1);
 
 $rval = $msl->getarray("SELECT b.name_rp,serie,number,institution,date FROM reg_applicant_edu_doc a LEFT JOIN reg_edu_doc b ON a.edu_doc=b.id WHERE applicant='".$applicant_id."' AND `primary`='1'");
 
 $pdf->SetFont("times", "", 14);
 
-$arr = splitstring($rval['name_rp'], array(34,85));
-$pdf->Text(115.0, 111.2, $arr[0]);
-$pdf->Text(30, 123.6, $arr[1]);
-$pdf->Text(30, 135.6, $arr[2]);
+$pdf->splitText($rval['name_rp'], array(array(115,111.2),array(30,123.6)),array(30,135.6), 1);
 
 $pdf->Text(119.8, 135.6, $rval['serie']);
 $pdf->Text(160.5, 135.6, $rval['number']);
 
-
-$arr = splitstring($rval['institution'].", ".mb_strtolower(russian_date( strtotime($rval['date']), 'j F Y' ), 'UTF-8'), 60);
-$pdf->Text(54, 144.2, $arr[0]);
-$pdf->Text(30, 156.2, $arr[1]);
+$pdf->splitText($rval['institution'].", ".mb_strtolower(russian_date( strtotime($rval['date']), 'j F Y' ), 'UTF-8'), array(array(54,144.2),array(30,156.2)), 60, 1);
 
 $pdf->Output('zayavl.pdf', 'D');
 ?>

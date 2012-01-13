@@ -1,6 +1,5 @@
 <?php
-require_once('../../../modules/russian_date.php');
-require_once('../../../modules/mysql.php');
+require_once('../../../modules/mysql.php'); 
 require_once('../../conf.php');
 require_once('../class/price.class.php');
 
@@ -188,18 +187,7 @@ if (sizeof($price) == 1 || $price[1] == 0) {
 
 switch ($_REQUEST['format']) {
 case 'pdf':
-    // just require TCPDF instead of FPDF
-    require_once('../../../modules/tcpdf/tcpdf.php');
-    require_once('../../../modules/fpdi/fpdi.php');
-
-    class PDF extends FPDI {
-         var $_tplIdx;
-   	 function Header() {}
-	 function Footer() {}
-	 function printInCells($text, $x, $y, $pitch) {
-      	     for ($i = 0; $i < strlen($text); $i++) $this->Text($x+$i*$pitch, $y, $text[$i]);
-      	 }
-    }
+    require_once('../class/pdf.class.php');
 
     $pdf = new PDF();
     $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
@@ -262,8 +250,6 @@ case 'pdf':
 case 'html':
 ?>
 <html lang="ru">
-<!-- SITEMAP_PRIORITY: 0.2 -->
-
 <head>
 <title>Печать квитанции</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">

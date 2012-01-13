@@ -1,21 +1,11 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
 require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
 require_once('../class/catalog.class.php');
+require_once('../class/pdf.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
-
-class PDF extends FPDI {
-    function Header() {
-        $this->setSourceFile('ekz_list.pdf');
-    }
-    
-    function Footer() {}
-}
 
 $req = getarray("SELECT * FROM reg_request 
 WHERE id = ".$_REQUEST['request_id'].";");
@@ -37,6 +27,7 @@ $mdl_grades = $msl->getarray("SELECT b.id,a.grade,b.min,c.surname,c.name,c.secon
 $pdf = new PDF();
 $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
 $pdf->SetAutoPageBreak(true, 0);
+$pdf->setSourceFile('ekz_list.pdf');
 
 // add a page
 $pdf->AddPage();
@@ -53,18 +44,13 @@ if ($rval['typen'] == 1) {
 } else {
     $rval['type'] = "Направление подготовки";
 }
-$arr = splitstring($rval['type']." \"".$rval['name']."\"", 66, 1);
-$pdf->Text(30, 47, $arr[0]); 
-if (isset($arr[1])) $pdf->Text(30, 57, $arr[1]); 
+$pdf->splitText($rval['type']." \"".$rval['name']."\"", array(array(30,47),array(30,57)), 66, 1);
 
 $pdf->Text(52, 68.2, $r['surname']);
 $pdf->Text(40, 77.6, $r['name']);
 $pdf->Text(123, 77.6, $r['second_name']);
 
-$arr = splitstring("Паспорт: серия ".$r['doc_serie']." №".$r['doc_number'].", выдан: ".$r['doc_issued'].", ".date('d.m.Y', strtotime($r['doc_date'])), array(52,54,52), 1); 
-$pdf->Text(75, 90.4, $arr[0]);
-$pdf->Text(75, 100, $arr[1]);
-$pdf->Text(75, 110.2, $arr[2]);
+$pdf->splitText("Паспорт: серия ".$r['doc_serie']." №".$r['doc_number'].", выдан: ".$r['doc_issued'].", ".date('d.m.Y', strtotime($r['doc_date'])), array(array(75,90.4),array(75,100),array(75,110.2)), array(52,54,52), 1);
 
 if (is_array($mdl_grades)) {
     $num[2] = 0;
@@ -79,7 +65,7 @@ if (is_array($mdl_grades)) {
     $pdf->SetFont("times", "", 12);
     foreach($mdl_grades as $v) {
         $y = 184+6.6*$num[$v['id']];
-    	$pdf->Text(110.4, $y, $v['grade']); 
+    	$pdf->Text(110.4, $y, round($v['grade'])); 
     	$pdf->Text(125.4, $y, $v['surname']." ".substr($v['name'],0,2).".".substr($v['second_name'],0,2)."."); 
     	if ($v['grade'] < $v['min']) $pass = 0;
     }

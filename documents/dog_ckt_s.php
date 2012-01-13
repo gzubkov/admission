@@ -1,17 +1,10 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
 require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
 require_once('../class/price.class.php');
 require_once('../class/catalog.class.php');
-
-class PDF extends FPDI {
-    function Header() {}
-    function Footer() {}
-}
+require_once('../class/pdf.class.php');
 
 $req = getarray("SELECT * FROM reg_request 
 WHERE id = ".$_REQUEST['request_id'].";");
@@ -25,6 +18,7 @@ $pdf = new PDF();
 $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
 $pdf->SetAutoPageBreak(true, 0);
 $pdf->setSourceFile('dog_ckt_s.pdf');
+
 // add a page
 $pdf->AddPage();
 $pdf->useTemplate($pdf->importPage(1));
@@ -60,11 +54,7 @@ $pdf->SetFont("times", "", 11);
 $pdf->Text(53.2, 16.6, $r['surname']." ".$r['name']." ".$r['second_name'].";");
 
 // паспорт
-$arr = splitstring("паспорт: серия ".$r['doc_serie']." № ".$r['doc_number'].", выдан ".date('d.m.Y', strtotime($r['doc_date'])).", ".$r['doc_issued'].";", 108, 1); 
-$pdf->Text(10, 21.3, $arr[0]);
-if (isset($arr[1])) {
-    $pdf->Text(10, 26.1, $arr[1]);
-}
+$pdf->splitText("паспорт: серия ".$r['doc_serie']." № ".$r['doc_number'].", выдан ".date('d.m.Y', strtotime($r['doc_date'])).", ".$r['doc_issued'].";", array(array(10,21.3),array(10,26.1)), 108, 1);
 
 $pdf->Text(10, 30.9, "зарегистрирован по адресу: ".$r['regaddress'].".");
 
@@ -73,7 +63,6 @@ if ($r['second_name'] != "") {
 } else {
     $pdf->Text(158.8, 71.6, substr($r['name'],0,2).". ".$r['surname']);
 }
-
 
 $pdf->Output('dogovor2.pdf', 'D');
 ?>

@@ -1,29 +1,7 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
-require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
-
-class PDF extends FPDI {
-    /**
-     * "Remembers" the template id of the imported page
-     */
-    var $_tplIdx;
-    
-    /**
-     * include a background template for every page
-     */
-    function Header() {
-        if (is_null($this->_tplIdx)) {
-            $this->setSourceFile('opis.pdf');
-            $this->_tplIdx = $this->importPage(1);
-        }
-    }
-    
-    function Footer() {}
-}
+require_once('../class/pdf.class.php');
 
 $msl = new dMysql();
 $applicant_id = $_REQUEST['applicant_id'];
@@ -36,10 +14,11 @@ WHERE reg_applicant.id = ".$applicant_id.";");
 $pdf = new PDF();
 $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
 $pdf->SetAutoPageBreak(true, 0);
+$pdf->setSourceFile('opis.pdf');
 
 // add a page
 $pdf->AddPage();
-$pdf->useTemplate($pdf->_tplIdx);
+$pdf->useTemplate($pdf->->importPage(1));
 
 $pdf->SetFont("times", "I", 13);
 $pdf->Text(61, 35.9, $r['surname']." ".$r['name']." ".$r['second_name']);
@@ -91,8 +70,6 @@ if ($rval['pay'] > 0) {
 }
 
 $pdf->SetFont("times", "", 14);
-//$pdf->Text(36.8, 257, mb_strtolower(russian_date( mktime(), 'j           F' ), 'UTF-8'));
-//$pdf->Text(85.8, 257, substr(date('y'),1));
 
 $pdf->Output('opis.pdf', 'D');
 ?>

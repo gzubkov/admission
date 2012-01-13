@@ -20,11 +20,10 @@ case "goback":
     break;
 
 case "revoke":
-    $query = "DELETE `reg_request` FROM `reg_request` WHERE `reg_request`.id=".$_POST['id']."";
     if ($msl->deleteArray('reg_request',array('id'=>$_POST['id']))) {
         print "ok\n";
     } else {
-        print "couldn't use query";
+        print "Ошибка при удалении заявления";
     }
     break;
 

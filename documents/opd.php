@@ -1,21 +1,10 @@
 <?php
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
 require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
+require_once('../class/pdf.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
-
-class PDF extends FPDI {
-    function Header() {
-        $this->setSourceFile('opd.pdf');
-    }
-    
-    function Footer() {}
-}
-
-
 
 $applicant_id = $_REQUEST['applicant_id'];
 
@@ -27,33 +16,16 @@ WHERE reg_applicant.id = ".$applicant_id.";");
 $pdf = new PDF();
 $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
 $pdf->SetAutoPageBreak(true, 0);
+$pdf->setSourceFile('opd.pdf');
 
 // add a page
 $pdf->AddPage();
 $pdf->useTemplate($pdf->importPage(1));
 
 $pdf->SetFont("times", "", 13);
-
-$arr = splitstring($r['surname']." ".$r['name']." ".$r['second_name'], array(47,47));
-$yo = 57.8;
-foreach($arr as $v) {
-    $pdf->Text(100.4, $yo, $v);
-    $yo += 5.2;
-}
-
-$arr = splitstring($r['regaddress'], array(47,47,47));
-$yo = 77.2;
-foreach($arr as $v) {
-    $pdf->Text(100.4, $yo, $v);
-    $yo += 5.2;
-}
-
-$arr = splitstring($r['doc_serie']." ".$r['doc_number'].", выдан ".$r['doc_issued'].", ".date('d.m.y', strtotime($r['doc_date'])), array(43,43,43));
-$yo = 100.6;
-foreach($arr as $v) {
-    $pdf->Text(100.4, $yo, $v);
-    $yo += 5.2;
-}
+$pdf->splitText($r['surname']." ".$r['name']." ".$r['second_name'], array(array(100.4,57.8),array(100.4,63),array(100.4,68.2)), array(47,47), 1);
+$pdf->splitText($r['regaddress'], array(array(100.4,77.2),array(100.4,82.4),array(100.4,87.6)), array(47,47), 1);
+$pdf->splitText($r['doc_serie']." ".$r['doc_number'].", выдан ".$r['doc_issued'].", ".date('d.m.Y', strtotime($r['doc_date'])), array(array(100.4,100.6),array(100.4,105.8),array(100.4,111)), array(43,43), 1);
 
 // add a page
 $pdf->AddPage();

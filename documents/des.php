@@ -1,17 +1,9 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
 require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
 require_once('../class/catalog.class.php');
-
-
-class PDF extends FPDI {
-    function Header() {}    
-    function Footer() {}
-}
+require_once('../class/pdf.class.php');
 
 if (!is_numeric($_REQUEST['request'])) exit(0);
 $request_id = $_REQUEST['request'];

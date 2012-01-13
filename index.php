@@ -498,7 +498,7 @@ print "</TBODY></TABLE></DIV>";
 
 print "<DIV id=\"ege_fields\">";
 
-if ($_SESSION['global_sid'] > 0) {
+if (isset($_SESSION['global_sid'])) {
     $_POST['catalog']=$_SESSION['global_sid'];
 } else {
     foreach($bval as $key=>$val) {

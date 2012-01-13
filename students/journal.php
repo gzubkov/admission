@@ -1,13 +1,9 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/russian_date.php');
 require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
+require_once('../class/pdf.class.php');
 
-class PDF extends TCPDF {
-    function Header() {}
-    
+class PDF2 extends PDF {
     function Footer() {
         $this->SetY(-12);
         $this->SetFont('verdana', '', 8);
@@ -18,7 +14,7 @@ class PDF extends TCPDF {
 
 
 // initiate PDF
-$pdf = new PDF();
+$pdf = new PDF2();
 
 $pdf->SetMargins(10, 40, 10);
 $pdf->SetAutoPageBreak(true, 8);
