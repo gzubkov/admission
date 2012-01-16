@@ -55,18 +55,18 @@ function sendRequestDocs($id) {
 function changeType($id,$type) {
     global $msl;
     $mail = 0;
-   if ($type == 1) {
-      $rval = $msl->getarray("SELECT surname,name,second_name,`e-mail`,sex,b.semestr,b.catalog FROM reg_applicant a LEFT JOIN reg_request b ON a.id = b.applicant_id WHERE b.id = ".$id);
+    if ($type == 1) {
+        $rval = $msl->getarray("SELECT surname,name,second_name,`e-mail`,sex,b.semestr,b.catalog FROM reg_applicant a LEFT JOIN reg_request b ON a.id = b.applicant_id WHERE b.id = ".$id);
 
-      $cat = new Catalog();
-      $spc = $cat->getInfo($rval['catalog']);
-      $uni = $cat->getUniversityInfo($rval['catalog']);
-      unset($cat);
+        $cat = new Catalog();
+      	$spc = $cat->getInfo($rval['catalog']);
+      	$uni = $cat->getUniversityInfo($rval['catalog']);
+      	unset($cat);
       	 
-      $to = $rval['surname']." ".$rval['name']." ".$rval['second_name']."<".$rval['e-mail'].">";
-      $subject = "Поступление в ".$uni['abbreviation']."";
+      	$to = $rval['surname']." ".$rval['name']." ".$rval['second_name']."<".$rval['e-mail'].">";
+      	$subject = "Поступление в ".$uni['abbreviation']."";
 
-      $message = "
+      	$message = "
 <html>
     <head><title>Поступление ".$uni['abbreviation']."</title></head>
     <body>
@@ -115,23 +115,24 @@ function changeType($id,$type) {
 }
 
 function getSpecialties($id) {
-   $rval = getarray("SELECT a.id, a.semestr, a.type, a.catalog, a.profile 
-                     FROM reg_request a
-                     WHERE a.applicant_id='".$id."'", 1);
+    global $CFG_uploaddir;
+    $rval = getarray("SELECT a.id, a.semestr, a.type, a.catalog, a.profile 
+                      FROM reg_request a
+                      WHERE a.applicant_id='".$id."'", 1);
 
-   $reg = getarray("SELECT step, `homeaddress-city` , b.name, homephone_code, homephone, mobile_code, mobile, region, num
-FROM reg_applicant a JOIN reg_rf_subject b ON a.`homeaddress-region`=b.id 
-WHERE a.id ='".$id."'");
+    $reg = getarray("SELECT step, `homeaddress-city` , b.name, homephone_code, homephone, mobile_code, mobile, region, num
+    	   	     FROM reg_applicant a JOIN reg_rf_subject b ON a.`homeaddress-region`=b.id 
+		     WHERE a.id ='".$id."'");
    
-   if ($reg['step'] > 1) {
-      print "Дом: +7 (".$reg['homephone_code'].") ".$reg['homephone'].", моб: +7 (".$reg['mobile_code'].") ".$reg['mobile']."<BR>";
-      print "".$reg['homeaddress-city']." (".$reg['name'].")<BR>";
-   }   
+    if ($reg['step'] > 1) {
+        print "Дом: +7 (".$reg['homephone_code'].") ".$reg['homephone'].", моб: +7 (".$reg['mobile_code'].") ".$reg['mobile']."<BR>";
+      	print "".$reg['homeaddress-city']." (".$reg['name'].")<BR>";
+    }   
 
-   $cat = new Catalog();
+    $cat = new Catalog();
 
-   if (is_array($rval)) {
-   foreach($rval as $key => $val) {
+    if (is_array($rval)) {
+    foreach($rval as $key => $val) {
       print "<h3>";
       $spc = $cat->getInfo($val['catalog'], $val['profile']);
       
@@ -235,29 +236,32 @@ WHERE a.id ='".$id."'");
       print "</TBODY></TABLE></DIV>\n\n";      
    }
   }
-   $fval = getarray("SELECT a.id, a.primary, b.name FROM reg_applicant_edu_doc a LEFT JOIN reg_edu_doc b ON a.edu_doc=b.id WHERE a.applicant=".$id, 1);
-   if ($fval == 0) {
-       print "<SCRIPT language=\"jajascript\">
-       	      function openDocAttach() {
+
+    $fval = getarray("SELECT a.id, a.primary, a.filename, b.name FROM reg_applicant_edu_doc a LEFT JOIN reg_edu_doc b ON a.edu_doc=b.id WHERE a.applicant=".$id, 1);
+    if ($fval == 0) {
+        print "<SCRIPT language=\"jajascript\">
+       	       function openDocAttach() {
 	          $('#dialog-message2').dialog('option','title', 'Добавление документа').dialog('open');
 		  $('#hiddenaid').val(".$id.");
-	      }
-	      </SCRIPT>";
-      print "<FONT color=red><B>Не загружено ни одного файла.</B></FONT> <A onclick=\"openDocAttach();\">Добавить документ вручную</A><BR><BR>";
-   } else {
-      print "Загруженые файлы: <UL>";
-      foreach($fval as $valf) {
-         print "<LI><A href=\"view.php?id=".$valf['id']."\" target=\"_blank\">";
-	 if ($valf['primary']) print "<I>";
-	 print $valf['name'];
-	 if ($valf['primary']) {
-	    print "</I></A>";
-	 } else {
-	    print "</A> (<A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=makeprimary&fid=".$valf['id']."&aid=".$id."'})\" title=\"Сделать первичным\">M</A>)";
-	 }
-	 print ".</LI>";
-      }
-      print "</UL>\n";
+	       }
+	       </SCRIPT>";
+        print "<FONT color=red><B>Не загружено ни одного файла.</B></FONT> <A onclick=\"openDocAttach();\">Добавить документ вручную</A><BR><BR>";
+    } else {
+        print "Загруженые файлы: <UL>";
+        foreach($fval as $valf) {
+	    print "<LI><A ";
+	    if (isset($valf['filename']) && file_exists($CFG_uploaddir.$id."/".$valf['filename'])) print "href=\"view.php?id=".$valf['id']."\" target=\"_blank\"";
+	    print ">";
+	    if ($valf['primary']) print "<I>";
+	    print $valf['name'];
+	    if ($valf['primary']) {
+	        print "</I></A>";
+	    } else {
+	        print "</A> (<A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=makeprimary&fid=".$valf['id']."&aid=".$id."'})\" title=\"Сделать первичным\">M</A>)";
+	    }
+	    print ".</LI>";
+      	}
+      	print "</UL>\n";
     }
     print "<A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=sendrequestdocs&id=".$id."'})\">Запросить копию паспорта и документов об образовании</A><BR>\n"; 
     if (isset($val)) {

@@ -328,15 +328,19 @@ if (document.domain && document.referrer && document.referrer.search(document.do
 function printincells($text, $n, $width=-1) {
     if ($width == -1) $width = 100/$n;
     print "<table class=\"cells\" cellspacing=\"0\"><tr>";
-    for ($i = 0; $i < $n; $i++) {
-        print "<td class=\"cell\" style=\"width: ".$width."%;\">".$text[$i]."</td>";
+    for($i = 0; $i < $n; $i++) {
+        print "<td class=\"cell\" style=\"width: ".$width."%;\">".(isset($text[$i]) ? $text[$i] : "")."</td>";
     }
     print "</tr></table>";
 }
  
-for ($i = 0; $i < 2*$kn; $i++) 
-{
+for ($i = 0; $i < 2*$kn; $i++) {
 $j = floor($i/2);
+
+if ($rval[$j]['rs'] == 0) {
+    print "<div id=\"toolbox\"><p><B>Ваш региональный партнер не предоставил сведений, необходимых для формирования квитанции.</B><BR> Сумма для оплаты услуг регионального партнера составляет ".floor($price[$j])." рублей ".sprintf("%02d", $price[$j]-floor($price[$j]))." копеек.</P></div><BR>";
+    break;
+}
 
 print "<tr>
 	<td style=\"width: 50mm; height: 65mm; border-bottom: black 1.5px solid;\">
@@ -351,7 +355,7 @@ print "</table></td>\n";
 print "<td style=\"width: 130mm; height: 65mm; padding: 0mm 4mm 0mm 3mm; border-left: black 1.5px solid; border-bottom: black 1.5px solid;\"> 
 <table cellspacing=\"0\" style=\"width: 123mm; height: 100%;\">";
 
-if ($i % 2 == 0) {
+if ($i%2 == 0) {
 print "<tr><td><table width=\"100%\" cellspacing=\"0\">
         <tr><td class=\"stext7\" style=\"text-align: right; vertical-align: middle;\"><i>Форма &#8470; ПД-4</i></td></tr>
        </table></td></tr>";
@@ -390,7 +394,7 @@ print '</td></tr></table></td></tr>
   <tr><td class="stext" width="1%">Ф.И.О&nbsp;плательщика&nbsp;</td><td class="string"><span class="nowr">'.$student['fio'].'</span></td></tr>
  </table>
 </td></tr>
-<tr><td><table cellspacing="0" width="100%"><tr><td class="stext" width="1%">Адрес&nbsp;плательщика&nbsp;</td><td class="string"><span class="nowr">'.$student['address'].'</span></td></tr></table></td></tr>
+<tr><td><table cellspacing="0" width="100%"><tr><td class="stext" width="1%">Адрес&nbsp;плательщика&nbsp;</td><td class="string"><DIV><span class="nowr">'.$student['address'].'</span></DIV></td></tr></table></td></tr>
 
 <tr><td><table cellspacing="0" width="100%"><tr>
 <td class="stext" width="1%">Сумма&nbsp;платежа&nbsp;</td>

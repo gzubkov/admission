@@ -781,19 +781,6 @@ ul.links li, ul.inline li {
 }
 
 /**
- * Menu.module
- */
-tr.menu-disabled {
-  opacity: 0.5;
-}
-tr.odd td.menu-disabled {
-  background-color: #f5f6f7;
-}
-tr.even td.menu-disabled {
-  background-color: #ffffff;
-}
-
-/**
  * Poll.module
  */
 .poll .bar {
@@ -970,18 +957,6 @@ table.system-status-report th {
 
 tr.selected td a:link, tr.selected td a:visited, tr.selected td a:active {
   color: #dde5e9;
-}
-
-tr.taxonomy-term-preview {
-  opacity: 0.5;
-}
-
-tr.taxonomy-term-divider-top {
-  border-bottom: none;
-}
-
-tr.taxonomy-term-divider-bottom {
-  border-top: 1px dotted #d6d6d6;
 }
 
 /**

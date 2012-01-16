@@ -8,10 +8,14 @@ if ($rg->checkAdmin()) {
     $msl = new dMysql();
     $r = getarray("SELECT applicant,filename FROM `reg_applicant_edu_doc` WHERE `id`=".$_REQUEST['id'].";");
 
-    $f = fopen($CFG_uploaddir.$r['applicant']."/".$r['filename'],"rb");
-    header("Content-type: image/jpeg");
-    while(!feof($f)) echo fread($f,65000);
-    fclose($f);
+    $file = $CFG_uploaddir.$r['applicant']."/".$r['filename'];
+    if (file_exists($file)) {
+        $f = fopen($file,"rb");
+    	if (!$f) exit(0);
+    	header("Content-type: image/jpeg");
+    	while(!feof($f)) echo fread($f,65000);
+    	fclose($f);
+    }
     exit();
 } else {
     print "Данная функция Вам недоступна!";
