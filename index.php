@@ -7,7 +7,7 @@ require_once('class/catalog.class.php');
 //$_SESSION['step_num'] = 2;
 ?>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html dir="ltr" xml:lang="ru" xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head>
 
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
@@ -169,23 +169,20 @@ if (!isset($_SESSION['applicant_id'])) {
 <div>
 <?php
 if (!isset($_SESSION['applicant_id'])) {
-   print "<div class=\"form-item\" id=\"edit-name-wrapper\">";
-   print "<label for=\"edit-name\">E-mail: <span class=\"form-required\" title=\"This field is required.\">*</span></label>
-          <input maxlength=\"60\" name=\"name\" id=\"edit-name\" size=\"15\" class=\"validate[required,custom[email]] text-input\" type=\"text\"></div>";
-   print "<div class=\"form-item\" id=\"edit-name-wrapper\">";
-   print "<label for=\"edit-pass\"><span title=\"Номер и серия паспорта, введенные слитно\">Данные паспорта</span>: <span class=\"form-required\" title=\"This field is required.\">*</span></label>
-          <input name=\"pass\" id=\"edit-pass\" maxlength=\"60\" size=\"15\" class=\"validate[required,custom[all]]\" type=\"password\"></div>";
-   print "<input name=\"op\" id=\"edit-submit\" value=\"Войти\" class=\"form-submit\" type=\"submit\">";
-   print "<input name=\"form_build_id\" id=\"form-b6b1ad575b4182b91c68b553e4905f07\" value=\"form-b6b1ad575b4182b91c68b553e4905f07\" type=\"hidden\">";
-   print "<input name=\"form_id\" id=\"edit-user-login-block\" value=\"user_login_block\" type=\"hidden\">";
+    print "<div class=\"form-item\" id=\"edit-name-wrapper\">";
+    print "<label for=\"edit-name\">E-mail: <span class=\"form-required\" title=\"Поле обязательно для заполнения.\">*</span></label>
+           <input maxlength=\"60\" name=\"name\" id=\"edit-name\" size=\"15\" class=\"validate[required,custom[email]] text-input\" type=\"text\" /></div>";
+    print "<div class=\"form-item\">";
+    print "<label for=\"edit-pass\"><span title=\"Номер и серия паспорта, введенные слитно\">Данные паспорта</span>: <span class=\"form-required\" title=\"Поле обязательно для заполнения.\">*</span></label><input name=\"pass\" id=\"edit-pass\" maxlength=\"60\" size=\"15\" class=\"validate[required,custom[all]]\" type=\"password\" /></div>";
+    print "<input name=\"op\" id=\"edit-submit\" value=\"Войти\" class=\"form-submit\" type=\"submit\" />";
 } else {
-   $rval = getarray("SELECT surname, name, second_name FROM `reg_applicant` WHERE id='".$_SESSION['applicant_id']."'");
-   print "<div class=\"form-item\" id=\"edit-name-wrapper\">";
-   print "Вы вошли как ".$rval['surname']." ".$rval['name']." ".$rval['second_name'];
-   print "</div>";
-   if ($_SESSION['step_num'] > 1) {
-      print "<div class=\"form-item\" id=\"edit-name-wrapper\"><INPUT type=\"button\" onclick=\"javascript: $.ajax({url: 'login.php', data: 'act=exit'});\" value=\"Выйти\"></div>";
-   }
+    $rval = getarray("SELECT surname, name, second_name FROM `reg_applicant` WHERE id='".$_SESSION['applicant_id']."'");
+    print "<div class=\"form-item\" id=\"edit-name-wrapper\">";
+    print "Вы вошли как ".$rval['surname']." ".$rval['name']." ".$rval['second_name'];
+    print "</div>";
+    if ($_SESSION['step_num'] > 1) {
+        print "<div class=\"form-item\" id=\"edit-name-wrapper\"><input type=\"button\" onclick=\"javascript: $.ajax({url: 'login.php', data: 'act=exit'});\" value=\"Выйти\" /></div>";
+    }
 }
 ?>
 </div></form>
@@ -223,64 +220,64 @@ class FormFields2 extends FormFields
 	}
         switch($_SESSION['step_num']) {
             case 0:
-	        print "<INPUT type=\"submit\" value=\"Я согласен\" class=\"submit\"></DIV>";
-                print "</FORM>\n";
+	        print "<input type=\"submit\" value=\"Я согласен\" class=\"submit\" /></div>";
+                print "</form>\n";
                 break;
             case 3:
-	        print "</FORM>\n";
+	        print "</form>\n";
                 break;
             case 2:
-	        print "<TR><TD align=\"center\" width=\"100%\">";
-	        print "<INPUT type=\"hidden\" name=\"act\" value=\"\" id=\"act\">";
+	        print "<tr><td align=\"center\" width=\"100%\">";
+	        print "<input type=\"hidden\" name=\"act\" value=\"\" id=\"act\" />";
 	        /* $fval = getarray("SELECT COUNT(id) AS cnt FROM `reg_request` WHERE applicant_id='".$_SESSION['applicant_id']."'");
 	        if ($fval['cnt'] < 2) {
-	            print "<INPUT type=\"button\" class=\"submit\" value=\"Подать заявление на еще одну специальность\" onclick=\"javascript: $('#act').val('add'); $('#formular').submit();\">"; 
+	            print "<input type=\"button\" class=\"submit\" value=\"Подать заявление на еще одну специальность\" onclick=\"javascript: $('#act').val('add'); $('#formular').submit();\">"; 
 	        } */
-      	        print "<INPUT type=\"button\" class=\"submit\" value=\"Перейти на следующий шаг\" onclick=\"javascript: $('#act').val(''); $('#formular').submit();\"></TD></TR></FORM>\n";
+      	        print "<input type=\"button\" class=\"submit\" value=\"Перейти на следующий шаг\" onclick=\"javascript: $('#act').val(''); $('#formular').submit();\" /></td></tr></form>\n";
                 break;
             default:
-	        print "<TR><TD align=\"center\" width=\"100%\"><INPUT type=\"submit\" class=\"submit\" value=\"Отправить\">";
-	        print "</TD></TR></FORM>\n";
+	        print "<tr><td align=\"center\" width=\"100%\"><input type=\"submit\" class=\"submit\" value=\"Отправить\">";
+	        print "</td></tr></form>\n";
 	}
     }
 }
 
-print '<H1 class="title">Шаг '.($step_num+1).' из 5</H1><DIV id="output"></DIV>';
+print '<h1 class="title">Шаг '.($step_num+1).' из 5</h1><div id="output"></div>';
 
 if ($step_num == 0) {
    if (isset($_REQUEST['global_sid'])) {
        $_SESSION['global_sid'] = $_REQUEST['global_sid'];
    }
 
-   print "<DIV id=\"myaccordion\">";
+   print "<div id=\"myaccordion\">";
 
    $form = new FormFields2('insert.php','formular', 93, 0);
 
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+   print "<div><table style=\"display: block;\"><tbody style=\"border: none;\">"; 
    $form->tdBox( 'text', 'Фамилия',          'surname',  200, 60, 'K' ); 
    $form->tdBox( 'text', 'Имя',              'name',     200, 60, 'K' ); 
    $form->tdBox( 'text', 'Отчество (при наличии)',         'second_name', 200, 60, 0 ); 
    $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, 'E' ); 
 
-   print "</TBODY></TABLE></DIV>\n\n"; 
-   print "<P>В соответствии с требованиями Федерального закона <A href=\"http://www.mami.ru/pk/files/152-FZ.pdf\" target=\"_blank\">«О персональных данных» от 27.07.2006 №152-ФЗ</A>  даю согласие на сбор и обработку моих персональных данных (далее – ПД) на срок с момента подписания согласия до 31.12.2012 в необходимом для зачисления в МГТУ «МАМИ» объеме.</P>
-<P><B>Адрес и наименование оператора, получающего разрешение на обработку ПД:</B> 107023, г. Москва, Б. Семеновская ул., д. 38; Государственное образовательное учреждение высшего профессионального образования «Московский государственный технический университет «МАМИ».</P>
-<P><B>Цель обработки ПД:</B> обеспечение соблюдения законов и иных нормативных правовых актов, обеспечении личной безопасности, обеспечение сохранности имущества оператора, Субъекта ПД и третьих лиц, статистические или иные научные цели при условии полного обезличивания ПД.</P>
-<P><B>Перечень ПД, на обработку которых даю согласие:</B> фамилия, имя, отчество; пол; число, месяц и год рождения; место рождения; адрес; сведения об образовании; номера телефонов; реквизиты документа, удостоверяющего личность и гражданство; результаты ЕГЭ или вступительных испытаний; реквизиты документа об образовании; иные данные, предусмотренные законодательством РФ.</P>
-<P><B>Перечень действий с ПД, на совершение которых даю согласие:</B> сбор, систематизация, накопление, распространение, хранение, уточнение, передача, обезличивание, блокирование, уничтожение.</P>
-<P><B>Способы обработки ПД:</B> на бумажных носителях, с помощью информационной системы ПД.</P>
-<P><B>Порядок отзыва согласия по инициативе Субъекта ПД:</B> субъект ПД в любой момент имеет право отозвать свое согласие в необходимом объеме на основании письменного заявления.</P>";
+   print "</tbody></table></div>\n\n"; 
+   print "<p>В соответствии с требованиями Федерального закона <a href=\"http://www.mami.ru/pk/files/152-FZ.pdf\" target=\"_blank\">«О персональных данных» от 27.07.2006 №152-ФЗ</a>  даю согласие на сбор и обработку моих персональных данных (далее – ПД) на срок с момента подписания согласия до 31.12.2012 в необходимом для зачисления в МГТУ «МАМИ» объеме.</p>
+<p><b>Адрес и наименование оператора, получающего разрешение на обработку ПД:</b> 107023, г. Москва, Б. Семеновская ул., д. 38; Государственное образовательное учреждение высшего профессионального образования «Московский государственный технический университет «МАМИ».</p>
+<p><b>Цель обработки ПД:</b> обеспечение соблюдения законов и иных нормативных правовых актов, обеспечении личной безопасности, обеспечение сохранности имущества оператора, Субъекта ПД и третьих лиц, статистические или иные научные цели при условии полного обезличивания ПД.</p>
+<p><b>Перечень ПД, на обработку которых даю согласие:</b> фамилия, имя, отчество; пол; число, месяц и год рождения; место рождения; адрес; сведения об образовании; номера телефонов; реквизиты документа, удостоверяющего личность и гражданство; результаты ЕГЭ или вступительных испытаний; реквизиты документа об образовании; иные данные, предусмотренные законодательством РФ.</p>
+<p><b>Перечень действий с ПД, на совершение которых даю согласие:</b> сбор, систематизация, накопление, распространение, хранение, уточнение, передача, обезличивание, блокирование, уничтожение.</p>
+<p><b>Способы обработки ПД:</b> на бумажных носителях, с помощью информационной системы ПД.</p>
+<p><b>Порядок отзыва согласия по инициативе Субъекта ПД:</b> субъект ПД в любой момент имеет право отозвать свое согласие в необходимом объеме на основании письменного заявления.</p>";
    unset($form);
 }
 if ($step_num == 1) {
    $form = new FormFields2('insert.php','formular', 180, 0);
 
    print "<P>Пожалуйста заполните следующие поля (поля отмеченные * обязательны для заполнения):</P>\n\n";
-   print "<DIV id=\"myaccordion\">\n";   
+   print "<div id=\"myaccordion\">\n";   
 
    // ------ 1 ------
    print "<h3>Общие сведения</h3>";
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 
    $form->tdRadio(   'Пол',              'sex',         array('M'=>'Мужской','F'=>'Женский'), 0, 1);
    $form->tdDateBox( 'Дата рождения',    'birthday',        1950, date('Y')-16, 'D' );
@@ -291,24 +288,24 @@ if ($step_num == 1) {
 //   $form->tdSelect('Гражданство',      'citizenry',   $tval, 0, 1);
    $form->tdRadio(   'Гражданство',      'citizenry',   array('Российская Федерация'=>'Российская Федерация','other'=>'Другое'), 0, 1);
 
-   print "</TBODY></TABLE></DIV>\n\n";
+   print "</TBODY></table></div>\n\n";
 
    // ------ 2 ------
    print '<h3>Паспортные данные</h3>';
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
+   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">";
 
-   print "<INPUT type=\"hidden\" name=\"doc_type\" value=1>\n";
+   print "<input type=\"hidden\" name=\"doc_type\" value=1>\n";
    $form->tdBox( 'text', array('Серия','Номер'), array('doc_serie','doc_number'),    array(45,70), array(4,6), array('N','N') ); 
    $form->tdBox( 'text', 'Кем выдан',         'doc_issued',  200, 200, 'A' ); 
    $form->tdBox( 'text', 'Код подразделения', 'doc_code',    100, 8, 'Okodp' ); 
    $form->tdDateBox( 'Дата выдачи',           'doc_date',    1990, date('Y'), 'D' );
    $form->tdBox( 'text', 'Место рождения',    'birthplace',  200, 100, 'A' ); 
   
-   print "</TBODY></TABLE></DIV>";
+   print "</TBODY></table></div>";
 
    // ------ 3 ------
    print "<h3>Адрес проживания</h3>";
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 
    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress-index', 100, 6, 'N' ); 
 
@@ -319,13 +316,13 @@ if ($step_num == 1) {
    $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress-street', 200, 60, 0 );
    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array('A',0,0) );
 
-   print "<TR><TD colspan=\"2\"><LABEL><INPUT type=\"checkbox\" id=\"regaddressashome\" name=\"regaddressashome\" value=\"1\" checked onclick=\"javascript: $('#regaddress_form').toggle();\">Совпадает с адресом регистрации.</LABEL>";
-   print "</TBODY></TABLE></DIV>";
+   print "<tr><TD colspan=\"2\"><LABEL><input type=\"checkbox\" id=\"regaddressashome\" name=\"regaddressashome\" value=\"1\" checked onclick=\"javascript: $('#regaddress_form').toggle();\">Совпадает с адресом регистрации.</LABEL>";
+   print "</TBODY></table></div>";
 
    // ------ 3 ------
-   print "<DIV id=\"regaddress_form\" style=\"display:none;\">";
+   print "<div id=\"regaddress_form\" style=\"display:none;\">";
    print "<h3>Адрес регистрации</h3>";
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 
    $form->tdBox( 'text', 'Почтовый индекс',  'regaddress-index', 100, 6, 'ON' ); 
 
@@ -334,22 +331,22 @@ if ($step_num == 1) {
    $form->tdBox( 'text', 'Населенный пункт',  'regeaddress-city', 200, 50, 'OK' );
    $form->tdBox( 'text', 'Улица (квартал)',  'regaddress-street', 200, 60, 0 );
    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress-home','regaddress-building','regaddress-flat'), array(25,25,25), array(5,4,4), array(0,0,0) );
-   print "</TBODY></TABLE></DIV></DIV>";
+   print "</TBODY></table></div></div>";
 
    // ------ 4   ------
    print "<h3>Контактные данные</h3>";
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 
    $form->tdBox( 'phone', 'Домашний телефон',         'homephone', array(40,70), array(5,10), 1 );
    $form->tdBox( 'phone', 'Мобильный телефон',        'mobile',    array(40,70), array(3,7), 1 );
    
-   print "</TBODY></TABLE></DIV>";
+   print "</TBODY></table></div>";
 
    
    
    // ------ 5 ------
    print "<h3>Сведения об имеющемся образовании</h3>";
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
    $kval = $msl->getarrayById("SELECT id, name FROM reg_education", 'id','name');
    $form->tdSelect(   'Тип учебного заведения', 'edu_base', $kval, 0, 1);
 
@@ -364,13 +361,13 @@ if (0) {
    $form->tdRadio(   'Изучаемый иностранный язык', 'language', $sval, 0, 1);
 
    $form->tdRadio(   'Высшее образование получаю', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), 0, 1);
-   print "</TBODY></TABLE></DIV>\n";
+   print "</TBODY></table></div>\n";
 
 
 if (0) {
    // ------ 6 ------
    print "<h3>Дополнительные сведения</h3>";
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
    
    $form->tdBox( 'text', 'Выпускник подшефной школы №',         'school',    50, 10, 0 );
    $form->tdRadio(   'Слушатель ПК или ПО при МГТУ "МАМИ"', 'tclistener',  array('1'=>'да','0'=>'нет'), 1, 1);
@@ -383,9 +380,9 @@ if (0) {
    
    $form->hidden('region', '1'); // id региона статичное (1 - интернет)
 
-   print "</TBODY></TABLE></DIV>\n";
+   print "</TBODY></table></div>\n";
    unset($form);
-   print "</DIV>";
+   print "</div>";
 
    
 }
@@ -450,7 +447,7 @@ function nextStep() {
 
         
    $form = new FormFields2('insert.php','fileupload', 250, 0);
-   print "<DIV><TABLE style=\"border: 0px;\"><TBODY style=\"border: 0px;\">\n";
+   print "<div><table style=\"border: 0px;\"><TBODY style=\"border: 0px;\">\n";
    
    $bdoc = $msl->getarrayById("SELECT id,name FROM `reg_edu_doc`",'id','name');
    $form->tdSelect(  'Тип загружаемого документа', 'doctype', $bdoc, 0, 1);
@@ -460,12 +457,12 @@ function nextStep() {
    $form->tdBox( 'text', 'Наименование учреждения, выдавшего документ',  'docinstitution', 150, 300, 'A' );
    $form->tdBox( 'text', 'Специальность',  'docspecialty', 150, 60, 0 );
    
-   print "<TR><TD><input type=\"button\" id=\"button1\" class=\"button\" value=\"Загрузить файлы\"></TD></TR>";
-   print "<TR><TD colspan=2><DIV id=\"filemode\"";
+   print "<tr><td><input type=\"button\" id=\"button1\" class=\"button\" value=\"Загрузить файлы\"></td></tr>";
+   print "<tr><TD colspan=2><div id=\"filemode\"";
    
    $rval = $msl->getarray("SELECT name,serie,number,date,filename FROM `reg_applicant_edu_doc` a LEFT JOIN `reg_edu_doc` b ON a.edu_doc = b.id WHERE a.applicant = '".$_SESSION['applicant_id']."'", 1);
    if ($rval == 0) print " style=\"display: none;\"";
-   print "><P>Загруженные файлы:</P><DIV id=\"uploader\"><OL class=\"files\">";
+   print "><P>Загруженные файлы:</P><div id=\"uploader\"><OL class=\"files\">";
 
    if (is_array($rval)) {
       foreach ($rval as $key=>$val) {
@@ -473,9 +470,9 @@ function nextStep() {
       }
    }
 
-   print "</OL></DIV></DIV></TD></TR>";
-   print "<TR><TD colspan=2><INPUT type=\"button\" value=\"Перейти на следующий шаг\" onclick=\"nextStep();\"></TD></TR>";
-   print "</TBODY></TABLE></DIV>";
+   print "</OL></div></div></td></tr>";
+   print "<tr><TD colspan=2><input type=\"button\" value=\"Перейти на следующий шаг\" onclick=\"nextStep();\"></td></tr>";
+   print "</TBODY></table></div>";
    unset($form);
 }
 
@@ -483,9 +480,9 @@ if ($step_num == 2) {
    $form = new FormFields2('insert.php','formular', 210, 0);
 
    print "<P>Пожалуйста заполните следующие поля (поля отмеченные * обязательны для заполнения):</P>\n\n";
-   print "<DIV id=\"myaccordion\">\n";   
+   print "<div id=\"myaccordion\">\n";   
    print "<h3>Выбор образовательной программы</h3>";
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 
 $cat = new Catalog();
 
@@ -493,10 +490,10 @@ $cat = new Catalog();
 $bval = $cat->getAvailableSpecialtiesByPgid(1);
 $form->tdSelect(  'Выбранная образовательная программа', 'catalog', $bval, (isset($_SESSION['global_sid']) ? $_SESSION['global_sid'] : 0), 1);
    
-print "</TBODY></TABLE></DIV>";
+print "</TBODY></table></div>";
 
 
-print "<DIV id=\"ege_fields\">";
+print "<div id=\"ege_fields\">";
 
 if (isset($_SESSION['global_sid'])) {
     $_POST['catalog']=$_SESSION['global_sid'];
@@ -509,12 +506,12 @@ if (isset($_SESSION['global_sid'])) {
 $_POST['width']=210;
 
 require('get.php'); 
- print "</DIV>\n\n";
+ print "</div>\n\n";
 
-print "</DIV>";
+print "</div>";
 
    unset($form);
-   print "</DIV>\n\n";
+   print "</div>\n\n";
 
    print "<P>Вы можете в любой момент проверить состояние дел по выбранной вами образовательной программе, выполнив вход в систему. Для входа используется адрес электронной почты и данные паспорта (серия и номер слитно).</p>";   
 }
@@ -522,7 +519,7 @@ print "</DIV>";
 if ($step_num == 4) {
    print "<P>Распечатайте и подпишите следующие документы:</P>";
 
-   print "<DIV id=\"myaccordion\">\n";   
+   print "<div id=\"myaccordion\">\n";   
    
    $rval = $msl->getarray("SELECT a.id, a.type, a.semestr, a.catalog FROM reg_request a WHERE a.applicant_id='".$_SESSION['applicant_id']."'", 1);
  
@@ -531,79 +528,79 @@ if ($step_num == 4) {
    foreach($rval as $key => $val) {
       $spc = $cat->getInfo($val['catalog']);
       print "<h3>Комплект документов для зачисления на ".$spc['type']." ".$spc['spec_code']." \"".$spc['name']."\"</h3>";
-      print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+      print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
    
       $id = $_SESSION['applicant_id'];
 
       switch ($val['type']){
          case 1:
-	    print "<TR><TD style=\"font-weight: bold; color: #ff0000;\">Внимание! Во всех документах даты не ставить!</TD></TR>";
+	    print "<tr><TD style=\"font-weight: bold; color: #ff0000;\">Внимание! Во всех документах даты не ставить!</td></tr>";
       	    switch($val['semestr']) {
                case 1: 
-	          print "<TR><TD><A href=\"documents/anketa.php?request=".$val['id']."\">Заявление абитуриента</A></TD></TR>\n";
+	          print "<tr><td><A href=\"documents/anketa.php?request=".$val['id']."\">Заявление абитуриента</A></td></tr>\n";
 		  break;
 	       default:
-	          print "<TR><TD><A href=\"documents/anketa2.php?request=".$val['id']."\">Заявление абитуриента</A></TD></TR>\n";
-		  print "<TR><TD><A href=\"documents/perez.php?applicant_id=".$id."\">Заявление о перезачете дисциплин</A></TD></TR>\n";
+	          print "<tr><td><A href=\"documents/anketa2.php?request=".$val['id']."\">Заявление абитуриента</A></td></tr>\n";
+		  print "<tr><td><A href=\"documents/perez.php?applicant_id=".$id."\">Заявление о перезачете дисциплин</A></td></tr>\n";
 		  $ival = getarray("SELECT pay FROM reg_institution_additional WHERE request_id='".$val['id']."'");
                   if ($ival['pay'] > 0) {
-		     print "<TR><TD><A href=\"documents/ds_ckt.php?request_id=".$val['id']."\">Дополнительное соглашение</A> (2 экземпляра)</TD></TR>\n";
-		     print "<TR><TD><A href=\"receipt/kvit_dop.php?purpose=3&request_id=".$val['id']."\">Квитанция для оплаты досдач</A></TD></TR>\n";
+		     print "<tr><td><A href=\"documents/ds_ckt.php?request_id=".$val['id']."\">Дополнительное соглашение</A> (2 экземпляра)</td></tr>\n";
+		     print "<tr><td><A href=\"receipt/kvit_dop.php?purpose=3&request_id=".$val['id']."\">Квитанция для оплаты досдач</A></td></tr>\n";
 		  }
 	    }
-	    print "<TR><TD><A href=\"documents/opd.php?applicant_id=".$id."\">Анкета-согласие на обработку персональных данных</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"documents/dog_ckt.php?request_id=".$val['id']."\">Договор на оказание платных образовательных услуг</A> (3 экземпляра)</TD></TR>\n";
-	    print "<TR><TD><A href=\"documents/dog_ckt_s.php?request_id=".$val['id']."\">Договор об организации обучения гражданина на платной основе</A> (2 экземпляра)</TD></TR>\n";
-	    print "<TR><TD><A href=\"documents/diplom.php?applicant_id=".$_SESSION['applicant_id']."\">Заявление на возврат оригинала документа об образовании</A> (даты не ставить)</TD></TR>\n";
-	    print "<TR><TD><A href=\"documents/opis.php?applicant_id=".$_SESSION['applicant_id']."\">Опись документов личного дела</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"documents/ekz_list.php?request_id=".$val['id']."\">Экзаменационный лист</A> (только для тех, кто проходил вступительные испытания)</TD></TR>\n";
-	    print "<TR><TD><A href=\"receipt/kvit.php?request_id=".$val['id']."\">Квитанция на оплату обучения</A></TD></TR>\n";
-	    print "<TR><TD>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.</TD></TR>";
+	    print "<tr><td><A href=\"documents/opd.php?applicant_id=".$id."\">Анкета-согласие на обработку персональных данных</A></td></tr>\n";
+	    print "<tr><td><A href=\"documents/dog_ckt.php?request_id=".$val['id']."\">Договор на оказание платных образовательных услуг</A> (3 экземпляра)</td></tr>\n";
+	    print "<tr><td><A href=\"documents/dog_ckt_s.php?request_id=".$val['id']."\">Договор об организации обучения гражданина на платной основе</A> (2 экземпляра)</td></tr>\n";
+	    print "<tr><td><A href=\"documents/diplom.php?applicant_id=".$_SESSION['applicant_id']."\">Заявление на возврат оригинала документа об образовании</A> (даты не ставить)</td></tr>\n";
+	    print "<tr><td><A href=\"documents/opis.php?applicant_id=".$_SESSION['applicant_id']."\">Опись документов личного дела</A></td></tr>\n";
+	    print "<tr><td><A href=\"documents/ekz_list.php?request_id=".$val['id']."\">Экзаменационный лист</A> (только для тех, кто проходил вступительные испытания)</td></tr>\n";
+	    print "<tr><td><A href=\"receipt/kvit.php?request_id=".$val['id']."\">Квитанция на оплату обучения</A></td></tr>\n";
+	    print "<tr><td>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.</td></tr>";
 	    break;
 	 default:
-	    print "<TR><TD>Ваши документы для поступления находятся на рассмотрении. После рассмотрения документов, Вы сможете распечатать с личного кабинета необходимые документы. Для входа в систему используйте адрес электронной почты в качестве логина и в качестве пароля серию и номер паспорта, написанные слитно. О результатах рассмотрения документов Вы будете уведомлены с помощью сообщения на ваш e-mail.</TD></TR>";
+	    print "<tr><td>Ваши документы для поступления находятся на рассмотрении. После рассмотрения документов, Вы сможете распечатать с личного кабинета необходимые документы. Для входа в систему используйте адрес электронной почты в качестве логина и в качестве пароля серию и номер паспорта, написанные слитно. О результатах рассмотрения документов Вы будете уведомлены с помощью сообщения на ваш e-mail.</td></tr>";
       }
 
 if (0) {   
-      print "<TR><TD>";
+      print "<tr><td>";
       print "<A onclick=\"jConfirm('Вы действительно хотите удалить заявление?', 'Удаление заявления', function(r) {
 if (r) {
 $.ajax({url: 'login.php', data: 'act=revoke&id=".$val['id']."'});
 }
 }); return false;\">Отказаться от заявления на данную образовательную программу</A>\n";
-      print "</TD></TR>";
+      print "</td></tr>";
    
-      print "</TBODY></TABLE></DIV>\n\n";
+      print "</TBODY></table></div>\n\n";
 }
    }
    
    unset($cat);
    } else {
       print "<h3>Нет добавленных образовательных программ</h3>";
-      print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+      print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
    
-      print "<TR><TD>";
+      print "<tr><td>";
       print "Пожалуйста вернитесь на предыдущий шаг и добавьте заявление.\n";
-      print "</TD></TR>";
-   print "</TBODY></TABLE></DIV>\n\n";
+      print "</td></tr>";
+   print "</TBODY></table></div>\n\n";
 
-   print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
    
    if ($key < 2) {
-      print "<TR><TD>";		     
-      print "<INPUT type=\"button\" value=\"Добавить заявление на другую образовательную программу\" onclick=\"$.ajax({url: 'login.php', data: 'act=goback'})\">\n";
-      print "</TD></TR>";
+      print "<tr><td>";		     
+      print "<input type=\"button\" value=\"Добавить заявление на другую образовательную программу\" onclick=\"$.ajax({url: 'login.php', data: 'act=goback'})\">\n";
+      print "</td></tr>";
    }
    }
    
    
-   print "</TBODY></TABLE></DIV>\n\n";
-   print "</DIV>";
+   print "</TBODY></table></div>\n\n";
+   print "</div>";
 }
    
 
 
-print '<P>Если у Вас в процессе заполнения формы появились вопросы, свяжитесь с нашими сотрудниками по телефонам: +7 (495) 663-1562, +7 (495) 663-1505 или <A href="mailto:iit@ins-iit.ru">по электронной почте</A>.</p></div></div>';
+print '<p>Если у Вас в процессе заполнения формы появились вопросы, свяжитесь с нашими сотрудниками по телефонам: +7 (495) 663-1562, +7 (495) 663-1505 или <a href="mailto:iit@ins-iit.ru">по электронной почте</a>.</p></div></div>';
                     
 ?>
 

@@ -254,7 +254,6 @@ case 'html':
 <title>Печать квитанции</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 	<meta http-equiv="Content-Language" content="ru">
-	<link rel="icon" type="image/png" href="images/q16x16.png">
 <style type="text/css">
 code { white-space: pre; }
 .nowr { white-space: nowrap; }

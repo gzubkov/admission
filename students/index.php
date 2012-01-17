@@ -16,16 +16,13 @@ require_once('../class/price.class.php');
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Личный кабинет студента</title>
 
-<link type="text/css" rel="stylesheet" media="all" href="../images/defaults.css">
-<link type="text/css" rel="stylesheet" media="all" href="../images/system.css">
-<link type="text/css" rel="stylesheet" media="all" href="../images/style.css">
-<link type="text/css" rel="stylesheet" media="all" href="../css/custom-theme/jquery-ui-1.8.custom.css">	
-
-
-<link href="css/jquery.alerts.css" rel="stylesheet" type="text/css" media="screen" />
+<link type="text/css" rel="stylesheet" media="all" href="../images/defaults.css"/>
+<link type="text/css" rel="stylesheet" media="all" href="../images/system.css"/>
+<link type="text/css" rel="stylesheet" media="all" href="../images/style.css"/>
+<link type="text/css" rel="stylesheet" media="all" href="../css/custom-theme/jquery-ui-1.8.custom.css"/>	
 
 <!-- Validation -->
-<link rel="stylesheet" href="css/validationEngine.jquery.css" type="text/css" media="screen" title="no title" charset="utf-8" />
+<link rel="stylesheet" href="../css/validationEngine.jquery.css" type="text/css" media="screen" title="no title" charset="utf-8" />
 </head>
 <body class="sidebar-left">
 

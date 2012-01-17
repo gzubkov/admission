@@ -18,7 +18,7 @@ $pdf->setSourceFile('opis.pdf');
 
 // add a page
 $pdf->AddPage();
-$pdf->useTemplate($pdf->->importPage(1));
+$pdf->useTemplate($pdf->importPage(1));
 
 $pdf->SetFont("times", "I", 13);
 $pdf->Text(61, 35.9, $r['surname']." ".$r['name']." ".$r['second_name']);

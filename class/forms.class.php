@@ -9,7 +9,7 @@ class FormFields
     // Создание новой формы с табличной разметкой, где $tdwidth - ширина колонок, $border - ширина границы, $action - принимающий скрипт   
     public function __construct($action, $fid, $tdwidth, $border, $submit_name="Отправить", $charset="UTF-8", $method="post") 
     {
-        print "<FORM action=\"".$action."\" accept-charset=\"".$charset."\" method=\"".$method."\" id=\"".$fid."\" class=\"formular\">\n\n";
+        print "<form action=\"".$action."\" accept-charset=\"".$charset."\" method=\"".$method."\" id=\"".$fid."\" class=\"formular\">\n\n";
         $this->gl_width = $tdwidth;
 	$this->action = $action;
 	$this->id = $fid;
@@ -18,9 +18,9 @@ class FormFields
    
     public function __destruct() 
     {
-        print "<TR><TD align=\"left\" width=\"100%\" colspan=\"2\">\n";
-	print "<INPUT type=\"submit\" class=\"submit\" value=\"".$this->submit_name."\">";
-	print "</TD></TR></FORM>\n";
+        print "<tr><td align=\"left\" width=\"100%\" colspan=\"2\">\n";
+	print "<input type=\"submit\" class=\"submit\" value=\"".$this->submit_name."\" />";
+	print "</td></tr></form>\n";
     }
 
     protected function _getRequired($r) 
@@ -70,11 +70,11 @@ class FormFields
 
     protected function _leftColumn($name, $rs = "")
     {
-    	print "<TR><TD style=\"width: ".$this->gl_width."px;\">".$name;
+    	print "<tr><td style=\"width: ".$this->gl_width."px;\">".$name;
         if ($rs && $rs[0] != 'O') {
-            print "<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN>"; 
+            print "<span class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</span>"; 
 	}
-	print "</TD>\n";
+	print "</td>\n";
         return 0;
     }
  
@@ -82,21 +82,21 @@ class FormFields
     {
         switch($type) {
             case "remark":
-                print "<TR><TD colspan=2 style=\"font-size: 7pt; line-height: 12px;\">".$name."</TD></TR>";
+                print "<tr><td colspan=2 style=\"font-size: 7pt; line-height: 12px;\">".$name."</td></tr>";
                 break;
             
 	    case "phone":
 	        $this->_leftColumn( $name, $r );
-                print "<TD>(<INPUT maxlength=\"".$maxlength[0]."\" name=\"".$qname."_code\"  id=\"edit-".$qname."_code\" class=\"";
+                print "<td>(<input maxlength=\"".$maxlength[0]."\" name=\"".$qname."_code\"  id=\"edit-".$qname."_code\" class=\"";
 	        if ($r) print "validate[required,custom[onlyNumber]]";
-                print "text-input\" style=\"width: ".$size[0]."px;\" type=\"text\" value=\"".(isset($val[0])?$val[0]:"")."\">) <INPUT maxlength=\"".$maxlength[1]."\" name=\"".$qname."\"  id=\"edit-".$qname."\" class=\"";
+                print "text-input\" style=\"width: ".$size[0]."px;\" type=\"text\" value=\"".(isset($val[0])?$val[0]:"")."\">) <input maxlength=\"".$maxlength[1]."\" name=\"".$qname."\"  id=\"edit-".$qname."\" class=\"";
                 if ($r) print "validate[required,custom[onlyNumber]]";
-                print "text-input\" style=\"width: ".$size[1]."px;\" type=\"text\" value=\"".(isset($val[1])?$val[1]:"")."\">.</TD>\n";
+                print "text-input\" style=\"width: ".$size[1]."px;\" type=\"text\" value=\"".(isset($val[1])?$val[1]:"")."\">.</td>\n";
                 break;
 
             case "static":
 	        $this->_leftColumn( $name, 0 );
-                print "<TD>".$qname.".</TD>\n";
+                print "<td>".$qname.".</td>\n";
                 break;
 
             default: 
@@ -104,26 +104,26 @@ class FormFields
          
         if (is_array( $name ) && is_array( $qname )){
             $this->_leftColumn( $name[0], $r[0] );
-            print "<TD>";
+            print "<td>";
             for ($i = 0; $i < count($qname); $i++){
 	        if ($i > 0) {
 		    print " ".$name[$i].$this->_required( $r, $i );
 		}
-	        print " <INPUT maxlength=\"".$maxlength[$i]."\" name=\"".$qname[$i]."\" id=\"edit-".$qname[$i]."\" style=\"width: ".$size[$i]."px;\" class=\"";
+	        print " <input maxlength=\"".$maxlength[$i]."\" name=\"".$qname[$i]."\" id=\"edit-".$qname[$i]."\" style=\"width: ".$size[$i]."px;\" class=\"";
 		print $this->_getValidate($r[$i]);
 		print "text-input\" type=\"text\"";
 		if (isset($val[$i])) print " value='".$val[$i]."'";
-		print ">";
+		print " />";
 	    }
-            print ".</TD>";
+            print ".</td>";
          } 
          if (!is_array( $name ) && !is_array( $qname )){
 	    $this->_leftColumn( $name, $r );
-            print "<TD><INPUT maxlength=\"".$maxlength."\" name=\"".$qname."\"  id=\"edit-".$qname."\" class=\"";
+            print "<td><input maxlength=\"".$maxlength."\" name=\"".$qname."\"  id=\"edit-".$qname."\" class=\"";
 	    print $this->_getValidate($r);
-            print "text-input\" style=\"width: ".$size."px;\" type=\"text\" value='".$val."'>.</TD>\n";
+            print "text-input\" style=\"width: ".$size."px;\" type=\"text\" value='".$val."' />.</td>\n";
          }
-	 print "</TR>\n";
+	 print "</tr>\n";
         } 
         return true;
     }
@@ -131,7 +131,7 @@ class FormFields
     public function tdRadio( $name, $qname, $array, $sel=null, $r=0 ) 
     {
         $this->_leftColumn( $name, $r );
-        print "<TD>";
+        print "<td>";
 
         print "<div id=\"".$qname."radio\">\n";
 	$k = 0;
@@ -158,13 +158,13 @@ name = \$('#".$qname."radio".$key."').attr('name');
 			    \$('#".$qname."div').hide(); }); ";
 	       print "});</script>\n";
 
-               $str = " <DIV style=\"display: none;\" id=\"".$qname."div\"><INPUT type=\"text\" name=\"".$qname."null\" id=\"".$qname."text\"><INPUT type=\"button\" value=\"X\" id=\"".$qname."radio_return\"></DIV>";
+               $str = " <div style=\"display: none;\" id=\"".$qname."div\"><input type=\"text\" name=\"".$qname."null\" id=\"".$qname."text\"><input type=\"button\" value=\"X\" id=\"".$qname."radio_return\"></DIV>";
             } 
         }
 
-        print "</DIV>";
+        print "</div>";
 	if (isset($str)) print $str;
-	print "</TD></TR>\n"; 
+	print "</td></tr>\n"; 
 	return 0;
       }
 
@@ -172,23 +172,23 @@ name = \$('#".$qname."radio".$key."').attr('name');
     {
         $this->_leftColumn( $name, $r );
 	$k = 0;
-        print "<TD><SELECT name=\"".$qname."\" id=\"".$qname."\">";
+        print "<td><select name=\"".$qname."\" id=\"".$qname."\">";
         foreach ($array as $key => $val) {
-            print "<OPTION value=\"".$key."\"";
+            print "<option value=\"".$key."\"";
 	    if (($sel != null && $key == $sel) || ($sel == null && $k == 0)) {
 	        print " selected";
 		$k = 1;
 	    }
-	    print ">".$val."</OPTION>\n"; 
+	    print ">".$val."</option>\n"; 
 	}
-        print "</SELECT></TD></TR>\n";
+        print "</select></td></tr>\n";
 	return 0;
     }
 
     public function tdDateBox( $name, $qname, $startY, $endY, $r=0, $size=75, $set=0, $val=0 ) 
     {
         if ($size == 0) $size=75;
-        print "<SCRIPT type=\"text/javascript\">
+        print "<script type=\"text/javascript\">
 	       $(function(){ $('#".$qname."').datepicker({defaultDate: new Date(";
 	if ($set == 0) {
 	    print round(($startY+$endY)/2);
@@ -198,17 +198,17 @@ name = \$('#".$qname."radio".$key."').attr('name');
 	print ", 1 - 1, 1),
 		yearRange: '".$startY.":".$endY."'});
 		});
-	      </SCRIPT>"; 
+	      </script>"; 
         $this->_leftColumn( $name, $r );
-        print "<TD><INPUT id=\"".$qname."\" name=\"".$qname."\" type=\"text\" maxlength=\"10\" style=\"width: ".$size."px;\"";
+        print "<td><input id=\"".$qname."\" name=\"".$qname."\" type=\"text\" maxlength=\"10\" style=\"width: ".$size."px;\"";
 	if ($val != 0) print " value=\"".$val."\"";
-	print ">.</TD></TR>\n";
+	print " />.</td></tr>\n";
 	return 0;	
     }
     
     public function hidden( $name, $value ) 
     {
-	print "<INPUT type=\"hidden\" name=\"".$name."\" id=\"hidden".$name."\" value=\"".$value."\">\n";
+	print "<input type=\"hidden\" name=\"".$name."\" id=\"hidden".$name."\" value=\"".$value."\" />\n";
 	return 0;	
     }
 }

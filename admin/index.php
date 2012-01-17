@@ -32,7 +32,7 @@ require_once('../class/forms.class.php');
 <script type="text/javascript" src="../js/jquery.blockUI.js"></script>
 <script type="text/javascript" src="../js/jquery.alerts.js"></script>
 <script type="text/javascript" src="../js/FixedHeader.min.js"></script>
-<script type="text/javascript" charset="utf-8">
+<script type="text/javascript">
 
 var oTable;
 var asInitVals = new Array();
@@ -198,8 +198,6 @@ function unloginA() {
 
 
 <?php
-print "<br />\n";
-      
 
 if (isset($_SESSION['rights']) && $_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
    print "<A onclick=\"unloginA();\">Выйти</A>\n";
@@ -277,8 +275,8 @@ print "</div>";
         <input type=\"button\" class=\"no\" value=\"Нет\" /></div> ";
 
 } else {
-   print "<div style=\"border: 1px solid #d3d3d3; width: 250px; height: 140px; background-color: #ffffff; margin:0 auto;\"><form id=\"login\" action=\"\">\n";
-   print "<table border=\"0\"><tbody style=\"border: none;\">";
+   print "<div style=\"border: 1px solid #d3d3d3; width: 250px; height: 140px; background-color: #ffffff; margin:20px auto 0pt;\"><form id=\"login\" action=\"\">\n";
+   print "<table style=\"border: none;\"><tbody style=\"border: none;\">";
    print "<tr><td colspan=\"2\" style=\"text-align: center;\"><b>Вход в систему</b></td></tr>";
    print "<tr><td style=\"width: 70px;\">Логин:</td>";
    print "<td><input type=\"text\" name=\"login\" />.</td></tr>";
