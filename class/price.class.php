@@ -1,9 +1,11 @@
 <?php
 class Price
 {
+    var $msl;
+
     private function _countFinalPrice($iprice, $purpose=1, $count=1, $region=1) {
     	$price = array();
-	$pval = getarray("SELECT percent,region_percent,count,region FROM `receipt_purpose` WHERE `id` = '".$purpose."' LIMIT 1");
+	$pval = $this->msl->getarray("SELECT percent,region_percent,count,region FROM `receipt_purpose` WHERE `id` = '".$purpose."' LIMIT 1");
 	$count = ($pval['count'] ? $count : 1);
 	if ($pval['region'] == 1 && $region == 1) {
 	    if ($pval['region_percent'] > 0) {
@@ -20,17 +22,22 @@ class Price
 	return $price;
     }    
 
-    public function __construct() {
+    public function __construct(&$msl) {
+        $this->msl = $msl;
         return true;
     }
 
+    public function __destruct() {
+        //unset($this->msl);
+	return true;
+    }
 
     public function getPriceByPgid($pgid, $catalog, $purpose=1, $count=1, $date=0, $region=1) {
         $query = "SELECT price,percent FROM admission.price_groups WHERE id='".$pgid."' AND catalog='".$catalog."'";
 	if ($date > 0) $query .= " AND `start` <= '".$date."' AND `end` >= '".$date."'";
 	if ($date == 0) $query.= " ORDER BY `start` DESC";
 	$query .= " LIMIT 1";
-	$iprice = getarray($query);
+	$iprice = $this->msl->getarray($query);
 
 	return $this->_countFinalPrice($iprice, $purpose, $count, $region);
     }  
@@ -40,22 +47,22 @@ class Price
 	if ($date > 0) $query .= " AND `start` <= '".$date."' AND `end` >= '".$date."'";
 	if ($date == 0) $query.= " ORDER BY `start` DESC";
 	$query .= " LIMIT 1";
-	return getarray($query);
+	return $this->msl->getarray($query);
     }  
 
     public function getPriceByRegion($rgn, $catalog, $purpose=1, $count=1, $date=0, $region=1) {
-        $reg = getarray("SELECT pgid FROM partner_regions WHERE id='".$rgn."'");
+        $reg = $this->msl->getarray("SELECT pgid FROM partner_regions WHERE id='".$rgn."'");
         return $this->getPriceByPgid($reg['pgid'], $catalog, $purpose, $count, $date, $region);
     }
 
     public function getPriceByStudent($id, $purpose=2, $count=1, $date=0) {
-    	$dsemestr = getarray("SELECT (a.semestr+1>=(SELECT 2*b.term+b.start_semestr FROM admission.catalogs b WHERE b.base_id=a.catalog)) as dsem FROM students_base.student a WHERE a.id='".$id."' LIMIT 1");
+    	$dsemestr = $this->msl->getarray("SELECT (a.semestr+1>=(SELECT 2*b.term+b.start_semestr FROM admission.catalogs b WHERE b.base_id=a.catalog)) as dsem FROM students_base.student a WHERE a.id='".$id."' LIMIT 1");
 
 	if ($dsemestr['dsem']) {
 	    $query = "SELECT price, percent, `diplom_to_us` FROM students_base.student_price WHERE id='".$id."'";
 	    if ($date > 0) $query .= " AND `date_start` <= '".$date."' AND `date_end` >= '".$date."'";
 	    $query .= " LIMIT 1";
-	    $price = getarray($query, 0);
+	    $price = $this->_msl->getarray($query, 0);
 	    if ($price == 0) die('Цена на студента не сформирована!');
 	    
 	    if ($purpose == 2) {
@@ -67,7 +74,7 @@ class Price
             $query = "SELECT price, percent FROM students_base.student_price WHERE id='".$id."'";
 	    if ($date > 0) $query .= " AND `date_start` <= '".$date."' AND `date_end` >= '".$date."'";
 	    $query .= " LIMIT 1";
-	    $price = getarray($query, 0);
+	    $price = $this->msl->getarray($query, 0);
 	
 	    if ($price == 0) die('Цена на студента не сформирована!');
 	}
@@ -76,7 +83,7 @@ class Price
     }
 
     public function getDateByStudent($id) {
-        return getarray("SELECT date_start,date_end FROM `students_base`.student_price WHERE id='4685' ORDER BY date_end DESC LIMIT 1");
+        return $this->msl->getarray("SELECT date_start,date_end FROM `students_base`.student_price WHERE id='4685' ORDER BY date_end DESC LIMIT 1");
     }
 
     // получить список сессий

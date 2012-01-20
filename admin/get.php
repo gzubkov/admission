@@ -1,9 +1,10 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/moodle.class.php');
 $msl = new dMysql();
+$mdl = new Moodle($msl);
 
 function deleteApplicant($id) {
     global $msl;
@@ -58,7 +59,7 @@ function changeType($id,$type) {
     if ($type == 1) {
         $rval = $msl->getarray("SELECT surname,name,second_name,`e-mail`,sex,b.semestr,b.catalog FROM reg_applicant a LEFT JOIN reg_request b ON a.id = b.applicant_id WHERE b.id = ".$id);
 
-        $cat = new Catalog();
+        $cat = new Catalog(&$msl);
       	$spc = $cat->getInfo($rval['catalog']);
       	$uni = $cat->getUniversityInfo($rval['catalog']);
       	unset($cat);
@@ -115,12 +116,15 @@ function changeType($id,$type) {
 }
 
 function getSpecialties($id) {
+    global $msl;
+    global $mdl;
     global $CFG_uploaddir;
-    $rval = getarray("SELECT a.id, a.semestr, a.type, a.catalog, a.profile 
+
+    $rval = $msl->getarray("SELECT a.id, a.semestr, a.type, a.catalog, a.profile 
                       FROM reg_request a
                       WHERE a.applicant_id='".$id."'", 1);
 
-    $reg = getarray("SELECT step, `homeaddress-city` , b.name, homephone_code, homephone, mobile_code, mobile, region, num
+    $reg = $msl->getarray("SELECT step, `homeaddress-city` , b.name, homephone_code, homephone, mobile_code, mobile, region, num, `e-mail`
     	   	     FROM reg_applicant a JOIN reg_rf_subject b ON a.`homeaddress-region`=b.id 
 		     WHERE a.id ='".$id."'");
    
@@ -129,7 +133,7 @@ function getSpecialties($id) {
       	print "".$reg['homeaddress-city']." (".$reg['name'].")<BR>";
     }   
 
-    $cat = new Catalog();
+    $cat = new Catalog(&$msl);
 
     if (is_array($rval)) {
     foreach($rval as $key => $val) {
@@ -151,7 +155,7 @@ function getSpecialties($id) {
          default:
 	    print "<TR><TD><A href=\"../documents/anketa2.php?request=".$val['id']."\">Заявление абитуриента</A></TD></TR>\n";
 	    print "<TR><TD><A href=\"../documents/perez.php?applicant_id=".$id."\">Заявление о перезачете дисциплин</A></TD></TR>\n";
-	    $ival = getarray("SELECT pay FROM reg_institution_additional WHERE request_id='".$val['id']."'");
+	    $ival = $msl->getarray("SELECT pay FROM reg_institution_additional WHERE request_id='".$val['id']."'");
             if ($ival['pay'] > 0) {
 		     print "<TR><TD><A href=\"../documents/ds_ckt.php?request_id=".$val['id']."\">Дополнительное соглашение</A></TD></TR>\n";
 		     print "<TR><TD><A href=\"../receipt/kvit.php?purpose=3&request_id=".$val['id']."\">Квитанция для оплаты досдач</A></TD></TR>\n";
@@ -195,7 +199,7 @@ function getSpecialties($id) {
       print "</SELECT> "; 
 
       print "<SELECT id=\"region".$val['id']."\">";
-      $tarr = getarray("SELECT id, name FROM `partner_regions` WHERE `id` = 1 or `id` = 3",1);
+      $tarr = $msl->getarray("SELECT id, name FROM `partner_regions` WHERE `id` = 1 or `id` = 3",1);
 
       foreach($tarr as $v) {
          print "<OPTION value=".$v['id'];
@@ -210,7 +214,7 @@ function getSpecialties($id) {
       print "</TD></TR>";
       
       if ($val['semestr'] > 1) {
-         $dval = getarray("SELECT rups,pay,date FROM `reg_institution_additional` WHERE request_id=".$val['id']);
+         $dval = $msl->getarray("SELECT rups,pay,date FROM `reg_institution_additional` WHERE request_id=".$val['id']);
       	 print "<TR><TD>Досдач <INPUT type=\"text\" id=\"dosdachi".$val['id']."\" value=\"".$dval['rups']."\" maxlength=2 style=\"width: 20px;\">";
 	 print " платных <INPUT type=\"text\" maxlength=2 value=\"".$dval['pay']."\" id=\"pay".$val['id']."\" style=\"width: 20px;\"> ";
 
@@ -237,15 +241,16 @@ function getSpecialties($id) {
    }
   }
 
-    $fval = getarray("SELECT a.id, a.primary, a.filename, b.name FROM reg_applicant_edu_doc a LEFT JOIN reg_edu_doc b ON a.edu_doc=b.id WHERE a.applicant=".$id, 1);
-    if ($fval == 0) {
-        print "<SCRIPT language=\"jajascript\">
+    $fval = $msl->getarray("SELECT a.id, a.primary, a.filename, b.name FROM reg_applicant_edu_doc a LEFT JOIN reg_edu_doc b ON a.edu_doc=b.id WHERE a.applicant=".$id, 1);
+    print "<SCRIPT language=\"jajascript\">
        	       function openDocAttach() {
 	          $('#dialog-message2').dialog('option','title', 'Добавление документа').dialog('open');
 		  $('#hiddenaid').val(".$id.");
 	       }
 	       </SCRIPT>";
-        print "<FONT color=red><B>Не загружено ни одного файла.</B></FONT> <A onclick=\"openDocAttach();\">Добавить документ вручную</A><BR><BR>";
+    if ($fval == 0) {
+        
+        print "<FONT color=red><B>Не загружено ни одного файла.</B></FONT> <BR><BR>";
     } else {
         print "Загруженые файлы: <UL>";
         foreach($fval as $valf) {
@@ -263,16 +268,25 @@ function getSpecialties($id) {
       	}
       	print "</UL>\n";
     }
+    print "<A onclick=\"openDocAttach();\">Добавить документ вручную</A><BR>";
     print "<A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=sendrequestdocs&id=".$id."'})\">Запросить копию паспорта и документов об образовании</A><BR>\n"; 
     if (isset($val)) {
-        print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=createmoodleuser&rid=".$val['id']."'})\">Создать пользователя в Moodle и назначить на тест</A><BR>\n"; 
-    	print "Номер личного дела в БД <INPUT type=\"text\" maxlength=5 value=\"".$reg['num']."\" id=\"num".$val['id']."\" style=\"width: 40px;\"> <A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=savebdindex&index='+$('#num".$val['id']."').val()+'&id=".$id."'})\">Сохранить</A><BR>\n"; 
+        $moduser = $mdl->searchUser($reg['e-mail']);
+	if ($moduser > 0) {
+	    print "<b>Moodle: пользователь уже создан.</b><br>";
+	} else {
+        if ($reg['num'] == 0) print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=createmoodleusertest&rid=".$val['id']."'})\">Создать пользователя в Moodle и назначить на тест</A><BR>\n"; 
+    	print "Номер личного дела в БД <INPUT type=\"text\" maxlength=5 value=\"".$reg['num']."\" id=\"num".$val['id']."\" style=\"width: 40px;\"> <A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=savebdindex&index='+$('#num".$val['id']."').val()+'&id=".$id."'})\">Сохранить</A><BR>\n";
+	if ($reg['num'] > 0) {
+	    print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=createmoodleuser&rid=".$val['id']."'})\">Создать пользователя в Moodle</A><BR>\n";  
+	}
+	} 
     }
     print "<A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=deleteapplicant&id=".$id."'})\">Удалить абитуриента</A><BR>\n"; 
 }
 
 if ($_POST['act'] == 'login') {
-    $r = getarray("SELECT * FROM users WHERE `e-mail`='".$_POST['login']."'");
+    $r = $msl->getarray("SELECT * FROM users WHERE `e-mail`='".$_POST['login']."'");
 
     if (md5($CFG_salted.$_POST['password']) == $r['passwd']) {
         $_SESSION['user_id'] = $r['id'];
@@ -346,7 +360,39 @@ switch($_POST['act'])
         break;
 
     case 'createmoodleuser':
-        $mdl = new Moodle();
+	$req = $msl->getarray("SELECT * FROM `admission`.`reg_request` WHERE id = ".$_POST['rid']);
+	if (is_array($req)) {
+	    $rval = $msl->getarray("SELECT surname,name,second_name,`e-mail`,sex,`homeaddress-city`,num FROM reg_applicant WHERE id = ".$req['applicant_id']);
+	
+	    $id = $mdl->createUser($rval['name'], $rval['surname'], $rval['e-mail'], '7428bd7aa76b3ae591ada0f46a2b22e8', $rval['homeaddress-city'], $rval['num']);
+        }
+
+	$cat = new Catalog(&$msl);
+      	$spc = $cat->getInfo($req['catalog']);
+      	unset($cat);
+
+	$to = $rval['surname']." ".$rval['name']." ".$rval['second_name']."<".$rval['e-mail'].">";
+      	$subject = "Интернет-обучение";
+
+      	$message = "
+<html>
+    <body>
+        <p>Уважаем".(($rval['sex'] == 'M') ? "ый" : "ая").", ".$rval['name']." ".$rval['second_name']."!</p>
+        <p>Вы зачислены на ".$spc['type']." «".$spc['name']."» системы электронного обучения (<A href=\"http://moodle.ins-iit.ru/\">http://moodle.ins-iit.ru/</A>)</p>
+        <p>Для входа в систему используйте адрес электронной почты как логин и временный пароль \"123456\".</p>
+ 	<P>По всем возникающим вопросам обращайтесь +7 (495) 6631562 доб.20, Ирина Викторовна.</P>
+	<P>С уважением, Институт Информационных Технологий</P>
+   </body>
+</html>";
+
+	$headers  = "Content-type: text/html; charset=utf-8 \r\n";
+      	$headers .= "From: Институт Информационных Технологий - Интернет-обучение <iit@ins-iit.ru>\r\n";
+      	if (mail($to, $subject, $message, $headers) && $id > 0) {
+	    print "ok";
+	} else print "error";
+        break;
+
+    case 'createmoodleusertest':
 	$req = $msl->getarray("SELECT * FROM `admission`.`reg_request` WHERE id = ".$_POST['rid']);
 	if (is_array($req)) {
 	    $rval = $msl->getarray("SELECT surname,name,second_name,`e-mail`,sex,`homeaddress-city` FROM reg_applicant WHERE id = ".$req['applicant_id']);
@@ -355,7 +401,7 @@ switch($_POST['act'])
 	    $mdl->assignTest($id);
         }
 
-	$cat = new Catalog();
+	$cat = new Catalog(&$msl);
       	$spc = $cat->getInfo($req['catalog']);
       	unset($cat);
 

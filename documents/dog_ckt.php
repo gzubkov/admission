@@ -1,17 +1,18 @@
 <?php
 require_once('../../../modules/russian_date.php');
-require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
+require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
+$msl = new dMysql();
 
-$req = getarray("SELECT * FROM reg_request 
+$req = $msl->getarray("SELECT * FROM reg_request 
 WHERE id = ".$_REQUEST['request_id'].";");
 
 $applicant_id = $req['applicant_id'];
 
 // --- Базовый запрос (сведения об абитуриенте) --- //
-$r = getarray("SELECT * FROM reg_applicant 
+$r = $msl->getarray("SELECT * FROM reg_applicant 
 WHERE reg_applicant.id = ".$applicant_id.";");
 
 // initiate PDF
@@ -26,7 +27,7 @@ $pdf->useTemplate($pdf->importPage(1));
 $pdf->SetFont("times", "I", 13);
 $pdf->Text(55, 114, $r['surname']." ".$r['name']." ".$r['second_name']);
 
-$catalog = new Catalog();
+$catalog = new Catalog(&$msl);
 $rval = $catalog->getInfo($req['catalog'], $req['profile']);
 unset($catalog);
 
@@ -71,15 +72,16 @@ $pdf->SetFont("times", "I", 13);
 $pdf->Text(64, 82.4, $r['surname']." ".$r['name']." ".$r['second_name']);
 
 $pdf->Text(50, 92.2, $r['citizenry']);
-$pdf->Text(160, 92.2, date('d.m.Y', strtotime($r['birthday'])));
+$pdf->Text(140, 92.2, date('d.m.Y', strtotime($r['birthday'])));
 
 // паспорт
-$pdf->Text(58.2, 99.6, $r['doc_serie']."           ".$r['doc_number']);
-$pdf->Text(137, 99.6, date('d.m.Y', strtotime($r['doc_date'])));
+$pdf->Text(52.2, 99.6, $r['doc_serie']);
+$pdf->Text(87.2, 99.6, $r['doc_number']);
+$pdf->Text(149, 99.6, date('d.m.Y', strtotime($r['doc_date'])));
 
-$pdf->splitText($r['doc_issued'], array(array(16,104),array(16,111.2)), 68, 1); 
+$pdf->splitText($r['doc_issued'], array(array(36,106.2),array(16,113.4)), 60, 1); // 104, 111.2
 
-$rval = getarray("SELECT name FROM reg_rf_subject WHERE reg_rf_subject.id='".$r['homeaddress-region']."'");
+$rval = $msl->getarray("SELECT name FROM reg_rf_subject WHERE reg_rf_subject.id='".$r['homeaddress-region']."'");
 
 $string = $r['homeaddress-index'].", ".$rval['name'].", ".$r['homeaddress-city'].", ";
 if ($r['homeaddress-street'] != '') $string.=$r['homeaddress-street'].", ";
@@ -87,10 +89,10 @@ $string .= $r['homeaddress-home'];
 if ($r['homeaddress-building'] != '') $string .= "/".$r['homeaddress-building'];
 if ($r['homeaddress-flat'] != '' && $r['homeaddress-flat'] != 0) $string .= ", ".$r['homeaddress-flat'];
 
-$pdf->splitText($r['regaddress'], array(array(75.4,118.2),array(16,125)), 53, 1);
-$pdf->splitText($string, array(array(61,132),array(16,139)), 58, 1);
+$pdf->splitText($r['regaddress'], array(array(75.4,120.4),array(16,127.2)), 53, 1);
+$pdf->splitText($string, array(array(61,134.2),array(16,141.2)), 58, 1);
 
-$pdf->SetXY(63, 141.8); 
+$pdf->SetXY(63, 144); 
 if ($r['homephone_code'] != 0) {
    $pdf->Write(0, "+7 (".$r['homephone_code'].") ".$r['homephone']);
    if ($r['mobile_code'] != 0) $pdf->Write(0, ", ");
@@ -98,7 +100,7 @@ if ($r['homephone_code'] != 0) {
 if ($r['mobile_code'] != 0) $pdf->Write(0, "+7 (".$r['mobile_code'].") ".$r['mobile']);
 
 $pdf->SetFont("times", "", 13);
-$pdf->SetXY(160, 257.5); 
+$pdf->SetXY(160, 259.7); 
 if ($r['second_name'] != "") {
    $pdf->Write(0, substr($r['name'],0,2).".".substr($r['second_name'],0,2).". ".$r['surname']);
 } else {

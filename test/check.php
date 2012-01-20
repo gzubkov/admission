@@ -1,12 +1,13 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 
 $arr = array();
+$msl = new dMysql();
 
 if (is_array($_REQUEST['sel'])) {
    foreach ($_REQUEST['sel'] as $key => $val) {
-      $cval = getArrayByField("SELECT `id` from reg_test_answers WHERE `question_id`='".$key."' AND `right`=1 ORDER by id ASC","id");
+      $cval = $msl->getArrayByField("SELECT `id` from reg_test_answers WHERE `question_id`='".$key."' AND `right`=1 ORDER by id ASC","id");
 
       if (!is_array($val) && count($cval) == 1) {
          $score = (int) in_array($val, $cval);

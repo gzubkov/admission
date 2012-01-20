@@ -1,10 +1,9 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../class/forms.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/price.class.php');
-
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -97,9 +96,10 @@ if ($student->isLogin()) {
 <?php
 
 $student_id = $_SESSION['student_id'];
+$msl = new dMysql();
 
-    $r = getarray("SELECT surname, name, second_name, region, catalog, semestr FROM `students_base`.student WHERE id='".$student_id."' LIMIT 1",0);
-    $spec = getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
+    $r = $msl->getarray("SELECT surname, name, second_name, region, catalog, semestr FROM `students_base`.student WHERE id='".$student_id."' LIMIT 1",0);
+    $spec = $msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
                   LEFT JOIN admission.specialties b ON a.specialty=b.id 
                   LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
                   LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
@@ -120,7 +120,7 @@ switch($r['region'])
 	break;
 
     default:
-        $reg = getarray("SELECT name,physicaladdress,inn FROM admission.partner_regions WHERE id='".$r['region']."'");
+        $reg = $msl->getarray("SELECT name,physicaladdress,inn FROM admission.partner_regions WHERE id='".$r['region']."'");
         print $reg['name'];
 }
 
@@ -173,7 +173,7 @@ if ($student->isLogin()) {
     print "<h3>Квитанция на оплату</h3>";
     print "<P>Для формирования квитанции необходимо указать назначение платежа и количество (в случае, если оплачиваются пересдачи). Затем нажмите \"Распечатать квитанцию\". Полученный pdf-документ, содержащий квитанцию со всеми реквизитами, можно распечатать или сохранить.</P>";
 
-    $price = new Price();
+    $price = new Price($msl);
     $pdate = $price->getDateByStudent($student_id);
     $sessions = $price->getSessions();
     unset($price);
@@ -187,7 +187,7 @@ if ($student->isLogin()) {
 
     print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
     
-    $rval = getarrayById("SELECT id,text FROM `receipt_purpose` WHERE `student`='1'", 'id', 'text');
+    $rval = $msl->getarrayById("SELECT id,text FROM `receipt_purpose` WHERE `student`='1'", 'id', 'text');
     foreach($rval as $k=>$v) {
         $replace = array("%dn%" => $_SESSION['student_id'],
 	                 "%s%" => $r['semestr']+1);

@@ -1,7 +1,7 @@
 <?php
-require_once('../../../modules/mysql.php'); 
 require_once('../../conf.php');
 require_once('../class/price.class.php');
+require_once('../class/mysql.class.php');
 
 if (!isset($_REQUEST['format']) || $_REQUEST['format'] != 'html') $_REQUEST['format'] = 'pdf';
 
@@ -11,16 +11,18 @@ class Receipt
     private $_semestr;
     private $_region;
     private $_pgid = 0;
+    private $_msl;
 
     public function __construct($id, $date=0) {
         $this->_id = $id;
 	$this->_date = $date;
+	$this->_msl = new dMysql();
 	return true;
     }
 
     public function getStudent($purpose=2, $count=1) {
         $student = array();
-        $r = getarray("SELECT surname, name, second_name, address, semestr, catalog, iit_ckt, region FROM `students_base`.student WHERE id='".$this->_id."'");   
+        $r = $this->_msl->getarray("SELECT surname, name, second_name, address, semestr, catalog, iit_ckt, region FROM `students_base`.student WHERE id='".$this->_id."'");   
         
 	if ($r['region'] == 1) {
 	    $this->_region  = (($r['iit_ckt'] == 1) ? 4 : 3);
@@ -35,14 +37,14 @@ class Receipt
 	$student['address'] = $r['address'];
 	$student['region'] = $this->getRegion();
 
-	$price = new Price();
+	$price = new Price($this->_msl);
 	$student['price'] = $price->getPriceByStudent($this->_id, $purpose, $count, $this->_date);
 	$student['purpose_text'] = $this->getPurposeText($purpose);
         return $student;
     }
 
     public function getApplicant($purpose=1, $count=1) {
-        $r = getarray("SELECT region,surname,name,second_name,regaddress,catalog,semestr,pay FROM partner_applicant WHERE id='".$this->_id."'");
+        $r = $this->_msl->getarray("SELECT region,surname,name,second_name,regaddress,catalog,semestr,pay FROM partner_applicant WHERE id='".$this->_id."'");
 	$this->_region = array(1, $r['region']);   
 	
         if ($purpose == 3) {
@@ -52,7 +54,7 @@ class Receipt
 	$student['address'] = $r['regaddress'];
 	$student['region'] = $this->getRegion();
 
-	$price = new Price();
+	$price = new Price($this->_msl);
 	$student['price'] = $price->getPriceByPgid($this->_pgid, $r['catalog'], $purpose, $count, $this->_date);
 
         $student['purpose_text'] = $this->getPurposeText($purpose);
@@ -60,19 +62,19 @@ class Receipt
     }
     
     public function getSelfApplicant($purpose=1, $count=1) {
-        $r = getarray("SELECT applicant_id,catalog FROM reg_request WHERE id='".$this->_id."' LIMIT 1;");
-	$k = getarray("SELECT surname,name,second_name,regaddress,region FROM reg_applicant WHERE id='".$r['applicant_id']."' LIMIT 1;");
+        $r = $this->_msl->getarray("SELECT applicant_id,catalog FROM reg_request WHERE id='".$this->_id."' LIMIT 1;");
+	$k = $this->_msl->getarray("SELECT surname,name,second_name,regaddress,region FROM reg_applicant WHERE id='".$r['applicant_id']."' LIMIT 1;");
 	$this->_region = $k['region'];   
 	
         if ($purpose == 3) {
-	    $m = getarray("SELECT pay FROM `reg_institution_additional` WHERE `request_id` = '".$this->_id."' LIMIT 1;");
+	    $m = $this->_msl->getarray("SELECT pay FROM `reg_institution_additional` WHERE `request_id` = '".$this->_id."' LIMIT 1;");
             $count = $m['pay'];
         }
         $student['fio'] = $k['surname']." ".$k['name']." ".$k['second_name'];
 	$student['address'] = $k['regaddress'];
 	$student['region'] = $this->getRegion();
 
-	$price = new Price();
+	$price = new Price($this->_msl);
 	$student['price'] = $price->getPriceByPgid($this->_pgid, $r['catalog'], $purpose, $count, $this->_date, 0);
         $student['purpose_text'] = $this->getPurposeText($purpose);
 
@@ -90,12 +92,11 @@ class Receipt
 	$student['address'] = $_REQUEST['address'];
 	$student['region'] = $this->getRegion();
 
-	$price = new Price();
+	$price = new Price($this->_msl);
 	$student['price'] = $price->getPriceByPgid($this->_pgid, $catalog, $purpose, $count, $this->_date, sizeof($this->_region)-1);
 // temp
-	$msl = new dMysql();
-	$r = $msl->getarray("SELECT `start_semestr`, term FROM admission.catalogs WHERE id=".$catalog." LIMIT 1;",0);
-//	unset($msl);
+	$r = $this->_msl->getarray("SELECT `start_semestr`, term FROM admission.catalogs WHERE id=".$catalog." LIMIT 1;",0);
+//	
 
 	if ($purpose == 2 && $_REQUEST['s'] >= ($r['start_semestr'] + $r['term'] * 2)) {
 	    $student['price'][0] = $student['price'][0]*1.5;
@@ -112,17 +113,17 @@ class Receipt
     public function getRegion() {
         $id = $this->_region;
         if (is_array($id)) {
-    	    $r = getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id[0]." OR partner_regions.id = ".$id[1]." ORDER BY id ASC;",1);
+    	    $r = $this->_msl->getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id[0]." OR partner_regions.id = ".$id[1]." ORDER BY id ASC;",1);
 	    $this->_pgid = $r[1]['pgid'];	
       	} else { 
-	    $r = getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id." LIMIT 1;",1);
+	    $r = $this->_msl->getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id." LIMIT 1;",1);
 	    $this->_pgid = $r[0]['pgid'];
 	}
 	return $r;
     }
 
     public function getPurposeText($purpose) {
-        $purpose = getarray("SELECT text FROM admission.receipt_purpose WHERE id='".$purpose."' LIMIT 1;");
+        $purpose = $this->_msl->getarray("SELECT text FROM admission.receipt_purpose WHERE id='".$purpose."' LIMIT 1;");
         $string = $purpose['text']." НДС не облагается";
 
         if ($this->_id == '') {

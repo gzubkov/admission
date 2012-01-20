@@ -1,7 +1,6 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
-
+require_once('../class/mysql.class.php');
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -726,6 +725,7 @@ print "<BR>\n";
       
 
 if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
+   $msl = new dMysql();
    print "<A onclick=\"unloginA();\">Выйти</A>\n";
 
    print "<DIV style=\"border: 1px solid #d3d3d3; background-color: #ffffff; width: 620px; margin:0 auto;\">";
@@ -740,7 +740,7 @@ if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.
                   LEFT JOIN admission.`universities_faculties` f ON e.faculty=f.id 
 		  LEFT JOIN admission.`universities` g ON f.university=g.id ORDER BY g.id ASC, a.id DESC";
 
-   $mappl = getarray($query);
+   $mappl = $msl->getarray($query);
    print "<TABLE border=0 cellspacing=0 cellpadding=0 id=example class=display>";
 
    /*print "<THEAD>

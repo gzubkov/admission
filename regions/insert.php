@@ -1,6 +1,6 @@
 <?php
 //require("../../conf.php");
-//require("../../../modules/mysql.php");
+//require_once('../class/mysql.class.php');
 //Header("Content-Type: text/javascript; charset=utf-8");
 
 class Insertion

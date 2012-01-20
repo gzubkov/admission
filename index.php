@@ -1,15 +1,16 @@
 <?php
-require("../conf.php");
-require_once('../../modules/mysql.php');
+require_once('../conf.php');
+require_once('class/mysql.class.php');
 require_once('class/forms.class.php');
 require_once('class/catalog.class.php');
+$msl = new dMysql();
 
 //$_SESSION['step_num'] = 2;
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html dir="ltr" xml:lang="ru" xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head>
-
+<link rel="icon" href="images/favicon.ico" type="image/x-icon"/> 
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
  
   
@@ -157,7 +158,6 @@ $('#edudoc_typeradio').children('input').hide()
               <div id="sidebar-left" class="sidebar">
                     <div id="block-user-0" class="clear-block block block-user">
 <?php
-$msl = new dMysql();
 
 if (!isset($_SESSION['applicant_id'])) {
    print "<h2>Вход в систему</h2>";
@@ -176,7 +176,7 @@ if (!isset($_SESSION['applicant_id'])) {
     print "<label for=\"edit-pass\"><span title=\"Номер и серия паспорта, введенные слитно\">Данные паспорта</span>: <span class=\"form-required\" title=\"Поле обязательно для заполнения.\">*</span></label><input name=\"pass\" id=\"edit-pass\" maxlength=\"60\" size=\"15\" class=\"validate[required,custom[all]]\" type=\"password\" /></div>";
     print "<input name=\"op\" id=\"edit-submit\" value=\"Войти\" class=\"form-submit\" type=\"submit\" />";
 } else {
-    $rval = getarray("SELECT surname, name, second_name FROM `reg_applicant` WHERE id='".$_SESSION['applicant_id']."'");
+    $rval = $msl->getarray("SELECT surname, name, second_name FROM `reg_applicant` WHERE id='".$_SESSION['applicant_id']."'");
     print "<div class=\"form-item\" id=\"edit-name-wrapper\">";
     print "Вы вошли как ".$rval['surname']." ".$rval['name']." ".$rval['second_name'];
     print "</div>";
@@ -229,7 +229,7 @@ class FormFields2 extends FormFields
             case 2:
 	        print "<tr><td align=\"center\" width=\"100%\">";
 	        print "<input type=\"hidden\" name=\"act\" value=\"\" id=\"act\" />";
-	        /* $fval = getarray("SELECT COUNT(id) AS cnt FROM `reg_request` WHERE applicant_id='".$_SESSION['applicant_id']."'");
+	        /* $fval = $msl->getarray("SELECT COUNT(id) AS cnt FROM `reg_request` WHERE applicant_id='".$_SESSION['applicant_id']."'");
 	        if ($fval['cnt'] < 2) {
 	            print "<input type=\"button\" class=\"submit\" value=\"Подать заявление на еще одну специальность\" onclick=\"javascript: $('#act').val('add'); $('#formular').submit();\">"; 
 	        } */
@@ -282,7 +282,7 @@ if ($step_num == 1) {
    $form->tdRadio(   'Пол',              'sex',         array('M'=>'Мужской','F'=>'Женский'), 0, 1);
    $form->tdDateBox( 'Дата рождения',    'birthday',        1950, date('Y')-16, 'D' );
 
-//   $rval = getarray("SELECT * FROM reg_citizenry");
+//   $rval = $msl->getarray("SELECT * FROM reg_citizenry");
 //   foreach($rval as $key => $val) $tval[$val['id']] = $val['name'];
    
 //   $form->tdSelect('Гражданство',      'citizenry',   $tval, 0, 1);
@@ -328,7 +328,7 @@ if ($step_num == 1) {
 
    $form->tdSelect(  'Субъект РФ', 'regaddress-region', $aspec, 77, 0);
 
-   $form->tdBox( 'text', 'Населенный пункт',  'regeaddress-city', 200, 50, 'OK' );
+   $form->tdBox( 'text', 'Населенный пункт',  'regaddress-city', 200, 50, 'OK' );
    $form->tdBox( 'text', 'Улица (квартал)',  'regaddress-street', 200, 60, 0 );
    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress-home','regaddress-building','regaddress-flat'), array(25,25,25), array(5,4,4), array(0,0,0) );
    print "</TBODY></table></div></div>";
@@ -484,7 +484,7 @@ if ($step_num == 2) {
    print "<h3>Выбор образовательной программы</h3>";
    print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 
-$cat = new Catalog();
+$cat = new Catalog(&$msl);
 
 //$bval = $cat->getAvailableByPgid(1);
 $bval = $cat->getAvailableSpecialtiesByPgid(1);
@@ -524,7 +524,7 @@ if ($step_num == 4) {
    $rval = $msl->getarray("SELECT a.id, a.type, a.semestr, a.catalog FROM reg_request a WHERE a.applicant_id='".$_SESSION['applicant_id']."'", 1);
  
    if (is_array($rval)) {
-    $cat = new Catalog();
+    $cat = new Catalog(&$msl);
    foreach($rval as $key => $val) {
       $spc = $cat->getInfo($val['catalog']);
       print "<h3>Комплект документов для зачисления на ".$spc['type']." ".$spc['spec_code']." \"".$spc['name']."\"</h3>";
@@ -542,7 +542,7 @@ if ($step_num == 4) {
 	       default:
 	          print "<tr><td><A href=\"documents/anketa2.php?request=".$val['id']."\">Заявление абитуриента</A></td></tr>\n";
 		  print "<tr><td><A href=\"documents/perez.php?applicant_id=".$id."\">Заявление о перезачете дисциплин</A></td></tr>\n";
-		  $ival = getarray("SELECT pay FROM reg_institution_additional WHERE request_id='".$val['id']."'");
+		  $ival = $msl->getarray("SELECT pay FROM reg_institution_additional WHERE request_id='".$val['id']."'");
                   if ($ival['pay'] > 0) {
 		     print "<tr><td><A href=\"documents/ds_ckt.php?request_id=".$val['id']."\">Дополнительное соглашение</A> (2 экземпляра)</td></tr>\n";
 		     print "<tr><td><A href=\"receipt/kvit_dop.php?purpose=3&request_id=".$val['id']."\">Квитанция для оплаты досдач</A></td></tr>\n";

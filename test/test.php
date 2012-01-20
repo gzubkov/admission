@@ -1,7 +1,8 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('latex.php');
+$msl = new dMysql();
 
 $_SESSION['uid'] = 1;
 ?>
@@ -65,8 +66,8 @@ $('#test').live('submit', function(){
 if (isset($_SESSION['uid']) && $_SESSION['uid'] > 0) {
    $_POST['subject'] = 8;
    $_POST['var'] = 3;
-   $rval = getarray("SELECT name,comment from reg_subjects WHERE id='".$_POST['subject']."'"); 
-   $rarr = getarray("SELECT id,text,type from reg_test_questions WHERE subject_id='".$_POST['subject']."' AND variant='".$_POST['var']."'");
+   $rval = $msl->getarray("SELECT name,comment from reg_subjects WHERE id='".$_POST['subject']."'"); 
+   $rarr = $msl->getarray("SELECT id,text,type from reg_test_questions WHERE subject_id='".$_POST['subject']."' AND variant='".$_POST['var']."'");
 
    print "<BR><DIV style=\"border: 1px solid #d3d3d3; background-color: #ffffff; width: 700px; margin:0 auto;\"><CENTER><BR>";
    print "Вступительные испытания по дисциплине \"".$rval['name']."\"<BR>Вариант № ".$_POST['var'];
@@ -83,7 +84,7 @@ if (isset($_SESSION['uid']) && $_SESSION['uid'] > 0) {
       print "<TR><TD colspan = 2 id=\"cell".$r['id']."\">";
       print "<B>".($key+1).". ".$render->transform(latex($r['text']))."</B></TD></TR>";
 
-      $rval = getarray("SELECT id, text from reg_test_answers WHERE question_id='".$r['id']."'",1);
+      $rval = $msl->getarray("SELECT id, text from reg_test_answers WHERE question_id='".$r['id']."'",1);
       
       foreach ($rval as $key2 => $r2) {
          print "<TR class=\"".(($key2%2 != 0) ? "even" : "odd")."\">";

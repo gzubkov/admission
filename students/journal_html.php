@@ -1,7 +1,7 @@
 <?php
 // just require TCPDF instead of FPDF
 require_once('../../../modules/russian_date.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../../conf.php');
 
 class Verification
@@ -38,7 +38,8 @@ if (isset($_SESSION['rights']) && isset($_SESSION['md_rights'])) {
 
 if (!is_numeric($student_id)) exit(0);
 
-$r = getarray("SELECT surname,name,second_name,catalog,region FROM students_base.student WHERE id='".$student_id."'");
+$msl = new dMysql();
+$r = $msl->getarray("SELECT surname,name,second_name,catalog,region FROM students_base.student WHERE id='".$student_id."'");
 
 ?>
 
@@ -80,7 +81,7 @@ input { font-family: Arial, sans-serif; font-size: 9pt; color: black; background
 <?php 
 print "<TR><TD colspan=6>Номер договора: ".$student_id."</TD></TR><TR><TD colspan=6>".$r['surname']." ".$r['name']." ".$r['second_name']."</TD></TR>"; 
 
-$spec = getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
+$spec = $msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
                   LEFT JOIN admission.specialties b ON a.specialty=b.id 
                   LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
                   LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
@@ -100,14 +101,14 @@ switch($r['region'])
 	break;
 
     default:
-        $reg = getarray("SELECT name FROM admission.partner_regions WHERE id='".$r['region']."'");
+        $reg = $msl->getarray("SELECT name FROM admission.partner_regions WHERE id='".$r['region']."'");
         print $reg['name'];
 }
 print "</TD></TR>";
 
 print "<TR><TD></TD><TD>Дисциплина</TD><TD>Часы</TD><TD>Вид контроля</TD><TD>Дата сдачи</TD><TD>Оценка</TD></TR>\n";
 
-$k = getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.type,b.name as discipline,c.name as markname 
+$k = $msl->getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.type,b.name as discipline,c.name as markname 
                FROM `students_base`.journal a 
                LEFT JOIN `students_base`.disciplines b ON a.discipline=b.id 
                LEFT JOIN `students_base`.marks c ON a.mark=c.id 

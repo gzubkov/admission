@@ -1,6 +1,6 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/price.class.php');
 $msl = new dMysql();
@@ -16,7 +16,7 @@ if (!is_numeric($_REQUEST['id'])) {
 $id = $_REQUEST['id'];
 
 $rval = $msl->getarray("SELECT * FROM `students_base`.`student` WHERE id = '".$id."' LIMIT 1;");
-$spec = getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
+$spec = $msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
                   LEFT JOIN admission.specialties b ON a.specialty=b.id 
                   LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
                   LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
@@ -63,7 +63,7 @@ foreach($cval as $v) {
 }
 print "</SELECT></TD></TR>\n\n";
 
-$price = new Price();
+$price = new Price($msl);
 $sessions = $price->getSessions();
 unset($price);
 

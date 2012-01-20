@@ -1,16 +1,17 @@
 <?php
 require_once('../../../modules/russian_date.php');
-require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
+require_once('../class/mysql.class.php');
 require_once('../class/price.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
+$msl = new dMysql();
 
-$req = getarray("SELECT * FROM reg_request 
+$req = $msl->getarray("SELECT * FROM reg_request 
 WHERE id = ".$_REQUEST['request_id'].";");
 
 // --- Базовый запрос (сведения об абитуриенте) --- //
-$r = getarray("SELECT * FROM reg_applicant 
+$r = $msl->getarray("SELECT * FROM reg_applicant 
 WHERE reg_applicant.id = ".$req['applicant_id'].";");
 
 // initiate PDF
@@ -26,12 +27,13 @@ $pdf->useTemplate($pdf->importPage(1));
 $pdf->SetFont("times", "I", 12);
 $pdf->Text(34.6, 71, $r['surname']." ".$r['name']." ".$r['second_name']);
 
-$cat = new Catalog();
+$cat = new Catalog($msl);
 $rval = $cat->getInfo($req['catalog']);
 
-$price = new Price();
+$price = new Price($msl);
 $rval['price'] = $price->getPriceByRegion($r['region'],$req['catalog'], 1, 1, 0, 0);
 
+unset($msl);
 unset($price);
 unset($cat);
 

@@ -1,7 +1,7 @@
 <?php
 require_once('../../../modules/russian_date.php');
-require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
+require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
 
@@ -31,8 +31,7 @@ $pdf->AddPage();
 $pdf->useTemplate($pdf->importPage(1));
 
 $pdf->SetFont("times", "B", 13);
-$pdf->SetXY(190.5, 7.8); // номер анкеты
-$pdf->Write(0, $request_id.($req['internet']?"И":""));
+$pdf->Text(187, 10, $applicant_id.($req['internet']?"И":""));
 
 $pdf->SetFont("times", "", 13);
 $pdf->SetXY(14.5, 22.8); // ФИО - полные
@@ -123,17 +122,23 @@ if ($r['homeaddress-home'] > 0) {
     $pdf->SetXY(134, 204.8); // дом
     $pdf->Write(0, $r['homeaddress-home']);
 }
-$pdf->SetXY(159, 204.8); // корпус
-$pdf->Write(0, $r['homeaddress-building']);
+if ($r['homeaddress-building'] > 0) {
+    $pdf->SetXY(159, 204.8); // корпус
+    $pdf->Write(0, $r['homeaddress-building']);
+}
 if ($r['homeaddress-flat'] > 0) {
 $pdf->SetXY(187, 204.8); // квартира
 $pdf->Write(0, $r['homeaddress-flat']);
 }
 
-$pdf->SetXY(50, 211.5); // телефон-домашний-код
-$pdf->Write(0, $r['homephone_code']);
-$pdf->SetXY(70, 211.5); // телефон-домашний-номер
-$pdf->Write(0, $r['homephone']);
+if ($r['homephone_code'] != 0) {
+    $pdf->SetXY(50, 211.5); // телефон-домашний-код
+    $pdf->Write(0, $r['homephone_code']);
+}
+if ($r['homephone'] != 0) {
+    $pdf->SetXY(70, 211.5); // телефон-домашний-номер
+    $pdf->Write(0, $r['homephone']);
+}
 $pdf->SetXY(131, 211.5); // телефон-мобильный-код
 $pdf->Write(0, $r['mobile_code']);
 $pdf->SetXY(150, 211.5); // телефон-мобильный-номер
@@ -237,7 +242,7 @@ $pdf->useTemplate($pdf->importPage(2));
 
 // специальность
 
-$cat = new Catalog();
+$cat = new Catalog(&$msl);
 $rval = $cat->getInfo($req['catalog'], $req['profile']);
 unset($cat);
 
@@ -345,7 +350,7 @@ $pdf->Write(0, $rval[2]['document']);
 }
 // -------------------------------
 
-/*$rval = getarray("SELECT a.name as 1name, b.name as 2name, c.name as 3name, ppe FROM reg_applicant_ppe LEFT JOIN reg_subjects a ON 1subject=a.id LEFT JOIN reg_subjects b ON 2subject=b.id LEFT JOIN reg_subjects c ON 3subject=c.id WHERE request_id = ".$request_id);
+/*$rval = $msl->getarray("SELECT a.name as 1name, b.name as 2name, c.name as 3name, ppe FROM reg_applicant_ppe LEFT JOIN reg_subjects a ON 1subject=a.id LEFT JOIN reg_subjects b ON 2subject=b.id LEFT JOIN reg_subjects c ON 3subject=c.id WHERE request_id = ".$request_id);
 
 if (is_array($rval)) {
    $pdf->SetFont("verdana", "B", 14);

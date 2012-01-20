@@ -1,6 +1,6 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../class/forms.class.php');
 ?>
 
@@ -200,17 +200,19 @@ function unloginA() {
 <?php
 
 if (isset($_SESSION['rights']) && $_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
-   print "<A onclick=\"unloginA();\">Выйти</A>\n";
+    $msl = new dMysql();
+   
+    print "<A onclick=\"unloginA();\">Выйти</A>\n";
 
-   print "<div style=\"border: 1px solid #d3d3d3; background-color: #ffffff; width: 98%; margin:0 auto;\">";
-   print "<P><b><CENTER>Работа с абитуриентами</CENTER></b></P>\n";
+    print "<div style=\"border: 1px solid #d3d3d3; background-color: #ffffff; width: 98%; margin:0 auto;\">";
+    print "<P><b><CENTER>Работа с абитуриентами</CENTER></b></P>\n";
 
-   print "<div style=\"border: none; width: 98%; margin:0 auto;\">";
+    print "<div style=\"border: none; width: 98%; margin:0 auto;\">";
 
-   $mappl = getarray("SELECT id, num, surname, name, second_name, `e-mail`, `create_date`, step, INET_NTOA(ip) as ip FROM `reg_applicant` ORDER by id DESC");
-   print "<table border=0 cellspacing=0 cellpadding=0 id=example class=display>";
+    $mappl = $msl->getarray("SELECT id, num, surname, name, second_name, `e-mail`, `create_date`, step, INET_NTOA(ip) as ip FROM `reg_applicant` ORDER by id DESC");
+    print "<table border=0 cellspacing=0 cellpadding=0 id=example class=display>";
 
-   print "<THEAD>
+    print "<THEAD>
               <tr>
 	       <TH style=\"text-align: center; \"><input type=\"checkbox\" id=\"selectAll\"></TH>
                <TH style=\"text-align: center; \"><input type=\"text\" name=\"search_id\" value=\"id\" style=\"width: 35px;\" class=\"search_init\"/></TH>
@@ -222,9 +224,9 @@ if (isset($_SESSION['rights']) && $_SESSION['rights'] == 'admin' && $_SESSION['m
                <TH>Шаг</TH>
               </tr>
           </THEAD>";
-   print "<tbody>";
+    print "<tbody>";
    
-   foreach($mappl as $key => $r) {
+    foreach($mappl as $key => $r) {
       print "<tr><td style=\"width: 1px; text-align: center; \" id=\"check".$key."\">";
       print "<input type=\"checkbox\" id=\"selectAppl[]\" name=\"selectAppl\" value=\"".$r['id']."\"></td>";
       print "<td style=\"width: 60px; text-align: center; ".(($r['num'] > 0) ? "text-decoration: line-through;":"")."\">".$r['id']."</td><td>".$r['surname']."</td><td>".$r['name']."</td><td>".$r['second_name']."</td>";

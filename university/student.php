@@ -1,6 +1,6 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/price.class.php');
 $msl = new dMysql();
@@ -17,7 +17,7 @@ if (!is_numeric($_REQUEST['id'])) {
 $id = $_REQUEST['id'];
 
 $rval = $msl->getarray("SELECT * FROM `students_base`.`student` WHERE id = '".$id."' LIMIT 1;");
-$spec = getarray("SELECT b.name FROM admission.catalogs a 
+$spec = $msl->getarray("SELECT b.name FROM admission.catalogs a 
                   LEFT JOIN admission.specialties b ON a.specialty=b.id 
                   WHERE a.base_id='".$rval['catalog']."'");
 

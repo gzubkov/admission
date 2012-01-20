@@ -1,8 +1,8 @@
 <?php
 require_once('../conf.php');
-require_once('../../modules/mysql.php');
-
+require_once('class/mysql.class.php');
 $msl = new dMysql();
+
 $_POST = $_REQUEST;
 if (!isset($_POST['act'])) {
     $_POST['act'] = "";

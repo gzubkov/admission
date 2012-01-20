@@ -3,8 +3,8 @@
 require_once('../../../../modules/tcpdf/tcpdf.php');
 require_once('../../../../modules/fpdi/fpdi.php');
 require_once('../../../../modules/russian_date.php');
-require_once('../../../../modules/mysql.php');
 require_once('../../../conf.php');
+require_once('../../class/mysql.class.php');
 require_once('../../class/catalog.class.php');
 
 class PDF extends FPDI {
@@ -231,7 +231,7 @@ $pdf->useTemplate($pdf->importPage(2));
 
 // специальность
 
-$cat = new Catalog();
+$cat = new Catalog($msl);
 $rval = $cat->getInfo($r['catalog']);
 unset($cat);
 

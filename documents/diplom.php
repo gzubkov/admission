@@ -1,6 +1,6 @@
 <?php
 require_once('../../../modules/russian_date.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
 require_once('../../conf.php');
@@ -28,8 +28,8 @@ $pdf->SetFont("times", "", 13);
 $pdf->Text(110, 45, $r['surname']);
 $pdf->Text(110, 53.6, $r['name']." ".$r['second_name']);
 
-$rval = getarray("SELECT catalog FROM reg_request WHERE applicant_id='".$applicant_id."' LIMIT 1;", 0);
-$cat = new Catalog();
+$rval = $msl->getarray("SELECT catalog FROM reg_request WHERE applicant_id='".$applicant_id."' LIMIT 1;", 0);
+$cat = new Catalog(&$msl);
 $spc = $cat->getInfo($rval['catalog']);
 
 $pdf->SetFont("times", "", 12);

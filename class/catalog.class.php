@@ -1,7 +1,11 @@
 <?php
+//require_once('mysql.class.php');
 class Catalog
 {
-    public function __construct() {
+    var $msl;
+
+    public function __construct(&$msl) {
+        $this->msl = $msl; //new dMysql();
         return true;
     }
 
@@ -17,7 +21,7 @@ class Catalog
 		  LEFT JOIN admission.`universities` g ON f.university=g.id WHERE b.id='".$pgid."' ";
         if ($archivetext == NULL) $query .= "AND a.archive = '0' AND a.applicable = '1' ";
 	$query.= "ORDER BY a.id ASC";
-        $rval = getArray($query,1); 
+        $rval = $this->msl->getArray($query,1); 
 
 	foreach($rval as $v) {
 	    $replace = array("%abbr%" => $v['abbreviation'],
@@ -38,12 +42,12 @@ class Catalog
     }
 
     public function getAvailableByRegion($region, $string="%abbr% - %name% (%base%)", $archivetext=NULL) {
-        $pgid = getarray("SELECT pgid FROM partner_regions WHERE id='".$region."' LIMIT 1",0);
+        $pgid = $this->msl->getarray("SELECT pgid FROM partner_regions WHERE id='".$region."' LIMIT 1",0);
 	return $this->getAvailableByPgid($pgid['pgid'], $string, $archivetext);
     }
 
     public function getInfo($catalog, $profile=0) {
-        $info = getarray("SELECT a.id, a.name, a.spec_code, a.qualify, a.shortname, b.term, b.termm 
+        $info = $this->msl->getarray("SELECT a.id, a.name, a.spec_code, a.qualify, a.shortname, b.term, b.termm 
                           FROM `admission`.`specialties` a LEFT JOIN catalogs b ON a.id=b.specialty
                           WHERE b.id='".$catalog."'");
 	switch($info['spec_code'][strlen($info['spec_code'])-1]) {
@@ -61,7 +65,7 @@ class Catalog
 	    $info['term'] += 0.5;
 	}
 	if ($profile != 0) {
-	    $prof = getarray("SELECT name FROM `admission`.`specialties_profiles` WHERE id='".$profile."' LIMIT 1;");
+	    $prof = $this->msl->getarray("SELECT name FROM `admission`.`specialties_profiles` WHERE id='".$profile."' LIMIT 1;");
 	    $info['profile'] = $prof['name'];
 	}
 	return $info;
@@ -74,12 +78,12 @@ class Catalog
                   LEFT JOIN price_groups b ON a.id=b.catalog AND b.id='".$pgid."' 
                   LEFT JOIN specialties c ON a.specialty=c.id GROUP BY a.specialty
 		  ORDER BY a.id ASC";
-        return getArrayById($query,'id','specialty'); 
+        return $this->msl->getArrayById($query,'id','specialty'); 
     }
 
     public function getSubCatalogsByRegion($region, $catalog, $archive=0) {
-        $pgid = getarray("SELECT pgid FROM partner_regions WHERE id='".$region."' LIMIT 1",0);
-	$specialty = getarray("SELECT specialty FROM catalogs WHERE id='".$catalog."' LIMIT 1", 0);
+        $pgid = $this->msl->getarray("SELECT pgid FROM partner_regions WHERE id='".$region."' LIMIT 1",0);
+	$specialty = $this->msl->getarray("SELECT specialty FROM catalogs WHERE id='".$catalog."' LIMIT 1", 0);
 	
 	$query = "SELECT a.id, b.short FROM catalogs a 
 	          LEFT JOIN education_type b ON a.baseedu=b.id 
@@ -88,11 +92,11 @@ class Catalog
         if ($archive == 0) {
 	    $query .= " AND a.archive=0";
 	}
-	return getArrayById($query,'id','short'); 
+	return $this->msl->getArrayById($query,'id','short'); 
     }
 
     public function getUniversityInfo($catalog, $base=0) {
-        return getarray("SELECT f.* FROM admission.catalogs a 
+        return $this->msl->getarray("SELECT f.* FROM admission.catalogs a 
                   LEFT JOIN admission.specialties b ON a.specialty=b.id 
                   LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
                   LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
@@ -112,7 +116,7 @@ class Catalog
 		  LEFT JOIN admission.`universities` g ON f.university=g.id WHERE b.id='".$pgid."' ";
         if ($archivetext == NULL) $query .= "AND a.archive = '0' AND a.applicable = '1' ";
 	$query.= "GROUP BY a.specialty ORDER BY c.qualify ASC, a.id DESC";
-        $rval = getArray($query,1); 
+        $rval = $this->msl->getArray($query,1); 
 
 	foreach($rval as $v) {
 	    $replace = array("%abbr%" => $v['abbreviation'],
@@ -131,7 +135,7 @@ class Catalog
     }
 
     public function getProfiles($specialty) {
-        $profile = getArray("SELECT id, name FROM `specialties_profiles` WHERE `specialty` = '".$specialty."'");
+        $profile = $this->msl->getArray("SELECT id, name FROM `specialties_profiles` WHERE `specialty` = '".$specialty."'");
 	return $profile;
     }
 

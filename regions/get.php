@@ -1,6 +1,6 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 
 $rus = array('Первый','Второй','Третий','Четвертый');
 

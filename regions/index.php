@@ -1,6 +1,6 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../class/forms.class.php');
 require_once('../class/catalog.class.php');
 
@@ -307,7 +307,7 @@ case "addstudent":
 
     $form->tdBox( 'remark', 'Сведения об образовании');
 
-    $catalog = new Catalog();
+    $catalog = new Catalog($msl);
     $bval = $catalog->getAvailableByRegion($region_id, "%name% (%base%) - %qualify%");
     unset($catalog);
     $form->tdSelect(  'Образовательная программа', 'catalog', $bval, 0, 1);
@@ -395,7 +395,7 @@ if ($apval['homeaddress-flat'] == 0) $apval['homeaddress-flat'] == '';
 
     $form->tdBox( 'remark', 'Сведения об образовании');
 
-    $catalog = new Catalog();
+    $catalog = new Catalog($msl);
     $bval = $catalog->getAvailableByRegion($region_id, "%name% (%base%) - %qualify%");
     unset($catalog);
     $form->tdSelect(  'Образовательная программа', 'catalog', $bval, $apval['catalog'], 1);
@@ -583,7 +583,7 @@ case "receipt":
     $rval = $msl->getarrayById("SELECT id,text FROM `receipt_purpose`", 'id', 'text');
     $form->tdSelect(  'Назначение платежа', 'purpose', $rval, 0, 1);
 
-    $catalog = new Catalog();
+    $catalog = new Catalog($msl);
     $rval = $catalog->getAvailableByRegion($region_id);
     unset($catalog);
 

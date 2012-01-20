@@ -3,8 +3,8 @@
 require_once('../../../../modules/tcpdf/tcpdf.php');
 require_once('../../../../modules/fpdi/fpdi.php');
 require_once('../../../../modules/russian_date.php');
-require_once('../../../../modules/mysql.php');
 require_once('../../../conf.php');
+require_once('../../class/mysql.class.php');
 require_once('../../class/catalog.class.php');
 require_once('../../class/price.class.php');
 
@@ -41,11 +41,11 @@ $rval = $msl->getarray("SELECT a.firm, a.longfirm, a.rsurname, a.rname, a.`rseco
                   FROM `partner_regions` a LEFT JOIN `partner_position` b ON a.gposition=b.id LEFT JOIN `partner_organizational_documents` c ON a.orgdoc=c.id WHERE a.id = ".$r['region'].";");
 
 
-$cat = new Catalog();
+$cat = new Catalog($msl);
 $kval = $cat->getInfo($r['catalog']);
 unset($cat);
 
-$prc = new Price();
+$prc = new Price($msl);
 $cval = $prc->getPricePercentByPgid($rval['pgid'], $r['catalog'],1,1,0);
 unset($prc);
 

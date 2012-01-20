@@ -1,6 +1,7 @@
 <?php
 require_once('../conf.php');
-require_once('../../modules/mysql.php');
+require_once('class/mysql.class.php');
+$mslk = new dMysql();
 
 $rus = array('Первый','Второй','Третий','Четвертый');
 
@@ -9,7 +10,7 @@ if (!is_numeric($_POST['catalog'])) {
    exit(0);
 }
 
-$gval = getarray("SELECT specialty,internet,basicsemestr FROM `catalogs` WHERE `id`='".$_POST['catalog']."'");
+$gval = $mslk->getarray("SELECT specialty,internet,basicsemestr FROM `catalogs` WHERE `id`='".$_POST['catalog']."'");
 
 print "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
 
@@ -24,7 +25,7 @@ if ($gval['internet'] > 0) {
 
    print "<INPUT type=\"hidden\" name=\"traditional_form\" value=\"1\"></TBODY></TABLE>\n";
 } else {
-$prval = getarray("SELECT * FROM `specialties_profiles` WHERE `specialty` ='".$gval['specialty']."';", 1);
+$prval = $mslk->getarray("SELECT * FROM `specialties_profiles` WHERE `specialty` ='".$gval['specialty']."';", 1);
 if ($prval != 0) {
     print "<TR><TD style=\"width: ".$_POST['width']."px;\">Профиль</TD>\n";
     if (sizeof($prval) == 1) {
@@ -54,7 +55,7 @@ print "</TBODY></TABLE>";
 
 print "<h3>Результаты ЕГЭ предыдущих годов (если имеются)</h3>";
 print "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-$rval = getarray("SELECT subject,name FROM `reg_ege_minscores` LEFT JOIN `reg_subjects` ON `reg_subjects`.id = `reg_ege_minscores`.subject 
+$rval = $mslk->getarray("SELECT subject,name FROM `reg_ege_minscores` LEFT JOIN `reg_subjects` ON `reg_subjects`.id = `reg_ege_minscores`.subject 
                   WHERE specialty = '".$gval['specialty']."' LIMIT 0, 10", 1);
 
 $cell = 0;
@@ -63,7 +64,7 @@ for ($i = 0; $i < count($rval); $i++) {
    print "<TR><TD style=\"width: ".$_POST['width']."px;\">".$rus[$i]." предмет</TD><TD>".$rval[$i]['name'].".</TD></TR>";   
    print "<INPUT type=\"hidden\" name=\"ege[".($i+1)."][subject]\" value=\"".$rval[$i]['subject']."\">";
 
-   $kval = getarray("SELECT score,document FROM `reg_applicant_scores` LEFT JOIN `reg_request` ON `reg_applicant_scores`.`request_id`= `reg_request`.id 
+   $kval = $mslk->getarray("SELECT score,document FROM `reg_applicant_scores` LEFT JOIN `reg_request` ON `reg_applicant_scores`.`request_id`= `reg_request`.id 
                      WHERE `subject` = ".$rval[$i]['subject']." AND `ege`=1 AND applicant_id=".$_SESSION['applicant_id']." LIMIT 0,1");
    if ($kval == 0) {
       print "<TR><TD style=\"width: ".$_POST['width']."px;\">Оценка (в 100-й шкале)</TD>"; //<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>";

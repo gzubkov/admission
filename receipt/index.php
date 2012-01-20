@@ -1,7 +1,7 @@
 <?php
 require_once('../../conf.php');
-require_once('../../../modules/mysql.php');
 require_once('../class/catalog.class.php');
+require_once('../class/mysql.class.php');
 require_once('../class/price.class.php');
 ?>
 
@@ -37,28 +37,29 @@ $(document).ready(function() {
 
 
 <?php
+$msl = new dMysql();
 
-   print "<div style=\"border: 1px solid #d3d3d3; background-color: #ffffff; width: 700px; margin:0 auto; text-align: center; margin: 20px auto 0pt;\">\n";
-   print "<b>Печать квитанции</b>";
+print "<div style=\"border: 1px solid #d3d3d3; background-color: #ffffff; width: 700px; margin:0 auto; text-align: center; margin: 20px auto 0pt;\">\n";
+print "<b>Печать квитанции</b>";
 
-   print "<div style=\"border: none; width: 98%; margin:0 auto; text-align:left;\">\n";
+print "<div style=\"border: none; width: 98%; margin:0 auto; text-align:left;\">\n";
 
-   print "<form action=\"kvit.php\" method=\"post\">"; // target=\"_blank\"
-   print "<table style=\"border: none; border-spacing:3px;\" id=\"example\" class=\"display\"><tbody style=\"border: none;\">";
+print "<form action=\"kvit.php\" method=\"post\">"; // target=\"_blank\"
+print "<table style=\"border: none; border-spacing:3px;\" id=\"example\" class=\"display\"><tbody style=\"border: none;\">";
 
 if (!isset($_SESSION['joomlaregion'])) {
-   $region = 2;
-   print "<tr><td>Тарифная зона:</td><td>";
-   print "<select name=\"region_id\">
-   	 	  <option value=\"1\">ЦКТ - Россия и Интернет</option>
-		  <option value=\"3\">ЦКТ - Москва</option>
-		  <option value=\"2\">ИИТ - Россия и Интернет</option>
-		  <option value=\"4\">ИИТ - Москва</option>
-	  </select>";
+    $region = 2;
+    print "<tr><td>Тарифная зона:</td><td>";
+    print "<select name=\"region_id\">
+   	   <option value=\"1\">ЦКТ - Россия и Интернет</option>
+	   <option value=\"3\">ЦКТ - Москва</option>
+	   <option value=\"2\">ИИТ - Россия и Интернет</option>
+	   <option value=\"4\">ИИТ - Москва</option>
+	   </select>";
 } else {
    print "<tr><td>Регион:</td><td><input type=\"hidden\" name=\"region_id\" value=\"".$_SESSION['joomlaregion']."\">";
    $region = $_SESSION['joomlaregion'];
-   $regname = getarray("SELECT name FROM `partner_regions` WHERE `id`='".$_SESSION['joomlaregion']."'");
+   $regname = $msl->getarray("SELECT name FROM `partner_regions` WHERE `id`='".$_SESSION['joomlaregion']."'");
    print $regname['name'].".";
    print "<tr><td>Посредник:</td><td>";
    print "<select name=\"partner_id\">
@@ -74,7 +75,7 @@ if (!isset($_SESSION['joomlaregion'])) {
 print "<script type=\"text/javascript\">
        $(function () {
         $(\"#purpose\").change(function () {
-	    if ($('#purpose :selected').attr('value') == 4) {
+	    if ($('#purpose :selected').attr('value') == 4 || $('#purpose :selected').attr('value') == 3) {
 	         $('#counttr').show();
 	    } else  {
 	         $('#counttr').hide();
@@ -83,7 +84,7 @@ print "<script type=\"text/javascript\">
        });
        </script>";
 print "<select name=\"purpose\" id=\"purpose\">";
-$rval = getarray("select * FROM `receipt_purpose`");
+$rval = $msl->getarray("select * FROM `receipt_purpose`");
 foreach($rval as $v) print "<option value=\"".$v['id']."\">".$v['text']."</option>";	      // countv=\"".$v['count']."\"
 print "</select>";
 print "</td></tr>\n";
@@ -91,7 +92,7 @@ print "</td></tr>\n";
 print "<tr><td>Специальность:</td><td>";
 print "<select name=\"catalog\" id=\"catalog\">";
 
-$catalog = new Catalog();
+$catalog = new Catalog(&$msl);
 $rval = $catalog->getAvailableByRegion($region, "%name% (%base%) %basicsemestr%");
 unset($catalog);
 
@@ -99,7 +100,7 @@ foreach($rval as $k => $v) print "<option value=\"".$k."\">".$v."</option>";
 print "</select>";
 print "</td></tr>\n";
 
-$prc = new Price();
+$prc = new Price($msl);
 $sessions = $prc->getSessions();
 unset($prc);
 
@@ -112,7 +113,7 @@ print "<tr><td>Договор:</td><td><input name=\"dn\" value=\"\" style=\"wid
 print "<tr><td>Семестр:</td><td><input name=\"s\" value=\"\" style=\"width: 50px;\" />.</td></tr>\n";
 print "<tr><td>ФИО плательщика:</td><td><input name=\"fio\" value=\"\" style=\"width: 400px;\" />.</td></tr>\n";
 print "<tr><td>Адрес плательщика:</td><td><input name=\"address\" value=\"\" style=\"width: 400px;\" />.</td></tr>\n";
-print "<tr id=\"counttr\" style=\"display: none;\"><td>Количество пересдач:</td><td><input name=\"count\" value=\"1\" style=\"width: 20px;\" />.</td></tr>\n";
+print "<tr id=\"counttr\" style=\"display: none;\"><td>Количество пересдач/досдач:</td><td><input name=\"count\" value=\"1\" style=\"width: 20px;\" />.</td></tr>\n";
 print "<tr><td>Формат вывода:</td><td><label><input type=\"radio\" name=\"format\" value=\"html\" checked=\"checked\" /> HTML</label> <label><input type=\"radio\" name=\"format\" value=\"pdf\" /> PDF</label></td></tr>";
 print "<tr><td colspan=\"2\" style=\"height: 50px; text-align: center; vertical-align: bottom;\"><input type=\"submit\" value=\"Распечатать квитанцию\" /></td></tr>";
 print "</tbody></table></form></div></div>";
@@ -141,7 +142,7 @@ print "<BR>";
        });
        </script>";
     print "<select name=\"purpose\" id=\"purpose2\">";
-    $rval = getarray("select * FROM `receipt_purpose` WHERE `student`=1");
+    $rval = $msl->getarray("select * FROM `receipt_purpose` WHERE `student`=1");
     foreach($rval as $v) print "<option value=\"".$v['id']."\" countv=\"".$v['count']."\">".$v['text']."</option>";	      
     print "</select>";
     print "</td></tr>\n";

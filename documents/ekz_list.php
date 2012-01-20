@@ -1,13 +1,13 @@
 <?php
 require_once('../../../modules/russian_date.php');
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
 
-$req = getarray("SELECT * FROM reg_request 
+$req = $msl->getarray("SELECT * FROM reg_request 
 WHERE id = ".$_REQUEST['request_id'].";");
 
 $applicant_id = $req['applicant_id'];
@@ -33,7 +33,7 @@ $pdf->setSourceFile('ekz_list.pdf');
 $pdf->AddPage();
 $pdf->useTemplate($pdf->importPage(1));
 
-$catalog = new Catalog();
+$catalog = new Catalog(&$msl);
 $rval = $catalog->getInfo($req['catalog']);
 unset($catalog);
 

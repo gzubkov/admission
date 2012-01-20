@@ -1,7 +1,7 @@
 <?php
 require_once('../../../modules/russian_date.php');
-require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
+require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
 
@@ -52,7 +52,7 @@ $pdf->Text(14.5, 55, "Место регистрации: ".$r['regaddress']);
 
 $pdf->Line(12, 58, 200, 58, array('width' => 0.4));
 
-$cat = new Catalog();
+$cat = new Catalog(&$msl);
 $rval = $cat->getInfo($req['catalog'], $req['profile']);
 unset($cat);
 

@@ -1,9 +1,9 @@
 <?php
 require_once('../../../modules/russian_date.php');
-require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
+require_once('../class/mysql.class.php');
 
 if (!is_numeric($_REQUEST['request'])) exit(0);
 $request_id = $_REQUEST['request'];
@@ -33,7 +33,7 @@ $pdf->useTemplate($pdf->importPage(1));
 
 $pdf->SetFont("times", "B", 13);
 $pdf->SetXY(190.5, 7.8); // номер анкеты
-$pdf->Write(0, $request_id.($req['internet']?"И":""));
+$pdf->Write(0, $applicant_id.($req['internet']?"И":""));
 
 $pdf->SetFont("times", "", 13);
 $pdf->SetXY(14.5, 22.8); // ФИО - полные
@@ -100,7 +100,7 @@ $pdf->Text(173.4, 184, date('d   m   Y', strtotime($r['doc_date']))); // дат�
 // ----------------------------------------------------
 $pdf->SetFont("times", "", 12);
 $pdf->Text(67, 191.2, $r['homeaddress-index']); // индекс
-$pdf->Text(116, 191.2, $r['homeaddress-region']); // код региона - 73
+$pdf->Text(116, 191.2, $r['homeaddress-region']); // код региона 
 
 
 $rval  = $msl->getarray("SELECT reg_rf_subject.name FROM reg_rf_subject WHERE reg_rf_subject.id='".$r['homeaddress-region']."'");
@@ -109,13 +109,13 @@ $pdf->Text(128.5, 197.2, $r['homeaddress-city']); // населенный пун
 
 $pdf->Text(40,  204.3, $r['homeaddress-street']); // улица
 $pdf->Text(142, 204.3, $r['homeaddress-home']); // дом
-$pdf->Text(165, 204.3, $r['homeaddress-building']); // корпус
+if ( $r['homeaddress-building'] != 0 ) $pdf->Text(165, 204.3, $r['homeaddress-building']); // корпус
 if ( $r['homeaddress-flat'] != 0) {
    $pdf->Text(190, 204.3, $r['homeaddress-flat']); // квартира
 }
 
-$pdf->Text(51, 211.0, $r['homephone_code']); // телефон-домашний-код
-$pdf->Text(71, 211.0, $r['homephone']); // телефон-домашний-номер
+if ( $r['homephone_code'] != 0 ) $pdf->Text(51, 211.0, $r['homephone_code']); // телефон-домашний-код
+if ( $r['homephone'] != 0 ) $pdf->Text(71, 211.0, $r['homephone']); // телефон-домашний-номер
 $pdf->Text(132, 211.0, $r['mobile_code']); // телефон-мобильный-код
 $pdf->Text(151, 211.0, $r['mobile']); // телефон-мобильный-номер
 
@@ -209,7 +209,7 @@ $pdf->Text(186.2, 37.2, $req['semestr']); // семестр
 $pdf->Text(29.2, 42, ceil($req['semestr']/2)); // курса
 
 // специальность
-$cat = new Catalog();
+$cat = new Catalog(&$msl);
 $rval = $cat->getInfo($req['catalog']);
 unset($cat);
 

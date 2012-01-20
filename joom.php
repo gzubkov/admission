@@ -1,6 +1,6 @@
 <?php
 include('../conf.php');
-include('../../modules/mysql.php');
+require_once('class/mysql.class.php');
 
 $msl = new dMysql();
 $r = $msl->getarray("SELECT `id` FROM `partner_regions` WHERE `jid`='".$_REQUEST['a']."'");

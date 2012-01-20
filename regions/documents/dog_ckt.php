@@ -3,7 +3,7 @@
 require_once('../../../../modules/tcpdf/tcpdf.php');
 require_once('../../../../modules/fpdi/fpdi.php');
 require_once('../../../../modules/russian_date.php');
-require_once('../../../../modules/mysql.php');
+require_once('../../class/mysql.class.php');
 require_once('../../../conf.php');
 require_once('../../class/catalog.class.php');
 
@@ -50,7 +50,7 @@ $pdf->SetFont("times", "I", 13);
 $pdf->SetXY(51, 105.3);
 $pdf->Write(0, $r['surname']." ".$r['name']." ".$r['second_name']);
 
-$cat = new Catalog();
+$cat = new Catalog($msl);
 $rval = $cat->getInfo($r['catalog']);
 unset($cat);
 

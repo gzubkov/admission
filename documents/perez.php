@@ -1,5 +1,5 @@
 <?php
-require_once('../../../modules/mysql.php');
+require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
 require_once('../../conf.php');

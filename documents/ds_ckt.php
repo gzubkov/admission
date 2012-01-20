@@ -1,16 +1,17 @@
 <?php
-require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
 require_once('../class/price.class.php');
+require_once('../class/mysql.class.php');
 require_once('../class/pdf.class.php');
+$msl = new dMysql();
 
-$req = getarray("SELECT * FROM reg_request 
+$req = $msl->getarray("SELECT * FROM reg_request 
 WHERE id = ".$_REQUEST['request_id'].";");
 
 $applicant_id = $req['applicant_id'];
 
 // --- Базовый запрос (сведения об абитуриенте) --- //
-$r = getarray("SELECT * FROM reg_applicant 
+$r = $msl->getarray("SELECT * FROM reg_applicant 
 WHERE reg_applicant.id = ".$applicant_id.";");
 
 // initiate PDF
@@ -26,10 +27,10 @@ $pdf->useTemplate($pdf->importPage(1));
 $pdf->SetFont("times", "", 12);
 $pdf->Text(52, 60.2, $r['surname']." ".$r['name']." ".$r['second_name']);
 
-$ival = getarray("SELECT pay FROM reg_institution_additional WHERE `request_id`='".$_REQUEST['request_id']."'");
+$ival = $msl->getarray("SELECT pay FROM reg_institution_additional WHERE `request_id`='".$_REQUEST['request_id']."'");
 $pdf->Text(162, 102.2, $ival['pay']);
 
-$price = new Price();
+$price = new Price($msl);
 $pay = $price->getPriceByRegion($r['region'], $req['catalog'], 3, $ival['pay'], 0, 0);
 unset($price);
 

@@ -1,7 +1,7 @@
 <?php
-require_once('../../../modules/mysql.php');
 require_once('../../conf.php');
 require_once('../class/pdf.class.php');
+require_once('../class/mysql.class.php');
 
 class PDF2 extends PDF {
     function Footer() {
@@ -46,8 +46,9 @@ if (isset($_REQUEST['mid'])) {
 } else {
     if (isset($_SESSION['rights']) && isset($_SESSION['md_rights'])) {
         if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
-            $student_id = $_REQUEST['student'];
-    	    if (!is_numeric($_REQUEST['student'])) $student_id = $_SESSION['student_id'];
+            if (isset($_REQUEST['student'])) {
+	        $student_id = $_REQUEST['student'];
+	    } else $student_id = $_SESSION['student_id'];
         }
     } else {
         $student_id = $_SESSION['student_id'];
@@ -56,14 +57,16 @@ if (isset($_REQUEST['mid'])) {
 
 if (!is_numeric($student_id)) exit(0);
 
-$r = getarray("SELECT surname,name,second_name,catalog,region FROM students_base.student WHERE id='".$student_id."'");
+$msl = new dMysql();
+
+$r = $msl->getarray("SELECT surname,name,second_name,catalog,region FROM students_base.student WHERE id='".$student_id."'");
 $pdf->Line(10, 10, 197.5, 10, array('width' => 0.2));
 $pdf->SetFont("times", "", 18);
 $pdf->Text(70, 16, "Ведомость успеваемости");
 $pdf->SetFont("times", "", 11);
 $pdf->Text(70, 21, $student_id." ".$r['surname']." ".$r['name']." ".$r['second_name']);
 
-$spec = getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
+$spec = $msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
                   LEFT JOIN admission.specialties b ON a.specialty=b.id 
                   LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
                   LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
@@ -82,7 +85,7 @@ switch($r['region'])
 	break;
 
     default:
-        $reg = getarray("SELECT name FROM admission.partner_regions WHERE id='".$r['region']."'");
+        $reg = $msl->getarray("SELECT name FROM admission.partner_regions WHERE id='".$r['region']."'");
         $pdf->Text(70, 29, "Регион ".$reg['name']);
 }
 
@@ -98,7 +101,7 @@ $pdf->Line(10, 33.6, 197.5, 33.6, array('width' => 0.1));
 $pdf->SetFont("times", "", 10);
 $pdf->SetFillColor(224, 235, 255);
 
-$k = getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.type,b.name as discipline,c.name as markname 
+$k = $msl->getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.type,b.name as discipline,c.name as markname 
                FROM `students_base`.journal a 
                LEFT JOIN `students_base`.disciplines b ON a.discipline=b.id 
                LEFT JOIN `students_base`.marks c ON a.mark=c.id 

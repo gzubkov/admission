@@ -1,6 +1,6 @@
 <?php
 require("../conf.php");
-require("../../modules/mysql.php");
+require_once('class/mysql.class.php');
 //Header("Content-Type: text/javascript; charset=utf-8");
 $msl = new dMysql();
         
@@ -60,15 +60,19 @@ class Insertion
 
     public function setSpecialty($uid, $request) {
         global $msl;
+	if (!isset($request[$uid.'profile'])) $request[$uid.'profile'] = "";
+        if (!isset($request[$uid.'spo'])) $request[$uid.'spo'] = "";
         $array = array('applicant_id' => $_SESSION['applicant_id'], 'catalog' => $request[$uid.'catalog'], 'profile' => $request[$uid.'profile'], 'internet' => $request[$uid.'internet'], 
                        'spo' => $request[$uid.'spo'], 'traditional_form' => $request[$uid.'traditional_form']);
 	$id = $msl->insertArray('reg_request',$array);
 
-        foreach($request[$uid.'ege'] as $val) {
-            if ($val['scores'] > 0) {
-                $msl->insertArray('reg_applicant_scores', array('request_id' => $id, 'subject' => $val['subject'], 'score' => $val['scores'], 'ege' => '1', 'document' => $val['document']));
+	if (isset($request[$uid.'ege'])) {
+            foreach($request[$uid.'ege'] as $val) {
+                if ($val['scores'] > 0) {
+                    $msl->insertArray('reg_applicant_scores', array('request_id' => $id, 'subject' => $val['subject'], 'score' => $val['scores'], 'ege' => '1', 'document' => $val['document']));
+            	}
             }
-        }
+	}
         return $id;
     }
  

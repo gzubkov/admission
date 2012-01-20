@@ -1,7 +1,13 @@
 <?php
-class Moodle extends dMysql
+class Moodle
 {
-    public function createUser($name, $surname, $email, $password, $city) {
+    var $_msl;
+
+    public function __construct($msl) {
+        $this->_msl = $msl;   
+    }
+
+    public function createUser($name, $surname, $email, $password, $city, $idnumber='') {
         $user = array("auth" => "manual",
 	      	      "confirmed" => "1",
 		      "mnethostid" => "1",
@@ -12,9 +18,10 @@ class Moodle extends dMysql
 		      "email" => $email,
 		      "lang" => "ru_utf8",
 		      "city" => $city,
-		      "country" => "RU");
+		      "country" => "RU",
+		      "idnumber" => $idnumber);
 
-        return $this->insertArray("education`.`edu_user", $user, 0);	
+        return $this->_msl->insertArray("education`.`edu_user", $user, 0);	
     }
 
     public function assignTest($id) {
@@ -23,7 +30,13 @@ class Moodle extends dMysql
 		      "contextid" => "2380",
 		      "timestart" => time());
 
-        return $this->insertArray("education`.`edu_role_assignments", $user, 0);	
+        return $this->_msl->insertArray("education`.`edu_role_assignments", $user, 0);	
+    }
+
+    public function searchUser($email) {
+    	$array = $this->_msl->getarray("SELECT id FROM `education`.`edu_user` WHERE `email`='".$email."'");
+	if ($array == 0) return 0;
+	return $array['id'];
     }
 }
 ?>

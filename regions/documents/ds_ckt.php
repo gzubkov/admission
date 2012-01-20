@@ -3,8 +3,8 @@
 require_once('../../../../modules/tcpdf/tcpdf.php');
 require_once('../../../../modules/fpdi/fpdi.php');
 require_once('../../../../modules/russian_date.php');
-require_once('../../../../modules/mysql.php');
 require_once('../../../conf.php');
+require_once('../../class/mysql.class.php');
 require_once('../../class/price.class.php');
 
 class PDF extends FPDI {
@@ -63,7 +63,7 @@ $pdf->Text(46, 75.4, $r['surname']." ".$r['name']." ".$r['second_name']);
 if ($r['pay'] > 0) {
     $pdf->Text(162, 110.4, $r['pay']);
 
-    $price = new Price();
+    $price = new Price($msl);
     $pay = $price->getPriceByPgid($rval['pgid'], $r['catalog'], 3, $r['pay'], 0, 1);
     unset($price);
 
