@@ -56,13 +56,14 @@ class Price
     }
 
     public function getPriceByStudent($id, $purpose=2, $count=1, $date=0) {
-    	$dsemestr = $this->msl->getarray("SELECT (a.semestr+1>=(SELECT 2*b.term+b.start_semestr FROM admission.catalogs b WHERE b.base_id=a.catalog)) as dsem FROM students_base.student a WHERE a.id='".$id."' LIMIT 1");
+    	$ds = $this->msl->getarray("SELECT a.semestr,b.term,b.start_semestr FROM students_base.student a LEFT JOIN admission.catalogs b ON b.base_id=a.catalog WHERE a.id='".$id."' LIMIT 1");
+	
 
-	if ($dsemestr['dsem']) {
+	if ($ds['semestr'] + 2 >= 2*$ds['term']+$ds['start_semestr']) {
 	    $query = "SELECT price, percent, `diplom_to_us` FROM students_base.student_price WHERE id='".$id."'";
 	    if ($date > 0) $query .= " AND `date_start` <= '".$date."' AND `date_end` >= '".$date."'";
 	    $query .= " LIMIT 1";
-	    $price = $this->_msl->getarray($query, 0);
+	    $price = $this->msl->getarray($query, 0);
 	    if ($price == 0) die('Цена на студента не сформирована!');
 	    
 	    if ($purpose == 2) {
