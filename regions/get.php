@@ -10,7 +10,7 @@ if (!is_numeric($_POST['catalog'])) {
 }
 
 $mslk = new dMysql();
-$gval = $mslk->getarray("SELECT specialty, internet, baseedu, term FROM `catalogs` WHERE `id`='".$_POST['catalog']."'");
+$gval = $mslk->getarray("SELECT specialty, internet, baseedu, term, termm FROM `catalogs` WHERE `id`='".$_POST['catalog']."'");
 
 if (0) {
 if ($gval['internet'] > 0) {
@@ -27,7 +27,10 @@ print "<TABLE border=0 cellspacing=0 cellpadding=0><TBODY style=\"border: none;\
 print "<TR><TD style=\"width: ".$_POST['width']."px;\">Начальный семестр обучения<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
 print "<TD><INPUT type=text name=\"semestr\" value=\"";
 if ($_POST['semestr'] != 0) {print "1";} else {print $_POST['semestr'];}
-print "\" size=2 maxlength=2> из ".($gval['term']*2)." (указывать 0, если неизвестно).</TD></TR>";  
+if ($gval['termm'] ! = 0) {
+    $gval['termm'] = 1;
+}
+print "\" size=2 maxlength=2> из ".($gval['term']*2+$gval['termm'])." (указывать 0, если неизвестно).</TD></TR>";  
 print "<TR><TD colspan=\"2\"><LABEL><INPUT type=\"checkbox\" id=\"traditional_form\" name=\"traditional_form\" value=\"1\" checked> Результаты ЕГЭ отсутствуют, сдача вступительных экзаменов в традиционно принятой в МГТУ \"МАМИ\" форме.</LABEL></TD></TR>";
 
 $rval = $mslk->getarray("SELECT subject,name FROM `reg_ege_minscores` LEFT JOIN `reg_subjects` ON `reg_subjects`.id = `reg_ege_minscores`.subject 

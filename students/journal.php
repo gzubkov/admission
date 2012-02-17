@@ -2,6 +2,7 @@
 require_once('../../conf.php');
 require_once('../class/pdf.class.php');
 require_once('../class/mysql.class.php');
+require_once('../class/catalog.class.php');
 
 class PDF2 extends PDF {
     function Footer() {
@@ -12,14 +13,12 @@ class PDF2 extends PDF {
     }
 }
 
-
-// initiate PDF
 $pdf = new PDF2();
 
 $pdf->SetMargins(10, 40, 10);
 $pdf->SetAutoPageBreak(true, 8);
 $pdf->setPrintFooter(true);
-// add a page
+
 $pdf->AddPage();
 
 class Verification
@@ -66,12 +65,8 @@ $pdf->Text(70, 16, "Ведомость успеваемости");
 $pdf->SetFont("times", "", 11);
 $pdf->Text(70, 21, $student_id." ".$r['surname']." ".$r['name']." ".$r['second_name']);
 
-$spec = $msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
-                  LEFT JOIN admission.specialties b ON a.specialty=b.id 
-                  LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
-                  LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
-		  LEFT JOIN admission.`universities` f ON d.university=f.id 		  
-                  WHERE a.base_id='".$r['catalog']."'");
+$cat = new Catalog($msl);
+$spec = $cat->getBaseInfo($r['catalog']);
 $pdf->Text(70, 25, $spec['abbreviation']." ".$spec['name']);
 
 switch($r['region']) 

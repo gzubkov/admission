@@ -56,28 +56,28 @@ class Price
     }
 
     public function getPriceByStudent($id, $purpose=2, $count=1, $date=0) {
-    	$ds = $this->msl->getarray("SELECT a.semestr,b.term,b.start_semestr FROM students_base.student a LEFT JOIN admission.catalogs b ON b.base_id=a.catalog WHERE a.id='".$id."' LIMIT 1");
-	
+        $cat = $this->msl->getarray("SELECT semestr,catalog FROM students_base.student WHERE id='".$id."' LIMIT 1");
 
-	if ($ds['semestr'] + 2 >= 2*$ds['term']+$ds['start_semestr']) {
-	    $query = "SELECT price, percent, `diplom_to_us` FROM students_base.student_price WHERE id='".$id."'";
-	    if ($date > 0) $query .= " AND `date_start` <= '".$date."' AND `date_end` >= '".$date."'";
-	    $query .= " LIMIT 1";
-	    $price = $this->msl->getarray($query, 0);
-	    if ($price == 0) die('Цена на студента не сформирована!');
+        $profile = $this->msl->getarray("SELECT catalog FROM `admission`.`catalogs_profiles` WHERE base_id='".$cat['catalog']."' LIMIT 1");
+	if ($profile != 0) {
+	    $ds = $this->msl->getarray("SELECT term,termm,start_semestr FROM admission.catalogs WHERE id='".$profile['catalog']."' LIMIT 1");
+	} else {
+	    $ds = $this->msl->getarray("SELECT term,termm,start_semestr FROM admission.catalogs WHERE `base_id`='".$cat['catalog']."' LIMIT 1");	
+	}
+
+	$query = "SELECT price, percent, `diplom_to_us` FROM students_base.student_price WHERE id='".$id."'";
+	if ($date > 0) $query .= " AND `date_start` <= '".$date."' AND `date_end` >= '".$date."'";
+	$query .= " LIMIT 1";
 	    
+	$price = $this->msl->getarray($query, 0);
+	if ($price == 0) die('Цена на студента не сформирована!');
+	    
+	if ($cat['semestr'] + 2 >= 2*$ds['term']+$ds['termm']/6+$ds['start_semestr']) {
 	    if ($purpose == 2) {
 	        return array($price['diplom_to_us'], $price['price']*1.5-$price['diplom_to_us']);
 	    } else {
 	        $price = array('price'=>$price['price']);
 	    }
-	} else {
-            $query = "SELECT price, percent FROM students_base.student_price WHERE id='".$id."'";
-	    if ($date > 0) $query .= " AND `date_start` <= '".$date."' AND `date_end` >= '".$date."'";
-	    $query .= " LIMIT 1";
-	    $price = $this->msl->getarray($query, 0);
-	
-	    if ($price == 0) die('Цена на студента не сформирована!');
 	}
 	
 	return $this->_countFinalPrice($price, $purpose, $count);

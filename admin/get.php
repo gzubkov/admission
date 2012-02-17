@@ -276,11 +276,12 @@ function getSpecialties($id) {
 	    print "<b>Moodle: пользователь уже создан.</b><br>";
 	} else {
         if ($reg['num'] == 0) print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=createmoodleusertest&rid=".$val['id']."'})\">Создать пользователя в Moodle и назначить на тест</A><BR>\n"; 
-    	print "Номер личного дела в БД <INPUT type=\"text\" maxlength=5 value=\"".$reg['num']."\" id=\"num".$val['id']."\" style=\"width: 40px;\"> <A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=savebdindex&index='+$('#num".$val['id']."').val()+'&id=".$id."'})\">Сохранить</A><BR>\n";
+    	
 	if ($reg['num'] > 0) {
 	    print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=createmoodleuser&rid=".$val['id']."'})\">Создать пользователя в Moodle</A><BR>\n";  
 	}
-	} 
+	}
+	print "Номер личного дела в БД <INPUT type=\"text\" maxlength=5 value=\"".$reg['num']."\" id=\"num".$val['id']."\" style=\"width: 40px;\"> <A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=savebdindex&index='+$('#num".$val['id']."').val()+'&id=".$id."'})\">Сохранить</A><BR>\n";
     }
     print "<A href=\"\" onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=deleteapplicant&id=".$id."'})\">Удалить абитуриента</A><BR>\n"; 
 }

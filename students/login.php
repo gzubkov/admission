@@ -8,7 +8,7 @@ if (!isset($_POST['act'])) {
 
 switch($_POST['act']) {
     case "exit":
-        $_SESSION = array();
+        unset($_SESSION['student_id']);
         print "ok\n";
         break;
     default:

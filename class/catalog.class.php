@@ -1,11 +1,10 @@
 <?php
-//require_once('mysql.class.php');
 class Catalog
 {
     var $msl;
 
     public function __construct(&$msl) {
-        $this->msl = $msl; //new dMysql();
+        $this->msl = $msl; 
         return true;
     }
 
@@ -69,6 +68,29 @@ class Catalog
 	    $info['profile'] = $prof['name'];
 	}
 	return $info;
+    }
+
+    public function getBaseInfo($base_id) {
+        $profile = $this->msl->getarray("SELECT a.catalog, b.name FROM `admission`.`catalogs_profiles` a LEFT JOIN `admission`.`specialties_profiles` b ON a.profile=b.id WHERE a.base_id='".$base_id."'");
+
+	if ($profile['catalog'] != 0) {
+	    $spec = $this->msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
+                  LEFT JOIN admission.specialties b ON a.specialty=b.id 
+                  LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
+                  LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
+		  LEFT JOIN admission.`universities` f ON d.university=f.id 		  
+                  WHERE a.id='".$profile['catalog']."'");
+
+	    $spec['profile'] = $profile['name'];
+	} else {
+            $spec = $this->msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
+                  LEFT JOIN admission.specialties b ON a.specialty=b.id 
+                  LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
+                  LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
+		  LEFT JOIN admission.`universities` f ON d.university=f.id 		  
+                  WHERE a.base_id='".$base_id."'");
+        }
+	return $spec;
     }
 
     public function getSpecialtiesByPgid($pgid) {

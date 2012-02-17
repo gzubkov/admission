@@ -733,7 +733,7 @@ if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.
 
    print "<DIV style=\"border: none; width: 98%; margin:0 auto;\">";
 
-   $query = "SELECT g.id, g.abbreviation, c.name, d.short, c.spec_code, c.qualify, a.internet, a.applicable, a.archive, a.term, a.basicsemestr FROM catalogs a 
+   $query = "SELECT g.id, g.abbreviation, c.name, d.short, c.spec_code, c.qualify, a.internet, a.applicable, a.archive, a.term, a.termm, a.basicsemestr FROM catalogs a 
                   LEFT JOIN specialties c ON a.specialty=c.id 
 		  LEFT JOIN education_type d ON a.baseedu=d.id 
 		  LEFT JOIN admission.`universities_departments` e ON c.department=e.id 
@@ -743,18 +743,6 @@ if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.
    $mappl = $msl->getarray($query);
    print "<TABLE border=0 cellspacing=0 cellpadding=0 id=example class=display>";
 
-   /*print "<THEAD>
-              <TR>
-	       <TH style=\"text-align: center; \"><INPUT type=\"checkbox\" id=\"selectAll\"></TH>
-               <TH style=\"text-align: center; \"><INPUT type=\"text\" name=\"search_id\" value=\"id\" style=\"width: 35px;\" class=\"search_init\"/></TH>
-               <TH><INPUT type=\"text\" name=\"search_surname\" value=\"Фамилия\" class=\"search_init\"/></TH>
-               <TH><INPUT type=\"text\" name=\"search_name\" value=\"Имя\" class=\"search_init\"/></TH>
-               <TH><INPUT type=\"text\" name=\"search_secondname\" value=\"Отчество\" class=\"search_init\"/></TH>
-               <TH><INPUT type=\"text\" name=\"search_email\" value=\"e-mail\" class=\"search_init\"/></TH>
-               <TH>Дата создания</TH>
-               <TH>Шаг</TH>
-              </TR>
-          </THEAD>"; */
    print "<TBODY>";
 
    $temp = "";
@@ -769,7 +757,9 @@ if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.
         } else {
 	    print "<TD></TD><TD></TD>";
 	}
-      print "<TD>".$r['short']." (".$r['term'].")</TD>";
+      print "<TD>".$r['short']." (".$r['term'];
+      if ($r['termm'] > 0) {print "года ".$r['termm']." месяцев";}
+      print ")</TD>";
       print "<TD>".($r['internet'] ? "И" : "")."</TD><TD>".($r['applicable'] ? "ЭП (".$r['basicsemestr'].")" : "")."</TD></TR>";
    }
    print "</TBODY>";

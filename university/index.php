@@ -200,7 +200,7 @@ print "<BR><DIV style=\"border: 1px solid #d3d3d3; width: 250px; height: 140px; 
       </div> <!-- /header -->
 
               <div id="sidebar-left" class="sidebar">
-                    <div id="block-user-0" class="clear-block block block-user"><h2>ВУЗ</h2>
+                    <div id="block-user-0" class="clear-block block block-user"><h2>Учебное заведение</h2>
   <div class="content">
 
 <?php
@@ -230,11 +230,24 @@ print "<BR><DIV style=\"border: 1px solid #d3d3d3; width: 250px; height: 140px; 
     print "<H1 class=\"title\">Список студентов</H1><BR>";
 
    print "<DIV style=\"border: none; width: 98%; margin:0 auto;\">";
-   $rval = $msl->getarray("SELECT a.id,a.surname,a.name,a.second_name FROM `students_base`.`student` a 
-    	    			   			       LEFT JOIN `admission`.`catalogs` b ON a.catalog=b.base_id 
-							       LEFT JOIN admission.specialties c ON b.specialty=c.id 
+   $spec = $msl->getarray("SELECT a.id, a.`base_id` FROM `admission`.`catalogs` a  
+							       LEFT JOIN admission.specialties c ON a.specialty=c.id 
 							       LEFT JOIN admission.`universities_departments` d ON c.department=d.id 
                   					       LEFT JOIN admission.`universities_faculties` e ON d.faculty=e.id WHERE e.university='".$university_id."' ORDER by a.id ASC", 1); 
+	
+$arr = array();
+foreach($spec as $v) {
+    if ($v['base_id'] != 0) $arr[] = $v['base_id'];
+}
+
+$arr2 = array();
+foreach($spec as $v) $arr2[] = $v['id'];
+
+$profile = $msl->getarray("SELECT `base_id` FROM `admission`.`catalogs_profiles` WHERE `catalog` IN (".implode(',',$arr2).")", 1);
+foreach ($profile as $v) {
+    $arr[] = $v['base_id'];
+} 
+   $rval = $msl->getarray("SELECT a.id,a.surname,a.name,a.second_name FROM `students_base`.`student` a WHERE a.catalog IN (".implode(',',$arr).");",1);
 
    print "<TABLE border=0 cellspacing=0 cellpadding=0 id=example class=display>";
 

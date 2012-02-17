@@ -17,9 +17,8 @@ if (!is_numeric($_REQUEST['id'])) {
 $id = $_REQUEST['id'];
 
 $rval = $msl->getarray("SELECT * FROM `students_base`.`student` WHERE id = '".$id."' LIMIT 1;");
-$spec = $msl->getarray("SELECT b.name FROM admission.catalogs a 
-                  LEFT JOIN admission.specialties b ON a.specialty=b.id 
-                  WHERE a.base_id='".$rval['catalog']."'");
+$cat = new Catalog($msl);
+$spec = $cat->getBaseInfo($rval['catalog']);
 
 print "<script type=\"text/javascript\">
 	$(function() {

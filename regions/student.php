@@ -16,12 +16,9 @@ if (!is_numeric($_REQUEST['id'])) {
 $id = $_REQUEST['id'];
 
 $rval = $msl->getarray("SELECT * FROM `students_base`.`student` WHERE id = '".$id."' LIMIT 1;");
-$spec = $msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
-                  LEFT JOIN admission.specialties b ON a.specialty=b.id 
-                  LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
-                  LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
-		  LEFT JOIN admission.`universities` f ON d.university=f.id 		  
-                  WHERE a.base_id='".$rval['catalog']."'");
+
+$cat = new Catalog($msl);
+$spec = $cat->getBaseInfo($rval['catalog']);
 
 print "<script type=\"text/javascript\">
 	$(function() {

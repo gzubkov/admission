@@ -98,13 +98,10 @@ if ($student->isLogin()) {
 $student_id = $_SESSION['student_id'];
 $msl = new dMysql();
 
+$cat = new Catalog($msl);
     $r = $msl->getarray("SELECT surname, name, second_name, region, catalog, semestr FROM `students_base`.student WHERE id='".$student_id."' LIMIT 1",0);
-    $spec = $msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
-                  LEFT JOIN admission.specialties b ON a.specialty=b.id 
-                  LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
-                  LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
-		  LEFT JOIN admission.`universities` f ON d.university=f.id 		  
-                  WHERE a.base_id='".$r['catalog']."'");
+    $spec = $cat->getBaseInfo($r['catalog']);
+
     print $r['surname']." ".$r['name']." ".$r['second_name'];
 
 print "<H2>Регион</H2>";

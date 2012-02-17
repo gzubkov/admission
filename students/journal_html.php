@@ -1,7 +1,7 @@
 <?php
-// just require TCPDF instead of FPDF
 require_once('../../../modules/russian_date.php');
 require_once('../class/mysql.class.php');
+require_once('../class/catalog.class.php');
 require_once('../../conf.php');
 
 class Verification
@@ -41,6 +41,8 @@ if (!is_numeric($student_id)) exit(0);
 $msl = new dMysql();
 $r = $msl->getarray("SELECT surname,name,second_name,catalog,region FROM students_base.student WHERE id='".$student_id."'");
 
+$cat = new Catalog($msl);
+$spec = $cat->getBaseInfo($r['catalog']);
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -81,12 +83,6 @@ input { font-family: Arial, sans-serif; font-size: 9pt; color: black; background
 <?php 
 print "<TR><TD colspan=6>Номер договора: ".$student_id."</TD></TR><TR><TD colspan=6>".$r['surname']." ".$r['name']." ".$r['second_name']."</TD></TR>"; 
 
-$spec = $msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
-                  LEFT JOIN admission.specialties b ON a.specialty=b.id 
-                  LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
-                  LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
-		  LEFT JOIN admission.`universities` f ON d.university=f.id 		  
-                  WHERE a.base_id='".$r['catalog']."'");
 print "<TR><TD colspan=6>".$spec['abbreviation']." ".$spec['name']."</TD></TR>";
 
 print "<TR><TD colspan=6 style=\"border-bottom: black 1px solid; line-height: 130%\">Регион ";
