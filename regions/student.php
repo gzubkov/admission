@@ -5,10 +5,11 @@ require_once('../class/catalog.class.php');
 require_once('../class/price.class.php');
 $msl = new dMysql();
 
+/*
 if ($_SESSION['rights'] != 'admin' || $_SESSION['md_rights'] != md5($CFG_salted.$_SESSION['rights'])) {
     exit(0);
 }
-
+*/
 if (!is_numeric($_REQUEST['id'])) {
     exit(0);
 }

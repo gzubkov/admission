@@ -170,9 +170,10 @@ $("thead input").keyup( function () {
   <h2>Действия</h2>
 
   <div class="content"><ul class="menu">
-  <li class="collapsed last"><a href="?act=addstudent">Добавить абитуриента</a></li>
-  <li class="collapsed last"><a href="?act=liststudent">Список абитуриентов</a></li> 
+  <li class="collapsed last"><a href="?act=addapplicant">Добавить абитуриента</a></li>
+  <li class="collapsed last"><a href="?act=listapplicant">Список абитуриентов</a></li> 
   <li class="collapsed last"><a href="?act=basestudent">Список студентов</a></li> 
+  <li class="collapsed last"><a href="?act=card">Мои данные</a></li> 
 <!--  <li class="collapsed last"><a href="?act=receipt">Распечатать квитанцию</a></li> -->
   <li class="collapsed last"><a href="?">Вернуться на главную</a></li>
   </ul></div>
@@ -254,7 +255,7 @@ if ($rval['approved'] == 0) {
 $act=$_REQUEST['act'];
 
 switch($act) {
-case "addstudent":
+case "addapplicant":
     print "<H1 class=\"title\">Добавление абитуриента</H1><DIV id=\"output\"></DIV>";
 
     print "<P>Пожалуйста заполните следующие поля (поля отмеченные * обязательны для заполнения):</P>\n\n";
@@ -507,7 +508,7 @@ case "deletestudent":
     print ".</P>\n\n";
     break;
 
-case "liststudent":
+case "listapplicant":
     print "<H1 class=\"title\">Список абитуриентов</H1><DIV id=\"output\"></DIV>";
     print "<DIV id=\"myaccordion\">\n";   
     $rval = $msl->getarray("SELECT id,CONCAT(surname,' ',name,' ',second_name) as fio FROM partner_applicant WHERE region = '".$region_id."' ORDER by id DESC", 1);
@@ -599,6 +600,50 @@ case "receipt":
     unset($form);
 
     print "</TBODY></TABLE></DIV>\n\n";     
+    break;
+
+case "verified":
+    $msl->insertArray('partner_agreement', array('region'=>$region_id, 'ip'=>sprintf('%u', ip2long($_SERVER['REMOTE_ADDR'])), 'remarks'=>$_POST['remarks']));
+
+case "card":
+    $rpval = $msl->getarray("SELECT a.*, b.name_rp as pos, c.name_rp as doc FROM `partner_regions` a 
+    	     		     LEFT JOIN `partner_position` b ON a.gposition=b.id LEFT JOIN `partner_organizational_documents` c ON a.orgdoc=c.id WHERE a.id = '".$region_id."'");
+
+    print "<H1 class=\"title\">Карточка регионального партнера</H1>";
+    print "<DIV id=\"myaccordion\">\n";
+
+    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+$agreed = $msl->getarray("SELECT date, used FROM `partner_agreement` WHERE region='".$region_id."'");
+if ($agreed == 0) {      
+   print "<TR><TD colspan=2>Проверьте указанные ниже сведения:</TD></TR>";
+}
+      print "<TR><TD style=\"width: 120px;\">Организация:</TD><TD>".$rpval['firm'].".</TD></TR>";
+      print "<TR><TD style=\"width: 120px;\">Полное наименование:</TD><TD>".$rpval['longfirm'].".</TD></TR>";
+      print "<TR><TD>В лице:</TD><TD>".(($rpval['pos'] == '') ? "<FONT color=red><B>укажите должность в замечаниях</B></FONT>": $rpval['pos'])." ".$rpval['name_rp'].".</TD></TR>";
+      print "<TR><TD>На основании:</TD><TD>".$rpval['doc'].".</TD></TR>";
+      print "<TR><TD>Юридический адрес:</TD><TD>".$rpval['legaladdress'].".</TD></TR>";
+      print "<TR><TD>Фактический адрес:</TD><TD>".$rpval['physicaladdress'].".</TD></TR>";
+      print "<TR><TD>БИК:</TD><TD>".$rpval['bik'].".</TD></TR>";
+      print "<TR><TD>Кор.счет:</TD><TD>".$rpval['ks'].".</TD></TR>";
+      print "<TR><TD>Рассчетный счет:</TD><TD>".$rpval['rs'].".</TD></TR>";
+      print "<TR><TD>Банк:</TD><TD>".$rpval['bank'].".</TD></TR>";
+      print "<TR><TD>ИНН/КПП:</TD><TD>".$rpval['inn']."/".$rpval['kpp'].".</TD></TR>";
+    if ($rpval['ckt_num'] != '') {
+        print "<TR><TD>Договор с ЦКТ:</TD><TD>".$rpval['dog_num']." от ".date('j.m.Y', strtotime($rpval['ckt_date'])).".</TD></TR>";
+    } 
+    print "<TR><TD>Электронная почта:</TD><TD><A href=\"mailto:".$rpval['e-mail']."\">".$rpval['e-mail']."</A>.</TD></TR>";
+
+if ($agreed == 0) {    
+   print "<TR><TD style=\"vertical-align: top;\">Замечания:</TD><TD><TEXTAREA name=\"remarks\" WRAP=\"virtual\" COLS=\"90\" ROWS=\"3\"></TEXTAREA></TD></TR>";
+   print "<INPUT type=\"hidden\" name=\"act\" value=\"verified\">";
+   print "<TR><TD colspan=2 style=\"text-align: center;\"><INPUT type=submit value=\"Отправить\"></TD></TR>";
+} else {
+   print "<TR><TD colspan=2>Данные подтверждены ".date( 'j.m.Y в h:i', strtotime($agreed['date'])).".";
+   if ($agreed['used'] == 1) {print " Замечания выполнены. В случае изменения Ваших данных, просьба незамедлительно связаться с нами по электронной почте.";}
+   print "</TD></TR>\n";
+}
+
+    print "</TBODY></TABLE></DIV>\n\n";    
     break;
 
 default:

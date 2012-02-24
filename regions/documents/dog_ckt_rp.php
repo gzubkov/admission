@@ -37,7 +37,7 @@ $msl = new dMysql();
 $r = $msl->getarray("SELECT surname,name,second_name,regaddress,CONCAT(doc_serie,' ',doc_number,', ',doc_issued) as doc, doc_date, region, catalog FROM partner_applicant 
 WHERE id = ".$applicant_id.";");
 
-$rval = $msl->getarray("SELECT a.firm, a.longfirm, a.rsurname, a.rname, a.`rsecond_name`, a.`name_rp`, a.pgid, b.name as gpos, b.name_rp as gposrp, c.name_tp as orgdoc, a.dog_num, a.dog_date, a.inn, a.kpp, a.bank, a.legaladdress, a.rs, a.ks, a.bik 
+$rval = $msl->getarray("SELECT a.firm, a.longfirm, a.rsurname, a.rname, a.`rsecond_name`, a.`name_rp`, a.pgid, b.name as gpos, b.name_rp as gposrp, c.name_tp as orgdoc, a.ckt_num, a.ckt_date, a.inn, a.kpp, a.bank, a.legaladdress, a.rs, a.ks, a.bik 
                   FROM `partner_regions` a LEFT JOIN `partner_position` b ON a.gposition=b.id LEFT JOIN `partner_organizational_documents` c ON a.orgdoc=c.id WHERE a.id = ".$r['region'].";");
 
 
@@ -66,8 +66,8 @@ $pdf->Text(15, 71,   $arr[1]);
 $pdf->Text(82, 75,   $rval['gposrp']." ".$rval['name_rp']);
 $pdf->Text(69, 79.3,   mb_convert_case($rval['orgdoc'], MB_CASE_TITLE, "UTF-8"));
 
-$pdf->Text(174, 79.3,   $rval['dog_num']);
-$pdf->Text(20, 83.3,   date('d.m.Y', strtotime($rval['dog_date'])));
+$pdf->Text(174, 79.3,   $rval['ckt_num']);
+$pdf->Text(20, 83.3,   date('d.m.Y', strtotime($rval['ckt_date'])));
 
 $pdf->Text(45, 87.3, $r['surname']." ".$r['name']." ".$r['second_name']);
 
