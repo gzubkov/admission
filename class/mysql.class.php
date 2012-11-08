@@ -2,13 +2,17 @@
 class dMysql {
     private $_link;
 
+    private function _error($query) {
+        print "Возникла ошибка при работе с базой данных. О ней сообщено администратору.<br>"; 
+	print mysql_error();
+	print "<BR>".$query;
+        exit();
+    }
+
     private function _query($query) {
         $result = mysql_query($query, $this->_link);
         if (!$result) {
-            print "Возникла ошибка при работе с базой данных. О ней сообщено администратору.<br>"; 
-	    print mysql_error();
-	    print "<BR>".$query;
-            exit();
+            $this->_error($query);
         }
         return $result; 
     }
@@ -29,7 +33,7 @@ class dMysql {
         global $CFG_dbuser;
         global $CFG_dbpass;
         if (!$this->_link = mysql_connect($CFG_dbhost,$CFG_dbuser,$CFG_dbpass)) {
-      	    die("Ошибка соединения с базой данных: ".mysql_error()." пожалуйста сообщите об этом администратору!");
+      	    $this->_error("connect");
    	}
    	mysql_select_db($CFG_dbname,$this->_link);
    	$this->_query('SET NAMES utf8');

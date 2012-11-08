@@ -1,35 +1,22 @@
 <?php
-require_once('../../../modules/russian_date.php');
 require_once('../../conf.php');
 require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
+require_once('../class/documents.class.php');
 
-if (!is_numeric($_REQUEST['request'])) exit(0);
-$request_id = $_REQUEST['request'];
 $msl = new dMysql();
+$appl = new Applicant($msl, $_REQUEST['applicant']);
 
-$req = $msl->getarray("SELECT * FROM reg_request WHERE id='".$request_id."' LIMIT 1");
+$r = $appl->getInfo();
 
-$applicant_id = $req['applicant_id'];
-
-//if ($_SESSION['applicant_id'] != $applicant_id && $_SESSION['rights'] != "admin") exit(0);
-
-// --- Базовый запрос (сведения об абитуриенте, регион, цена (руб., коп.)) --- //
-$r = $msl->getarray(
-"SELECT reg_applicant.*
-FROM reg_applicant 
-WHERE reg_applicant.id = ".$applicant_id." LIMIT 1;");
-
-// initiate PDF
 $pdf = new PDF();
 $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 10);
 $pdf->SetAutoPageBreak(true, 0);
-
 $pdf->AddPage();
 
 $pdf->SetFont("times", "B", 13);
-$pdf->Text(190.5, 7.8, $request_id.($req['internet']?"И":""));
+$pdf->Text(190.5, 7.8, $_REQUEST['applicant'].($r['internet']?"И":""));
 
 $pdf->SetFont("times", "B", 14);
 $pdf->SetXY(0, 7.8);
@@ -39,25 +26,27 @@ $pdf->SetXY(0, 12);
 $pdf->MultiCell(0, 0, 'о возможности зачисления абитуриента', 0, 'C', 0, 0, '', '', true);
 
 $pdf->SetFont("times", "", 14);
-//$pdf->Text(14.5, 25, "ФИО: <B>".$r['surname']." ".$r['name']."</B> ".$r['second_name']);
 
-$pdf->WriteHtmlCell(0,0, 13, 20, "ФИО: <B>".$r['surname']." ".$r['name']." ".$r['second_name']."</B>.");
+$pdf->WriteHtmlCell(0,0, 13, 20, "ФИО: <B>".$appl->surname." ".$appl->name." ".$appl->second_name."</B>.");
 
 $pdf->SetFont("times", "", 12);
 $pdf->Text(14.5, 31, "Дата рождения: ".date('d.m.Y', strtotime($r['birthday'])));
 $pdf->Text(14.5, 37, "Гражданство: ".$r['citizenry']);
 $pdf->Text(14.5, 43, "Мобильный телефон: +7 (".$r['mobile_code'].") ".$r['mobile']);
 $pdf->Text(14.5, 49, "e-mail: ".$r['e-mail']);
-$pdf->Text(14.5, 55, "Место регистрации: ".$r['regaddress']);
+
+$pdf->Text(14.5, 55, "Адрес регистрации: ".$appl->getRegAddress());
 
 $pdf->Line(12, 58, 200, 58, array('width' => 0.4));
 
 $cat = new Catalog(&$msl);
-$rval = $cat->getInfo($req['catalog'], $req['profile']);
+$rval = $cat->getInfo($appl->catalog, $appl->profile);
 unset($cat);
 
-if ($rval['profile'] != '') {
+if (isset($rval['profile'])) {
     $rval['profile'] = " (профиль: ".$rval['profile'].")";
+} else {
+    $rval['profile'] = "";
 }
 
 $pdf->SetFont("times", "", 14);
@@ -86,7 +75,7 @@ $pdf->Text(20.2, 123, "без вступительных испытаний;");
 $y = 123;
 
 // баллы ЕГЭ
-$rval = $msl->getarray("SELECT name, score FROM reg_applicant_scores LEFT JOIN reg_subjects ON reg_applicant_scores.subject = reg_subjects.id WHERE `request_id` = ".$request_id." AND `ege` = 1 ORDER BY subject ASC", 1);
+$rval = $appl->getEge();
 
 if ($rval != 0) {
     $a = array();  

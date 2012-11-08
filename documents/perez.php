@@ -2,29 +2,27 @@
 require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
+require_once('../class/documents.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
-$applicant_id = $_REQUEST['applicant_id'];
+$appl = new Applicant($msl, $_REQUEST['applicant_id']);
 
-// --- Базовый запрос (сведения об абитуриенте) --- //
-$r = $msl->getarray("SELECT surname,name,second_name FROM reg_applicant 
-WHERE reg_applicant.id = ".$applicant_id.";");
+$cat = new Catalog($msl);
+$univ = $cat->getUniversityInfo($appl->catalog);
+unset($cat);
 
-// initiate PDF
-$pdf = new PDF();
-$pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
-$pdf->SetAutoPageBreak(true, 0);
-$pdf->setSourceFile('perez.pdf');
+$pdf = new PDF('pdf/perez.pdf');
 
-// add a page
-$pdf->AddPage();
-$pdf->useTemplate($pdf->importPage(1));
+$pdf->SetFont("times", "", 12);
 
-$pdf->SetFont("times", "", 13);
+$pdf->SetFillColor(255,255,255);
+$pdf->Rect(100,10,100,60,'F');
+$pdf->WriteHtmlCell(80,0, 110, 18, "Ректору<BR>
+".$univ['type']." \"".$univ['name']."\" ".$univ['rsurname_rp']." ".substr($univ['rname_rp'],0,2).".".substr($univ['rsecond_name_rp'],0,2).".<BR> 
+от ".$appl->surname." ".$appl->name." ".$appl->second_name,0,0,true);
 
-$pdf->Text(112, 42.8, $r['surname']);
-$pdf->Text(107, 53.2, $r['name']." ".$r['second_name']);
+//$pdf->splitText("Ректору ".$univ['type']." \"".$univ['name']."\" ".$univ['rsurname_rp']." ".substr($univ['rname_rp'],0,2).".".substr($univ['rsecond_name_rp'],0,2).". от ".$appl->surname." ".$appl->name." ".$appl->second_name, array(array(100, 30),array(100,40),array(100,50),array(100,60)), array(55,55,55), 0);
 
 $pdf->Output('perez.pdf', 'D');
 ?>

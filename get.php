@@ -64,7 +64,7 @@ for ($i = 0; $i < count($rval); $i++) {
    print "<TR><TD style=\"width: ".$_POST['width']."px;\">".$rus[$i]." предмет</TD><TD>".$rval[$i]['name'].".</TD></TR>";   
    print "<INPUT type=\"hidden\" name=\"ege[".($i+1)."][subject]\" value=\"".$rval[$i]['subject']."\">";
 
-   $kval = $mslk->getarray("SELECT score,document FROM `reg_applicant_scores` LEFT JOIN `reg_request` ON `reg_applicant_scores`.`request_id`= `reg_request`.id 
+   $kval = $mslk->getarray("SELECT score,document FROM `reg_applicant_scores` 
                      WHERE `subject` = ".$rval[$i]['subject']." AND `ege`=1 AND applicant_id=".$_SESSION['applicant_id']." LIMIT 0,1");
    if ($kval == 0) {
       print "<TR><TD style=\"width: ".$_POST['width']."px;\">Оценка (в 100-й шкале)</TD>"; //<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>";

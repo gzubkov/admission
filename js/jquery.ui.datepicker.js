@@ -1755,3 +1755,4 @@ $.datepicker.version = "1.8.7";
 window['DP_jQuery_' + dpuuid] = $;
 
 })(jQuery);
+

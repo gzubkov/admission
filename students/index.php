@@ -165,7 +165,7 @@ if ($student->isLogin()) {
    
     print "<h3>Сводная ведомость успеваемости</h3>";
     print "<P>Для получения сводной ведомости успеваемости выберите формат.</P>";
-    print "<INPUT type=\"button\" value=\"В формате HTML\" onclick=\"javascript: window.location.href='journal_html.php';\"><INPUT type=\"button\" value=\"В формате PDF\" onclick=\"javascript: window.location.href='journal.php';\"><BR><BR>";
+    print "<INPUT type=\"button\" value=\"В формате HTML\" onclick=\"javascript: window.location.href='journal.php?format=HTML';\"><INPUT type=\"button\" value=\"В формате PDF\" onclick=\"javascript: window.location.href='journal.php';\"><BR><BR>";
    
     print "<h3>Квитанция на оплату</h3>";
     print "<P>Для формирования квитанции необходимо указать назначение платежа и количество (в случае, если оплачиваются пересдачи). Затем нажмите \"Распечатать квитанцию\". Полученный pdf-документ, содержащий квитанцию со всеми реквизитами, можно распечатать или сохранить.</P>";

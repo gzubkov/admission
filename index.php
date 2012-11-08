@@ -3,6 +3,7 @@ require_once('../conf.php');
 require_once('class/mysql.class.php');
 require_once('class/forms.class.php');
 require_once('class/catalog.class.php');
+require_once('class/documents.class.php');
 $msl = new dMysql();
 
 //$_SESSION['step_num'] = 2;
@@ -138,11 +139,6 @@ $('#edudoc_typeradio').children('input').hide()
 
 </script>
 
-
-
-
-
-<!-- Layout -->
   <div id="header-region" class="clear-block"></div>
 
     <div id="wrapper">
@@ -151,9 +147,7 @@ $('#edudoc_typeradio').children('input').hide()
       <div id="header">
         <div id="logo-floater">
         <h1><span>Электронная приемная комиссия</span></h1>        </div>
-
-                                                    
-      </div> <!-- /header -->
+      </div>
 
               <div id="sidebar-left" class="sidebar">
                     <div id="block-user-0" class="clear-block block block-user">
@@ -176,9 +170,9 @@ if (!isset($_SESSION['applicant_id'])) {
     print "<label for=\"edit-pass\"><span title=\"Номер и серия паспорта, введенные слитно\">Данные паспорта</span>: <span class=\"form-required\" title=\"Поле обязательно для заполнения.\">*</span></label><input name=\"pass\" id=\"edit-pass\" maxlength=\"60\" size=\"15\" class=\"validate[required,custom[all]]\" type=\"password\" /></div>";
     print "<input name=\"op\" id=\"edit-submit\" value=\"Войти\" class=\"form-submit\" type=\"submit\" />";
 } else {
-    $rval = $msl->getarray("SELECT surname, name, second_name FROM `reg_applicant` WHERE id='".$_SESSION['applicant_id']."'");
+    $rvalx = $msl->getarray("SELECT surname, name, second_name, birthday FROM `reg_applicant` WHERE id='".$_SESSION['applicant_id']."'");
     print "<div class=\"form-item\" id=\"edit-name-wrapper\">";
-    print "Вы вошли как ".$rval['surname']." ".$rval['name']." ".$rval['second_name'];
+    print "Вы вошли как ".$rvalx['surname']." ".$rvalx['name']." ".$rvalx['second_name'];
     print "</div>";
     if ($_SESSION['step_num'] > 1) {
         print "<div class=\"form-item\" id=\"edit-name-wrapper\"><input type=\"button\" onclick=\"javascript: $.ajax({url: 'login.php', data: 'act=exit'});\" value=\"Выйти\" /></div>";
@@ -229,7 +223,7 @@ class FormFields2 extends FormFields
             case 2:
 	        print "<tr><td align=\"center\" width=\"100%\">";
 	        print "<input type=\"hidden\" name=\"act\" value=\"\" id=\"act\" />";
-	        /* $fval = $msl->getarray("SELECT COUNT(id) AS cnt FROM `reg_request` WHERE applicant_id='".$_SESSION['applicant_id']."'");
+	        /* $fval = $msl->getarray("SELECT COUNT(id) AS cnt FROM !!!!! WHERE applicant_id='".$_SESSION['applicant_id']."'");
 	        if ($fval['cnt'] < 2) {
 	            print "<input type=\"button\" class=\"submit\" value=\"Подать заявление на еще одну специальность\" onclick=\"javascript: $('#act').val('add'); $('#formular').submit();\">"; 
 	        } */
@@ -260,8 +254,8 @@ if ($step_num == 0) {
    $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, 'E' ); 
 
    print "</tbody></table></div>\n\n"; 
-   print "<p>В соответствии с требованиями Федерального закона <a href=\"http://www.mami.ru/pk/files/152-FZ.pdf\" target=\"_blank\">«О персональных данных» от 27.07.2006 №152-ФЗ</a>  даю согласие на сбор и обработку моих персональных данных (далее – ПД) на срок с момента подписания согласия до 31.12.2012 в необходимом для зачисления в МГТУ «МАМИ» объеме.</p>
-<p><b>Адрес и наименование оператора, получающего разрешение на обработку ПД:</b> 107023, г. Москва, Б. Семеновская ул., д. 38; Государственное образовательное учреждение высшего профессионального образования «Московский государственный технический университет «МАМИ».</p>
+   print "<p><b>Для поступающих на второй и выше семестры:</b> в соответствии с требованиями Федерального закона <a href=\"http://www.mami.ru/pk/files/152-FZ.pdf\" target=\"_blank\">«О персональных данных» от 27.07.2006 №152-ФЗ</a>  даю согласие на сбор и обработку моих персональных данных (далее – ПД) на срок с момента подписания согласия до 31.12.2013 в необходимом для зачисления в «Университет машиностроения» объеме.</p>
+<p><b>Адрес и наименование оператора, получающего разрешение на обработку ПД:</b> 107023, г. Москва, Б. Семеновская ул., д. 38; Государственное образовательное учреждение высшего профессионального образования «Московский государственный машиностроительный университет (МАМИ)».</p>
 <p><b>Цель обработки ПД:</b> обеспечение соблюдения законов и иных нормативных правовых актов, обеспечении личной безопасности, обеспечение сохранности имущества оператора, Субъекта ПД и третьих лиц, статистические или иные научные цели при условии полного обезличивания ПД.</p>
 <p><b>Перечень ПД, на обработку которых даю согласие:</b> фамилия, имя, отчество; пол; число, месяц и год рождения; место рождения; адрес; сведения об образовании; номера телефонов; реквизиты документа, удостоверяющего личность и гражданство; результаты ЕГЭ или вступительных испытаний; реквизиты документа об образовании; иные данные, предусмотренные законодательством РФ.</p>
 <p><b>Перечень действий с ПД, на совершение которых даю согласие:</b> сбор, систематизация, накопление, распространение, хранение, уточнение, передача, обезличивание, блокирование, уничтожение.</p>
@@ -364,20 +358,6 @@ if (0) {
    print "</TBODY></table></div>\n";
 
 
-if (0) {
-   // ------ 6 ------
-   print "<h3>Дополнительные сведения</h3>";
-   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-   
-   $form->tdBox( 'text', 'Выпускник подшефной школы №',         'school',    50, 10, 0 );
-   $form->tdRadio(   'Слушатель ПК или ПО при МГТУ "МАМИ"', 'tclistener',  array('1'=>'да','0'=>'нет'), 1, 1);
-   
-   $form->tdBox( 'text', 'Являюсь победителем (призером) Олимпиады',         'olymp',            100, 70, 0 );
-   $form->tdBox( 'text', 'Реквизиты диплома победителя (призера)',           'olymp_details',    100, 70, 0 );
-   $form->tdBox( 'text', 'При поступлении имею следующие льготы',            'facilities',       100, 70, 0 );
-   $form->tdBox( 'text', 'Реквизиты документа, удостоверяющего льготы',      'facilities_details', 100, 70, 0 );
-}
-   
    $form->hidden('region', '1'); // id региона статичное (1 - интернет)
 
    print "</TBODY></table></div>\n";
@@ -517,94 +497,39 @@ print "</div>";
 }
 
 if ($step_num == 4) {
-   print "<P>Распечатайте и подпишите следующие документы:</P>";
+    print "<P>Распечатайте и подпишите следующие документы:</P>";
+    print "<div id=\"myaccordion\">\n";   
 
-   print "<div id=\"myaccordion\">\n";   
+    $appl = new Applicant($msl, $_SESSION['applicant_id']);
+    $cat  = new Catalog(&$msl);
+
+    $spc = $cat->getInfo($appl->catalog);
+    
+    print "<h3>Комплект документов для зачисления на ".$spc['type']." ".$spc['spec_code']." \"".$spc['name']."\"</h3>";
+    print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
    
-   $rval = $msl->getarray("SELECT a.id, a.type, a.semestr, a.catalog FROM reg_request a WHERE a.applicant_id='".$_SESSION['applicant_id']."'", 1);
- 
-   if (is_array($rval)) {
-    $cat = new Catalog(&$msl);
-   foreach($rval as $key => $val) {
-      $spc = $cat->getInfo($val['catalog']);
-      print "<h3>Комплект документов для зачисления на ".$spc['type']." ".$spc['spec_code']." \"".$spc['name']."\"</h3>";
-      print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+    switch ($appl->type){
+    case 1:
+	print "<tr><TD style=\"font-weight: bold; color: #ff0000;\">Внимание! Во всех документах даты не ставить!</td></tr>";
+      	$appl->printDocs('',1); 
+
+	print "<tr><td>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.</td></tr>";
+	break;
+
+    default:
+	print "<tr><td>Ваши документы для поступления находятся на рассмотрении. После рассмотрения документов, Вы сможете распечатать с личного кабинета необходимые документы. Для входа в систему используйте адрес электронной почты в качестве логина и в качестве пароля серию и номер паспорта, написанные слитно. О результатах рассмотрения документов Вы будете уведомлены с помощью сообщения на ваш e-mail.</td></tr>";
+    }
+    
+    unset($cat);
    
-      $id = $_SESSION['applicant_id'];
-
-      switch ($val['type']){
-         case 1:
-	    print "<tr><TD style=\"font-weight: bold; color: #ff0000;\">Внимание! Во всех документах даты не ставить!</td></tr>";
-      	    switch($val['semestr']) {
-               case 1: 
-	          print "<tr><td><A href=\"documents/anketa.php?request=".$val['id']."\">Заявление абитуриента</A></td></tr>\n";
-		  break;
-	       default:
-	          print "<tr><td><A href=\"documents/anketa2.php?request=".$val['id']."\">Заявление абитуриента</A></td></tr>\n";
-		  print "<tr><td><A href=\"documents/perez.php?applicant_id=".$id."\">Заявление о перезачете дисциплин</A></td></tr>\n";
-		  $ival = $msl->getarray("SELECT pay FROM reg_institution_additional WHERE request_id='".$val['id']."'");
-                  if ($ival['pay'] > 0) {
-		     print "<tr><td><A href=\"documents/ds_ckt.php?request_id=".$val['id']."\">Дополнительное соглашение</A> (2 экземпляра)</td></tr>\n";
-		     print "<tr><td><A href=\"receipt/kvit_dop.php?purpose=3&request_id=".$val['id']."\">Квитанция для оплаты досдач</A></td></tr>\n";
-		  }
-	    }
-	    print "<tr><td><A href=\"documents/opd.php?applicant_id=".$id."\">Анкета-согласие на обработку персональных данных</A></td></tr>\n";
-	    print "<tr><td><A href=\"documents/dog_ckt.php?request_id=".$val['id']."\">Договор на оказание платных образовательных услуг</A> (3 экземпляра)</td></tr>\n";
-	    print "<tr><td><A href=\"documents/dog_ckt_s.php?request_id=".$val['id']."\">Договор об организации обучения гражданина на платной основе</A> (2 экземпляра)</td></tr>\n";
-	    print "<tr><td><A href=\"documents/diplom.php?applicant_id=".$_SESSION['applicant_id']."\">Заявление на возврат оригинала документа об образовании</A> (даты не ставить)</td></tr>\n";
-	    print "<tr><td><A href=\"documents/opis.php?applicant_id=".$_SESSION['applicant_id']."\">Опись документов личного дела</A></td></tr>\n";
-	    print "<tr><td><A href=\"documents/ekz_list.php?request_id=".$val['id']."\">Экзаменационный лист</A> (только для тех, кто проходил вступительные испытания)</td></tr>\n";
-	    print "<tr><td><A href=\"receipt/kvit.php?request_id=".$val['id']."\">Квитанция на оплату обучения</A></td></tr>\n";
-	    print "<tr><td>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.</td></tr>";
-	    break;
-	 default:
-	    print "<tr><td>Ваши документы для поступления находятся на рассмотрении. После рассмотрения документов, Вы сможете распечатать с личного кабинета необходимые документы. Для входа в систему используйте адрес электронной почты в качестве логина и в качестве пароля серию и номер паспорта, написанные слитно. О результатах рассмотрения документов Вы будете уведомлены с помощью сообщения на ваш e-mail.</td></tr>";
-      }
-
-if (0) {   
-      print "<tr><td>";
-      print "<A onclick=\"jConfirm('Вы действительно хотите удалить заявление?', 'Удаление заявления', function(r) {
-if (r) {
-$.ajax({url: 'login.php', data: 'act=revoke&id=".$val['id']."'});
+    print "</TBODY></table></div>\n\n";
+    print "</div>";
 }
-}); return false;\">Отказаться от заявления на данную образовательную программу</A>\n";
-      print "</td></tr>";
-   
-      print "</TBODY></table></div>\n\n";
-}
-   }
-   
-   unset($cat);
-   } else {
-      print "<h3>Нет добавленных образовательных программ</h3>";
-      print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-   
-      print "<tr><td>";
-      print "Пожалуйста вернитесь на предыдущий шаг и добавьте заявление.\n";
-      print "</td></tr>";
-   print "</TBODY></table></div>\n\n";
-
-   print "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-   
-   if ($key < 2) {
-      print "<tr><td>";		     
-      print "<input type=\"button\" value=\"Добавить заявление на другую образовательную программу\" onclick=\"$.ajax({url: 'login.php', data: 'act=goback'})\">\n";
-      print "</td></tr>";
-   }
-   }
-   
-   
-   print "</TBODY></table></div>\n\n";
-   print "</div>";
-}
-   
-
 
 print '<p>Если у Вас в процессе заполнения формы появились вопросы, свяжитесь с нашими сотрудниками по телефонам: +7 (495) 663-1562, +7 (495) 663-1505 или <a href="mailto:iit@ins-iit.ru">по электронной почте</a>.</p></div></div>';
-                    
 ?>
 
-<div id="footer">© 2009-2011, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
+<div id="footer">© 2009-2012, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
 
 <!--<div id="dialog_validate" class="myDialog">Проверьте правильность заполнения всех полей формы и нажмите "Отправить".</div>-->
 

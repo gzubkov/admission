@@ -18,7 +18,7 @@ class PDF extends FPDI {
      */
     function Header() {
         if (is_null($this->_tplIdx)) {
-            $this->setSourceFile('../../documents/document.pdf');
+            $this->setSourceFile('../../documents/pdf/document.pdf');
             $this->_tplIdx = $this->importPage(1);
         }
     }

@@ -6,19 +6,23 @@ $msl = new dMysql();
         
 class Insertion
 {
-    public function __construct() {
+    public function __construct() 
+    {
         return 0;
     }
    
-    public function __destruct() {
+    public function __destruct() 
+    {
         return 0;
     }
 
-    private function _makeDate($date) {
+    private function _makeDate($date) 
+    {
         return implode("-", array_reverse(explode(".",$date)));
     }
    
-    private function _makeTitle($text) {
+    private function _makeTitle($text) 
+    {
         return mb_convert_case($text, MB_CASE_TITLE, "UTF-8");
     }
    
@@ -41,14 +45,16 @@ class Insertion
       return $exp;
    }
    
-    public function nextStep() {
+    public function nextStep() 
+    {
         global $msl;
         $_SESSION['step_num']++;
         $msl->updateArray('reg_applicant', array('step'=>$_SESSION['step_num']), array('id'=>$_SESSION['applicant_id']));
 	return 1;	
     }
 
-    public function createUser($uid, $request) {
+    public function createUser($uid, $request) 
+    {
         global $msl;
         $array = array('surname' => $this->_makeTitle($request[$uid.'surname']),
 	               'name' => $this->_makeTitle($request[$uid.'name']),
@@ -58,46 +64,47 @@ class Insertion
         return $msl->insertArray('reg_applicant', $array);
     }
 
-    public function setSpecialty($uid, $request) {
+    public function setSpecialty($uid, $request) 
+    {
         global $msl;
 	if (!isset($request[$uid.'profile'])) $request[$uid.'profile'] = "";
         if (!isset($request[$uid.'spo'])) $request[$uid.'spo'] = "";
-        $array = array('applicant_id' => $_SESSION['applicant_id'], 'catalog' => $request[$uid.'catalog'], 'profile' => $request[$uid.'profile'], 'internet' => $request[$uid.'internet'], 
+        $array = array('catalog' => $request[$uid.'catalog'], 'profile' => $request[$uid.'profile'], 'internet' => $request[$uid.'internet'], 
                        'spo' => $request[$uid.'spo'], 'traditional_form' => $request[$uid.'traditional_form']);
-	$id = $msl->insertArray('reg_request',$array);
+	$msl->updateArray('reg_applicant', $array, array('id' => $_SESSION['applicant_id']));
 
 	if (isset($request[$uid.'ege'])) {
             foreach($request[$uid.'ege'] as $val) {
                 if ($val['scores'] > 0) {
-                    $msl->insertArray('reg_applicant_scores', array('request_id' => $id, 'subject' => $val['subject'], 'score' => $val['scores'], 'ege' => '1', 'document' => $val['document']));
+                    $msl->insertArray('reg_applicant_scores', array('applicant_id' => $_SESSION['applicant_id'], 'subject' => $val['subject'], 'score' => $val['scores'], 'ege' => '1', 'document' => $val['document']));
             	}
             }
 	}
-        return $id;
+        return 1;
     }
  
     public function updateFields($uid, $request) {
         global $msl;
+
+// test!!
       
-        if ($request[$uid.'regaddressashome'] == 1) {
-            $rval = $msl->getarray("SELECT name FROM reg_rf_subject WHERE id=".$request[$uid.'homeaddress-region']);
-         
-      	    $request[$uid.'regaddress'] = $request[$uid.'homeaddress-index'].", ".$rval['name'].", ".$request[$uid.'homeaddress-city'].", ";"";
-	    if ($request[$uid.'homeaddress-street'] != '') $request[$uid.'regaddress'] .= $request[$uid.'homeaddress-street'].", ";
-   	    $request[$uid.'regaddress'] .= "дом ".$request[$uid.'homeaddress-home'];
-	    if ($request[$uid.'homeaddress-building'] != '') $request[$uid.'regaddress'] .= "/".$request[$uid.'homeaddress-building'];
-   	    if ($request[$uid.'homeaddress-flat'] != '') $request[$uid.'regaddress'] .= ", ".$request[$uid.'homeaddress-flat'];
-        } else {
-	    $region = $msl->getarray("SELECT name FROM `admission`.`reg_regions` WHERE id='".$request[$uid.'regaddress-region']."' LIMIT 1;");
-            $request[$uid.'regaddress'] = $request[$uid.'regaddress-index'].", ".$region['name'].", ".$request[$uid.'regaddress-city'].", ";
-	    if ($request[$uid.'regaddress-street'] != '') $request[$uid.'regaddress'] .= $request[$uid.'regaddress-street'].", ";
-   	    $request[$uid.'regaddress'] .= "дом ".$request[$uid.'regaddress-home'];
-	    if ($request[$uid.'homeaddress-building'] != '') $request[$uid.'regaddress'] .= "/".$request[$uid.'regaddress-building'];
-   	    if ($request[$uid.'regaddress-flat'] != '') $request[$uid.'regaddress'] .= ", ".$request[$uid.'regaddress-flat'];
-        }
+$arr = array('applicant_id' => $_SESSION['applicant_id'], 'type' => 1, 'index'=>$request[$uid.'homeaddress-index'], 'region'=> $request[$uid.'homeaddress-region'], 
+             'city' => $request[$uid.'homeaddress-city'], 'street' => $request[$uid.'homeaddress-street'],'home' => $request[$uid.'homeaddress-home'],
+             'building' => $request[$uid.'homeaddress-building'], 'flat' => $request[$uid.'homeaddress-flat']);
 
+if (isset($request[$uid.'regaddressashome']) && $request[$uid.'regaddressashome'] != 1) {
+    $arr2 = array('applicant_id' => $_SESSION['applicant_id'], 'type' => 1, 'index'=>$request[$uid.'regaddress-index'], 'region'=> $request[$uid.'regaddress-region'], 
+             'city' => $request[$uid.'regaddress-city'], 'street' => $request[$uid.'regaddress-street'],'home' => $request[$uid.'regaddress-home'],
+             'building' => $request[$uid.'regaddress-building'], 'flat' => $request[$uid.'regaddress-flat']);
+    $msl->insertArray('reg_applicant_address', $arr2);
+    $arr['type'] = 2;
+}
 
-        $array = array('birthday' => $this->_makeDate($request[$uid.'birthday']), 'sex' => $request[$uid.'sex'], 'citizenry' => $request[$uid.'citizenry'], 'doc_type' => $request[$uid.'doc_type'], 'doc_serie' => $request[$uid.'doc_serie'], 'doc_number' => $request[$uid.'doc_number'], 'doc_issued' => $request[$uid.'doc_issued'], 'doc_date' => $this->_makeDate($request[$uid.'doc_date']), 'doc_code' => $request[$uid.'doc_code'], 'language' => $request[$uid.'language'], 'highedu' => $request[$uid.'highedu'], 'region' => $request[$uid.'region'], 'edu_base' => $request[$uid.'edu_base'], 'birthplace' => $request[$uid.'birthplace'], 'homeaddress-index' => $request[$uid.'homeaddress-index'], 'homeaddress-region' => $request[$uid.'homeaddress-region'], 'homeaddress-city' => $request[$uid.'homeaddress-city'], 'homeaddress-street' => $request[$uid.'homeaddress-street'], 'homeaddress-home' => $request[$uid.'homeaddress-home'], 'homeaddress-building' => $request[$uid.'homeaddress-building'], 'homeaddress-flat' => $request[$uid.'homeaddress-flat'], 'regaddress' => $request[$uid.'regaddress'], 'homephone_code' => $request[$uid.'homephone_code'], 'homephone' => $request[$uid.'homephone'], 'mobile_code' => $request[$uid.'mobile_code'], 'mobile' => $request[$uid.'mobile']);
+$msl->insertArray('reg_applicant_address', $arr);
+
+// test!!
+
+        $array = array('birthday' => $this->_makeDate($request[$uid.'birthday']), 'sex' => $request[$uid.'sex'], 'citizenry' => $request[$uid.'citizenry'], 'doc_type' => $request[$uid.'doc_type'], 'doc_serie' => $request[$uid.'doc_serie'], 'doc_number' => $request[$uid.'doc_number'], 'doc_issued' => $request[$uid.'doc_issued'], 'doc_date' => $this->_makeDate($request[$uid.'doc_date']), 'doc_code' => $request[$uid.'doc_code'], 'language' => $request[$uid.'language'], 'highedu' => $request[$uid.'highedu'], 'region' => $request[$uid.'region'], 'edu_base' => $request[$uid.'edu_base'], 'birthplace' => $request[$uid.'birthplace'], 'homephone_code' => $request[$uid.'homephone_code'], 'homephone' => $request[$uid.'homephone'], 'mobile_code' => $request[$uid.'mobile_code'], 'mobile' => $request[$uid.'mobile']);
 
         $msl->updateArray('reg_applicant', $array, array('id' => $_SESSION['applicant_id']));
 

@@ -3,7 +3,7 @@ require_once('../../conf.php');
 require_once('../class/price.class.php');
 require_once('../class/mysql.class.php');
 
-if (!isset($_REQUEST['format']) || $_REQUEST['format'] != 'html') $_REQUEST['format'] = 'pdf';
+if (!isset($_REQUEST['format']) || ($_REQUEST['format'] != 'html' && $_REQUEST['format'] != 'HTML')) $_REQUEST['format'] = 'pdf';
 
 class Receipt
 {
@@ -62,20 +62,23 @@ class Receipt
     }
     
     public function getSelfApplicant($purpose=1, $count=1) {
-        $r = $this->_msl->getarray("SELECT applicant_id,catalog FROM reg_request WHERE id='".$this->_id."' LIMIT 1;");
-	$k = $this->_msl->getarray("SELECT surname,name,second_name,regaddress,region FROM reg_applicant WHERE id='".$r['applicant_id']."' LIMIT 1;");
+        require_once("../class/documents.class.php");
+
+	$appl = new Applicant($this->_msl, $this->_id);
+        
+	$k = $appl->getInfo('region');
 	$this->_region = $k['region'];   
 	
         if ($purpose == 3) {
-	    $m = $this->_msl->getarray("SELECT pay FROM `reg_institution_additional` WHERE `request_id` = '".$this->_id."' LIMIT 1;");
+	    $m = $appl->getRups();
             $count = $m['pay'];
         }
-        $student['fio'] = $k['surname']." ".$k['name']." ".$k['second_name'];
-	$student['address'] = $k['regaddress'];
+        $student['fio'] = $appl->surname." ".$appl->name." ".$appl->second_name;
+	$student['address'] = $appl->getRegAddress();
 	$student['region'] = $this->getRegion();
 
 	$price = new Price($this->_msl);
-	$student['price'] = $price->getPriceByPgid($this->_pgid, $r['catalog'], $purpose, $count, $this->_date, 0);
+	$student['price'] = $price->getPriceByPgid($this->_pgid, $appl->catalog, $purpose, $count, $this->_date, 0, 1);
         $student['purpose_text'] = $this->getPurposeText($purpose);
 
         return $student;
@@ -87,26 +90,25 @@ class Receipt
 	} else {
              $this->_region = $region;  
 	} 
-
         $student['fio'] = $_REQUEST['fio'];
 	$student['address'] = $_REQUEST['address'];
 	$student['region'] = $this->getRegion();
 
 	$price = new Price($this->_msl);
-	$student['price'] = $price->getPriceByPgid($this->_pgid, $catalog, $purpose, $count, $this->_date, sizeof($this->_region)-1);
+	$student['price'] = $price->getPriceByPgid($this->_pgid, $catalog, $purpose, $count, $this->_date, sizeof($this->_region)-1, $_REQUEST['tpapplicant']);
 // temp
 	$r = $this->_msl->getarray("SELECT `start_semestr`, term FROM admission.catalogs WHERE id=".$catalog." LIMIT 1;",0);
 //	
 
-	if ($purpose == 2 && $_REQUEST['s'] >= ($r['start_semestr'] + $r['term'] * 2)) {
+	if ($purpose == 2 && $_REQUEST['s'] >= ($r['start_semestr'] - 1 + $r['term'] * 2)) {
 	    $student['price'][0] = $student['price'][0]*1.5;
-	    $this->_semestr = $r['start_semestr'] + $r['term'] * 2;
+	    $this->_semestr = $r['start_semestr'] + $r['term'] * 2 - 1;
 	} else {
 	    $this->_semestr = $_REQUEST['s'];
 	}
 // temp
 
-        $student['purpose_text'] = $this->getPurposeText($purpose);
+        $student['purpose_text'] =  $this->getPurposeText($purpose);
         return $student;
     }
 
@@ -167,8 +169,8 @@ if (isset($_REQUEST['student'])) {
     $receipt = new Receipt($_REQUEST['applicant'], $_REQUEST['date']);
     $student = $receipt->getApplicant($_REQUEST['purpose'], $_REQUEST['count']);
     
-} else if (isset($_REQUEST['request_id'])) {
-    $receipt = new Receipt($_REQUEST['request_id']);
+} else if (isset($_REQUEST['applicant_id'])) {
+    $receipt = new Receipt($_REQUEST['applicant_id']);
     $student = $receipt->getSelfApplicant($_REQUEST['purpose'], $_REQUEST['count']);
     
 } else {
@@ -187,7 +189,7 @@ if (sizeof($price) == 1 || $price[1] == 0) {
 }
 
 switch ($_REQUEST['format']) {
-case 'pdf':
+case 'pdf': case 'PDF':
     require_once('../class/pdf.class.php');
 
     $pdf = new PDF();
@@ -248,7 +250,7 @@ case 'pdf':
     $pdf->Output('kvit.pdf', 'D');
     break;
 
-case 'html':
+case 'html': case 'HTML':
 ?>
 <html lang="ru">
 <head>
@@ -337,7 +339,7 @@ function printincells($text, $n, $width=-1) {
 for ($i = 0; $i < 2*$kn; $i++) {
 $j = floor($i/2);
 
-if ($rval[$j]['rs'] == 0) {
+if (!isset($rval[$j]['rs'])) {
     print "<div id=\"toolbox\"><p><B>Ваш региональный партнер не предоставил сведений, необходимых для формирования квитанции.</B><BR> Сумма для оплаты услуг регионального партнера составляет ".floor($price[$j])." рублей ".sprintf("%02d", $price[$j]-floor($price[$j]))." копеек.</P></div><BR>";
     break;
 }
@@ -398,9 +400,9 @@ print '</td></tr></table></td></tr>
 
 <tr><td><table cellspacing="0" width="100%"><tr>
 <td class="stext" width="1%">Сумма&nbsp;платежа&nbsp;</td>
-<td class="string" width="8%"><span class="nowr">'.floor($price[$j]).'</span></td>
+<td class="string" width="8%"><span class="nowr">'.(($price[$j] > 0) ? floor($price[$j]):"").'</span></td>
 <td class="stext" width="1%">&nbsp;руб.&nbsp;</td>
-<td class="string" width="8%"><span class="nowr">'.sprintf("%02d", $price[$j]-floor($price[$j])).'</span></td>
+<td class="string" width="8%"><span class="nowr">'.(($price[$j] > 0) ? sprintf("%02d", $price[$j]-floor($price[$j])):"").'</span></td>
 <td class="stext" width="1%">&nbsp;коп.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сумма&nbsp;платы&nbsp;за&nbsp;услуги&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="1%">&nbsp;руб.&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="1%">&nbsp;коп.</td></tr></table></td></tr>
 
 <tr><td><table cellspacing="0" width="100%"><tr><td class="stext" width="5%">Итого&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="5%">&nbsp;руб.&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="5%">&nbsp;коп.&nbsp;</td><td class="stext" width="20%" align="right">&laquo;&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="1%">&nbsp;&raquo;&nbsp;</td><td class="string" width="20%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td class="stext" width="3%">&nbsp;20&nbsp;</td><td class="string" width="5%">&nbsp;</td><td class="stext" width="1%">&nbsp;г.</td></tr></table></td></tr><tr><td class="stext7" style="text-align: justify">С условиями приема указанной в платежном документе суммы, в т.ч. с суммой взимаемой платы за&nbsp;услуги банка,&nbsp;ознакомлен&nbsp;и&nbsp;согласен.</td></tr><tr><td style="padding-bottom: 0.5mm;"><table cellspacing="0" width="100%"><tr><td class="stext7" width="50%">&nbsp;</td><td class="stext7" width="1%"><b>Подпись&nbsp;плательщика&nbsp;</b></td><td class="string" width="40%">&nbsp;</td></tr></table></td></tr></table>

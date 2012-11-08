@@ -19,14 +19,6 @@ case "goback":
     print "ok\n";
     break;
 
-case "revoke":
-    if ($msl->deleteArray('reg_request',array('id'=>$_POST['id']))) {
-        print "ok\n";
-    } else {
-        print "Ошибка при удалении заявления";
-    }
-    break;
-
 default:
     $rval = $msl->getarray("SELECT id, step, doc_serie, doc_number, region, edu_base FROM `reg_applicant` WHERE `e-mail`='".$_POST['name']."'");
     if ($_POST['pass'] === $rval['doc_serie'].$rval['doc_number']) {

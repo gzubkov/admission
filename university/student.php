@@ -31,6 +31,6 @@ print "<TR><TD><B>Назначенный семестр:</B></TD><TD>".$rval['se
 
 $mhash = md5(md5("moodle.ins-iit.rudddddsdsd".$id));
 
-print "<TR><TD><B>Сводная ведомость успеваемости:</B></TD><TD><INPUT type=\"button\" value=\"В формате PDF\" onclick=\"javascript: window.open('http://admission.iitedu.ru/students/journal.php?mid=".$id."&mhash=".$mhash."'); return false;\"><INPUT type=\"button\" value=\"В формате HTML\" onclick=\"javascript: window.open('http://admission.iitedu.ru/students/journal_html.php?mid=".$id."&mhash=".$mhash."'); return false;\"></TD></TR>\n";
+print "<TR><TD><B>Сводная ведомость успеваемости:</B></TD><TD><INPUT type=\"button\" value=\"В формате PDF\" onclick=\"javascript: window.open('http://admission.iitedu.ru/students/journal.php?mid=".$id."&mhash=".$mhash."'); return false;\"><INPUT type=\"button\" value=\"В формате HTML\" onclick=\"javascript: window.open('http://admission.iitedu.ru/students/journal.php?mid=".$id."&format=HTML&mhash=".$mhash."'); return false;\"></TD></TR>\n";
 print "</TBODY></TABLE>";
 ?>

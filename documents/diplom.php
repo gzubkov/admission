@@ -3,34 +3,28 @@ require_once('../../../modules/russian_date.php');
 require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
+require_once('../class/documents.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
+$appl = new Applicant($msl, $_REQUEST['applicant_id']);
 
 $applicant_id = $_REQUEST['applicant_id'];
 
-// --- Базовый запрос (сведения об абитуриенте) --- //
-$r = $msl->getarray("SELECT surname,name,second_name FROM reg_applicant 
-WHERE reg_applicant.id = ".$applicant_id.";");
-
-// initiate PDF
-$pdf = new PDF();
-$pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
-$pdf->SetAutoPageBreak(true, 0);
-$pdf->setSourceFile('diplom.pdf');
-
-// add a page
-$pdf->AddPage();
-$pdf->useTemplate($pdf->importPage(1));
+$pdf = new PDF('pdf/diplom.pdf');
 
 $pdf->SetFont("times", "", 13);
+$pdf->Text(110, 45, $appl->surname);
+$pdf->Text(110, 53.6, $appl->name." ".$appl->second_name);
 
-$pdf->Text(110, 45, $r['surname']);
-$pdf->Text(110, 53.6, $r['name']." ".$r['second_name']);
-
-$rval = $msl->getarray("SELECT catalog FROM reg_request WHERE applicant_id='".$applicant_id."' LIMIT 1;", 0);
 $cat = new Catalog(&$msl);
-$spc = $cat->getInfo($rval['catalog']);
+$spc = $cat->getInfo($appl->catalog);
+$univ = $cat->getUniversityInfo($appl->catalog);
+
+$pdf->SetFont("times", "", 12);
+$pdf->SetXY(70, 23.3);
+//$pdf->MultiCell(125,30, $univ['type']." «".$univ['name']."» ".$univ['rsurname_rp']." ".substr($univ['rname_rp'],0,2).". ".substr($univ['rsecond_name_rp'],0,2).".", 0, 'R');
+
 
 $pdf->SetFont("times", "", 12);
 $pdf->Text(109.8, 62.4, $spc['type']);

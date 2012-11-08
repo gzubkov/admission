@@ -4,10 +4,14 @@ require_once('../class/mysql.class.php');
 require_once('../class/forms.class.php');
 require_once('../class/catalog.class.php');
 
+if (isset($_SESSION['rights'])) {
 if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
-    if ($_REQUEST['region'] > 0) $_SESSION['joomlaregion'] = $_REQUEST['region'];
+    if (isset($_REQUEST['region'])) {
+        $_SESSION['joomlaregion'] = $_REQUEST['region'];
+    } 
 }
-if ($_SESSION['joomlaregion'] == 0) exit(0); 
+}
+if (!isset($_SESSION['joomlaregion'])) exit(0); 
 $region_id = $_SESSION['joomlaregion'];
 
 $msl = new dMysql();
@@ -159,7 +163,7 @@ $("thead input").keyup( function () {
   <div class="content">
 
 <?php
-    $rval = $msl->getarray("SELECT firm,approved FROM `partner_regions` WHERE id='".$region_id."'");
+    $rval = $msl->getarray("SELECT firm,approved,`base_password` FROM `partner_regions` WHERE id='".$region_id."'");
     print "<div class=\"form-item\">".$rval['firm']."</div>";
 ?>
 </div>
@@ -170,8 +174,8 @@ $("thead input").keyup( function () {
   <h2>Действия</h2>
 
   <div class="content"><ul class="menu">
-  <li class="collapsed last"><a href="?act=addapplicant">Добавить абитуриента</a></li>
-  <li class="collapsed last"><a href="?act=listapplicant">Список абитуриентов</a></li> 
+<!--  <li class="collapsed last"><a href="?act=addapplicant">Добавить абитуриента</a></li>
+  <li class="collapsed last"><a href="?act=listapplicant">Список абитуриентов</a></li> -->
   <li class="collapsed last"><a href="?act=basestudent">Список студентов</a></li> 
   <li class="collapsed last"><a href="?act=card">Мои данные</a></li> 
 <!--  <li class="collapsed last"><a href="?act=receipt">Распечатать квитанцию</a></li> -->
@@ -230,7 +234,7 @@ class Applicant
     	print "<TR><TD><A href=\"../receipt/kvit.php?applicant=".$id."&purpose=1\" target=\"_blank\">Квитанция на оплату обучения</A></TD></TR>\n";
 
 	if ((time()-strtotime($r['birthday']))<567648000) {
-	    print "<TR><TD><A href=\"../documents/dop_net_18.pdf\" target=\"_blank\">Дополнение к договору</A> (2 экземпляра, если нет 18 лет)</TD></TR>\n";	
+	    print "<TR><TD><A href=\"../documents/pdf/dop_net_18.pdf\" target=\"_blank\">Дополнение к договору</A> (2 экземпляра, если нет 18 лет)</TD></TR>\n";	
 	}
 
 	print "<TR><TD>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.\n</TD></TR>";
@@ -248,16 +252,16 @@ class Applicant
 	return $r;
     } 
 }
+if (!isset($_REQUEST['act'])) $_REQUEST['act'] = '';
 
-if ($rval['approved'] == 0) {      
-    print "<P>Продолжение работы невозможно без подтверждения Вами сведений о региональном партнере. Для подтверждения <A href=\"card.php\" target=\"_blank\">проверьте свои данные</A>.</P>\n\n";
-} else {
-$act=$_REQUEST['act'];
-
-switch($act) {
+switch($_REQUEST['act']) {
 case "addapplicant":
     print "<H1 class=\"title\">Добавление абитуриента</H1><DIV id=\"output\"></DIV>";
 
+    if ($rval['approved'] == 0) {    
+        print "<P>Продолжение работы невозможно без подтверждения Вами сведений о региональном партнере. Для подтверждения <A href=\"?act=card\">проверьте свои данные</A>.</P>\n\n";
+        break;
+    }	    
     print "<P>Пожалуйста заполните следующие поля (поля отмеченные * обязательны для заполнения):</P>\n\n";
     print "<DIV id=\"myaccordion\">";
 
@@ -529,6 +533,10 @@ case "listapplicant":
     break;
 
 case "basestudent":
+    if ($rval['approved'] == 0) {    
+        print "<P>Продолжение работы невозможно без подтверждения Вами сведений о региональном партнере. Для подтверждения <A href=\"?act=card\">проверьте свои данные</A>.</P>\n\n";
+        break;
+    }	    
     print "<SCRIPT language=\"javascript\">
            $('#example tbody tr td').live( 'click', function () {
            var parentr = $(this).parent('tr');
@@ -572,6 +580,10 @@ print "</TBODY></TABLE></DIV>\n\n";
     break;
 
 case "receipt":
+    if ($rval['approved'] == 0) {    
+        print "<P>Продолжение работы невозможно без подтверждения Вами сведений о региональном партнере. Для подтверждения <A href=\"?act=card\">проверьте свои данные</A>.</P>\n\n";
+        break;
+    }	    
     print "<H1 class=\"title\">Печать квитанции</H1><DIV id=\"output\"></DIV>";
     print "<DIV id=\"myaccordion\">\n";   
 
@@ -629,18 +641,18 @@ if ($agreed == 0) {
       print "<TR><TD>Банк:</TD><TD>".$rpval['bank'].".</TD></TR>";
       print "<TR><TD>ИНН/КПП:</TD><TD>".$rpval['inn']."/".$rpval['kpp'].".</TD></TR>";
     if ($rpval['ckt_num'] != '') {
-        print "<TR><TD>Договор с ЦКТ:</TD><TD>".$rpval['dog_num']." от ".date('j.m.Y', strtotime($rpval['ckt_date'])).".</TD></TR>";
+        print "<TR><TD>Договор с ЦКТ:</TD><TD>".$rpval['ckt_num']." от ".date('j.m.Y', strtotime($rpval['ckt_date'])).".</TD></TR>";
     } 
     print "<TR><TD>Электронная почта:</TD><TD><A href=\"mailto:".$rpval['e-mail']."\">".$rpval['e-mail']."</A>.</TD></TR>";
 
 if ($agreed == 0) {    
-   print "<TR><TD style=\"vertical-align: top;\">Замечания:</TD><TD><TEXTAREA name=\"remarks\" WRAP=\"virtual\" COLS=\"90\" ROWS=\"3\"></TEXTAREA></TD></TR>";
-   print "<INPUT type=\"hidden\" name=\"act\" value=\"verified\">";
-   print "<TR><TD colspan=2 style=\"text-align: center;\"><INPUT type=submit value=\"Отправить\"></TD></TR>";
+    print "<TR><TD style=\"vertical-align: top;\">Замечания:</TD><TD><TEXTAREA name=\"remarks\" WRAP=\"virtual\" COLS=\"90\" ROWS=\"3\"></TEXTAREA></TD></TR>";
+    print "<INPUT type=\"hidden\" name=\"act\" value=\"verified\">";
+    print "<TR><TD colspan=2 style=\"text-align: center;\"><INPUT type=submit value=\"Отправить\"></TD></TR>";
 } else {
-   print "<TR><TD colspan=2>Данные подтверждены ".date( 'j.m.Y в h:i', strtotime($agreed['date'])).".";
-   if ($agreed['used'] == 1) {print " Замечания выполнены. В случае изменения Ваших данных, просьба незамедлительно связаться с нами по электронной почте.";}
-   print "</TD></TR>\n";
+    print "<TR><TD colspan=2>Данные подтверждены ".date( 'j.m.Y в h:i', strtotime($agreed['date'])).".";
+    if ($agreed['used'] == 1) {print " Замечания выполнены. В случае изменения Ваших данных, просьба незамедлительно связаться с нами по электронной почте.";}
+    print "</TD></TR>\n";
 }
 
     print "</TBODY></TABLE></DIV>\n\n";    
@@ -654,21 +666,26 @@ default:
 
     print "<h3>Добро пожаловать в Личный кабинет регионального партнера</h3>";
 
-    print "<P>Данная система предназначена для формирования комплекта документов абитуриента, поступающего через Центр Компьютерных Технологий в Московский государственный технический университет \"МАМИ\".</P>";
+//    print "<P>Данная система предназначена для работы регионального партнераформирования комплекта документов абитуриента, поступающего через Центр Компьютерных Технологий в \"Московский государственный машиностроительный университет (МАМИ)\".</P>";
+    print "<h3>Пароль для базы данных</h3>";
+    print "<P>При установке базы данных требуется Ваш пароль: <B>".$rval['base_password']."</B></P>";
 
-    print "<h3>Порядок работы</h3>";
-    print "<P>Для формирования договоров на нового абитуриента выберите в меню слева пункт \"Добавить абитуриента\". После заполнения всех необходимых полей (поле количество досдач оставить 0, если количество платных досдач неизвестно. При этом будет формироваться дополнительное соглашение и квитанция для дополнительного соглашения без указания сумм), нажмите кнопку \"Добавить абитуриента\". После добавления Вы сможете распечатать или сохранить весь необходимый комплект документов.</P>";
-    print "<P>Также, имеется возможность просмотреть список уже оформленных абитуриентов и их документов. Для этого в меню слева выберите пункт \"Список абитуриентов\". При выборе конкретного абитуриента Вы получите список его документов.</P>";
+//    print "<h3>Порядок работы</h3>";
+    /*print "<P>Для формирования договоров на нового абитуриента выберите в меню слева пункт \"Добавить абитуриента\". После заполнения всех необходимых полей (поле количество досдач оставить 0, если количество платных досдач неизвестно. При этом будет формироваться дополнительное соглашение и квитанция для дополнительного соглашения без указания сумм), нажмите кнопку \"Добавить абитуриента\". После добавления Вы сможете распечатать или сохранить весь необходимый комплект документов.</P>";
+    print "<P>Также, имеется возможность просмотреть список уже оформленных абитуриентов и их документов. Для этого в меню слева выберите пункт \"Список абитуриентов\". При выборе конкретного абитуриента Вы получите список его документов.</P>";*/
 /*    
     print "<h3>Квитанция на оплату</h3>";
     print "<P>Для формирования квитанции необходимо выбрать в меню слева пункт \"Распечатать квитанцию\". Выберите организацию (ИИТ или ЦКТ), назначение платежа, образовательную программу. Поля номер договора, семестр, ФИО плательщика, адрес плательщика являются необязательными. Поле количество требуется для указания количества пересдач или досдач, в иных случаях указывайте 1. После заполнения всех необходимых полей, нажмите кнопку \"Распечатать квитанцию\". Полученный pdf-документ, содержащий квитанцию со всеми реквизитами, можно открыть или сохранить.</P>";
 */
+
+    print "<h3>Сведения по студентам</h3>";
+    print "<P>Вы можете получить сведения по студентам, их ведомость успеваемости или квитанцию на оплату в режиме реального времени. Для этого необходимо выбрать в меню слева пункт \"Список студентов\", найти необходимого студента и нажать на него. В появившемся окне Вы можете вывести ведомость успеваемости или квитанцию в формате HTML или PDF. Формат HTML является гораздо более \"компактным\" по размеру полученного файла, но может иметь проблемы с выводом на печать (зависит от настроек браузера, принтера и тп).</P>";
 //    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 //   print "</TBODY></TABLE></DIV>\n\n"; 
 
 }
 unset($msl);
-}
+
 
 print '<P>Если у Вас появились вопросы, свяжитесь с нашими сотрудниками по телефонам: +7 (495) 663-1562, +7 (495) 663-1505 или <A href="mailto:iit@ins-iit.ru">по электронной почте</A>.</p></div></div>';
                     

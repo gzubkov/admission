@@ -114,6 +114,7 @@ print "<tr><td>Семестр:</td><td><input name=\"s\" value=\"\" style=\"widt
 print "<tr><td>ФИО плательщика:</td><td><input name=\"fio\" value=\"\" style=\"width: 400px;\" />.</td></tr>\n";
 print "<tr><td>Адрес плательщика:</td><td><input name=\"address\" value=\"\" style=\"width: 400px;\" />.</td></tr>\n";
 print "<tr id=\"counttr\" style=\"display: none;\"><td>Количество пересдач/досдач:</td><td><input name=\"count\" value=\"1\" style=\"width: 20px;\" />.</td></tr>\n";
+print "<tr><td>ТП \"Абитуриент\":</td><td><label><input type=\"radio\" name=\"tpapplicant\" value=\"0\" checked=\"checked\" /> нет</label> <label><input type=\"radio\" name=\"tpapplicant\" value=\"1\" /> да</label></td></tr>";
 print "<tr><td>Формат вывода:</td><td><label><input type=\"radio\" name=\"format\" value=\"html\" checked=\"checked\" /> HTML</label> <label><input type=\"radio\" name=\"format\" value=\"pdf\" /> PDF</label></td></tr>";
 print "<tr><td colspan=\"2\" style=\"height: 50px; text-align: center; vertical-align: bottom;\"><input type=\"submit\" value=\"Распечатать квитанцию\" /></td></tr>";
 print "</tbody></table></form></div></div>";

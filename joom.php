@@ -12,12 +12,15 @@ if ($r != 0) {
     case "receipt":
         header('Location: http://admission.iitedu.ru/receipt/');
         break;
+
     case "verify":
         header('Location: http://admission.iitedu.ru/regions/card.php');
         break;
+
     case "profile":
         header('Location: http://admission.iitedu.ru/regions/index.php');
 	break;
+
     default:
         break;
     }

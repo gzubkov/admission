@@ -1,0 +1,60 @@
+<?php
+require_once('../../conf.php');
+require_once('../class/mysql.class.php');
+$msl = new dMysql();
+
+include_once '../class/PHPExcel/IOFactory.php';
+$objPHPExcel = PHPExcel_IOFactory::load('tarif.xls');
+$objPHPExcel->setActiveSheetIndex(0);
+    
+$aSheet = $objPHPExcel->getActiveSheet();
+
+print "<html><body><table border=1>";		
+
+foreach ($aSheet->getRowIterator() as $row){
+    $cellIterator = $row->getCellIterator();
+    $item = array();
+
+    foreach($cellIterator as $cell){
+//				array_push($item, iconv('utf-8', 'cp1251', $cell->getCalculatedValue()));
+        array_push($item, $cell->getCalculatedValue());
+	if ($item[0] != "МАМИ") {
+	    $item = 0;
+	    break;
+	}
+    }
+
+    if ($item != 0 && sizeof($item) > 0) {
+        if ($item[6] == "ОСО") $item[6] = "СО";
+	$region = $msl->getarray("SELECT id FROM `price_groups_remark` WHERE `name` LIKE '%".$item[5]."%' LIMIT 1");
+if ($region['id'] == 0) print "sss".$item[5];
+	$catalog = $msl->getarray("SELECT id FROM `catalogs` WHERE `specialty`=(SELECT id FROM `specialties` WHERE `spec_code`='".$item[4]."') AND `baseedu`=(SELECT id FROM `education_type` WHERE `short`='".$item[6]."' LIMIT 1) AND `archive`=0");
+
+$price = $msl->getarray("SELECT * FROM `price_groups` WHERE `id`='".$region['id']."' AND `catalog`='".$catalog['id']."' AND `applicant`=0 AND `start`='2012-09-01'");
+
+if ($region['id'] != 9 && $region['id'] != 8) {
+    if ($price['price'] != $item[8] OR $price['percent'] != $item[10]) {
+        //print_r($price);
+	//print_r($item);
+if ($catalog['id'] != 0) {
+	print "<TR><TD>".$region['id']."</TD><TD>".$catalog['id']."</TD><TD>".$item[8]."</TD><TD>".$item[10]."</TD></TR>";
+$array = array('id'=>$region['id'], 'catalog'=>$catalog['id'], 'price'=>$item[8], 'percent'=>$item[10], 'start'=>'2012-09-01', 'end'=>'2013-08-31', 'applicant'=>0);
+//if ($catalog['id'] >= 1) $msl->insertArray('price_groups', $array);
+} else {
+print $item[3].$item[4]."<BR>";
+print_r($catalog);
+}
+
+	//print "\n";
+    }
+}
+
+
+//print_r($array);
+//$msl->insertArray('price_groups', $array);
+
+
+	
+    }
+}
+?>	

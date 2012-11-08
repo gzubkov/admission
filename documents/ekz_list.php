@@ -1,41 +1,31 @@
 <?php
-require_once('../../../modules/russian_date.php');
 require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
+require_once('../class/moodle.class.php');
+require_once('../class/documents.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
 
-$req = $msl->getarray("SELECT * FROM reg_request 
-WHERE id = ".$_REQUEST['request_id'].";");
-
-$applicant_id = $req['applicant_id'];
-
-// --- Базовый запрос (сведения об абитуриенте) --- //
-$r = $msl->getarray("SELECT surname,name,second_name,sex,doc_serie,doc_number,doc_date,doc_issued,`e-mail` FROM reg_applicant 
-WHERE reg_applicant.id = ".$applicant_id.";");
-
-$mdl_user = $msl->getarray("SELECT id FROM education.`edu_user` WHERE `email`='".$r['e-mail']."' LIMIT 1");
-
-if ($mdl_user['id'] > 0) {
-$mdl_grades = $msl->getarray("SELECT b.id,a.grade,b.min,c.surname,c.name,c.second_name FROM education.`edu_quiz_grades` a 
-	      		      LEFT JOIN admission.`reg_subjects` b ON a.quiz=b.mid 
-			      LEFT JOIN admission.`reg_teachers` c ON b.`teacher_id`=c.id WHERE a.`userid`='".$mdl_user['id']."' ORDER BY b.id;",1);
-}
-// initiate PDF
-$pdf = new PDF();
-$pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
-$pdf->SetAutoPageBreak(true, 0);
-$pdf->setSourceFile('ekz_list.pdf');
-
-// add a page
-$pdf->AddPage();
-$pdf->useTemplate($pdf->importPage(1));
+$appl = new Applicant(&$msl, $_REQUEST['applicant']);
+$r = $appl->getInfo('passport','email');
 
 $catalog = new Catalog(&$msl);
-$rval = $catalog->getInfo($req['catalog']);
+$rval = $catalog->getInfo($appl->catalog);
+$univ = $catalog->getUniversityInfo($appl->catalog);
 unset($catalog);
+
+$mdl = new Moodle(&$msl);
+$mdl_id = $mdl->searchUser($r['e-mail']);
+$mdl_grades = $mdl->getGrades($mdl_id);
+unset($mdl);
+
+$pdf = new PDF('pdf/ekz_list.pdf');
+
+$pdf->SetFont("times", "", 12);
+$pdf->WriteHtmlCell(160,0, 35, 14, $univ['longtype']."<BR>«".$univ['name']."»",0,0,false,true,'C');
+
 
 $pdf->SetFont("times", "", 14);
 
@@ -44,13 +34,13 @@ if ($rval['typen'] == 1) {
 } else {
     $rval['type'] = "Направление подготовки";
 }
-$pdf->splitText($rval['type']." \"".$rval['name']."\"", array(array(30,47),array(30,57)), 66, 1);
+$pdf->splitText($rval['type']." «".$rval['name']."»", array(array(30,47),array(30,57)), 66, 1);
 
-$pdf->Text(52, 68.2, $r['surname']);
-$pdf->Text(40, 77.6, $r['name']);
-$pdf->Text(123, 77.6, $r['second_name']);
+$pdf->Text(52, 68.2, $appl->surname);
+$pdf->Text(40, 77.6, $appl->name);
+$pdf->Text(123, 77.6, $appl->second_name);
 
-$pdf->splitText("Паспорт: серия ".$r['doc_serie']." №".$r['doc_number'].", выдан: ".$r['doc_issued'].", ".date('d.m.Y', strtotime($r['doc_date'])), array(array(75,90.4),array(75,100),array(75,110.2)), array(52,54,52), 1);
+$pdf->splitText("Паспорт: серия ".$r['doc_serie']." №".$r['doc_number'].", выдан: ".$r['doc_issued'].", ".date('d.m.Y', strtotime($r['doc_date'])), array(array(75,90.4),array(75,100),array(75,110.2)), array(52,54,52));
 
 if (is_array($mdl_grades)) {
     $num[2] = 0;
@@ -71,13 +61,13 @@ if (is_array($mdl_grades)) {
     }
 
     $pdf->SetFont("times", "I", 12);
-    if ($r['sex'] == 'M') {
+    if ($appl->sex == 'M') {
         $text = "прошел";
     } else {
         $text = "прошла";
     }
-    if ($pass == 0) $text = "не ".$text;
-    $pdf->Text(112, 228, $text);
+//    if ($pass == 0) $text = "не ".$text;
+    $pdf->Text(112+6, 228, $text);
 }
 
 $pdf->Output('ekz_list.pdf', 'D');

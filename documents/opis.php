@@ -2,55 +2,28 @@
 require_once('../../conf.php');
 require_once('../class/mysql.class.php');
 require_once('../class/pdf.class.php');
-
-class Applicant
-{
-    var $_msl;
-    var $_id;
-    var $dog_num = 2; // количество договоров мы-студент
-
-    public function __construct(&$msl, $id) {
-        $this->_msl = $msl; 
-	$this->_id = $id;
-        return true;
-    }
-
-    public function get_surnamens() {
-        return $this->_msl->getarray("SELECT surname,name,second_name FROM reg_applicant WHERE reg_applicant.id = ".$this->_id.";");
-    }
-
-    public function get_edu_doc() {
-        return $this->_msl->getarray("SELECT edu_doc, serie, number FROM reg_applicant_edu_doc WHERE applicant='".$this->_id."' AND `primary`='1'",1);
-    }
-
-    public function get_rups() {
-        return $this->_msl->getarray("SELECT rups, pay FROM reg_institution_additional a LEFT JOIN reg_request b ON a.request_id=b.id WHERE b.applicant_id='".$this->_id."' LIMIT 1",0);
-    }
-}
+require_once('../class/documents.class.php');
 
 $msl = new dMysql();
 $applicant_id = $_REQUEST['applicant_id'];
 
 $appl = new Applicant($msl, $applicant_id);
-$r = $appl->get_surnamens();
-$rval = $appl->get_edu_doc();
+$val = $appl->getEduDoc();
 
-if (!is_array ($rval)) die("Нет добавленных документов.");
+if (!is_array ($val)) die("Нет добавленных документов.");
 
-$pdf = new PDF();
-$pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
-$pdf->SetAutoPageBreak(true, 0);
-$pdf->setSourceFile('opis.pdf');
-
-$pdf->AddPage();
-$pdf->useTemplate($pdf->importPage(1));
+$pdf = new PDF('pdf/opis.pdf');
 
 $pdf->SetFont("times", "I", 13);
-$pdf->Text(61, 35.9, $r['surname']." ".$r['name']." ".$r['second_name']);
+$pdf->Text(61, 35.9, $appl->surname." ".$appl->name." ".$appl->second_name);
+
+$pdf->SetFillColor(255,255,255);
+$pdf->Rect(150,164.4,10,4,'F');
+
 
 $pdf->SetFont("times", "I", 13);
 
-foreach($rval as $key=>$val) {
+//foreach($rval as $key=>$val) {
     switch($val['edu_doc']) {
         case 1:
             // аттестат 
@@ -65,8 +38,7 @@ foreach($rval as $key=>$val) {
 	    break;
 
         case 7: 
-            $pdf->SetXY(94.8, 128.4); 
-	    $pdf->Write(0, $val['number']);
+            $pdf->Text(94.8, 128.4, $val['number']);
 	    break;
 
         default:
@@ -75,18 +47,18 @@ foreach($rval as $key=>$val) {
 	    $pdf->Text(96, 150.2, $val['serie']);
 	    $pdf->Text(113.4, 150.2, $val['number']);
     }
-}
+//}
 
 $pdf->SetFont("times", "", 11);
-$pdf->Text(153, 217.5, $appl->dog_num); // количество договоров мы-студент
+$pdf->Text(153, 217.5, $appl->connum); // количество договоров мы-студент
 
-$rval = $appl->get_rups();
+$rval = $appl->getRups();
 if ($rval['rups'] > 0) {
     $pdf->Text(156, 120.5, "1");
 }
 
 if ($rval['pay'] > 0) {
-    $pdf->Text(153, 224.5, $appl->dog_num." экз.");
+    $pdf->Text(153, 224.5, $appl->connum." экз.");
 }
 
 $pdf->SetFont("times", "", 14);

@@ -60,9 +60,21 @@ class Catalog
 	    $info['typen'] = 1;
 	    break;
 	}
+
+	$info['termtext'] = $info['term'];
+	if ($info['term'] < 5) {
+	    $info['termtext'] .= " года";
+	} else {
+	    $info['termtext'] .= " лет";
+	}
+	if ($info['termm'] > 0) {
+	    $info['termtext'] .= " ".$info['termm']." мес";
+	}
+
 	if ($info['termm'] == '6') {
 	    $info['term'] += 0.5;
 	}
+	
 	if ($profile != 0) {
 	    $prof = $this->msl->getarray("SELECT name FROM `admission`.`specialties_profiles` WHERE id='".$profile."' LIMIT 1;");
 	    $info['profile'] = $prof['name'];
@@ -158,6 +170,11 @@ class Catalog
 
     public function getProfiles($specialty) {
         $profile = $this->msl->getArray("SELECT id, name FROM `specialties_profiles` WHERE `specialty` = '".$specialty."'");
+	return $profile;
+    }
+
+    public function getAllProfiles($internet=1) {
+        $profile = $this->msl->getArrayById("SELECT id, name FROM `specialties_profiles` WHERE internet=".$internet.";", 'id','name');
 	return $profile;
     }
 

@@ -1,5 +1,4 @@
 <?php
-require_once('../../../modules/russian_date.php');
 require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../../conf.php');
@@ -28,8 +27,11 @@ if (isset($_REQUEST['mid'])) {
 } else {
 if (isset($_SESSION['rights']) && isset($_SESSION['md_rights'])) {
     if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
-        $student_id = $_REQUEST['student'];
-    	if (!is_numeric($_REQUEST['student'])) $student_id = $_SESSION['student_id'];
+        if (!is_numeric($_REQUEST['student'])) {
+	    $student_id = $_SESSION['student_id'];
+	} else {
+	    $student_id = $_REQUEST['student'];
+	}
     }
 } else {
     $student_id = $_SESSION['student_id'];
@@ -113,9 +115,7 @@ $k = $msl->getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.typ
 $i = 1;
 $sem = 0;
 
-
-
-
+if (isset($k)) {
 foreach($k as $v) {
     if ($v['semestr'] != $sem) {
         $sem = $v['semestr'];
@@ -157,6 +157,7 @@ if (!is_null($v['type'])) {
 
 print "</TD></TR>\n";
     $i++; 
+}
 }
 print "</table>";
 ?>
