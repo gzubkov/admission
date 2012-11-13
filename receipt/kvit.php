@@ -21,8 +21,12 @@ class Receipt
     }
 
     public function getStudent($purpose=2, $count=1) {
-        $student = array();
-        $r = $this->_msl->getarray("SELECT surname, name, second_name, address, semestr, catalog, iit_ckt, region FROM `students_base`.student WHERE id='".$this->_id."'");   
+        require_once('../class/mssql.class.php');
+	
+	$student = array();
+	$mssql   = new dMssql(); 
+	
+        $r = $mssql->getarray("SELECT surname, name, second_name, address, semestr, catalog, iit_ckt, region FROM dbo.student WHERE id='".$this->_id."'");   
         
 	if ($r['region'] == 1) {
 	    $this->_region  = (($r['iit_ckt'] == 1) ? 4 : 3);
@@ -37,7 +41,7 @@ class Receipt
 	$student['address'] = $r['address'];
 	$student['region'] = $this->getRegion();
 
-	$price = new Price($this->_msl);
+	$price = new Price($this->_msl, $mssql);
 	$student['price'] = $price->getPriceByStudent($this->_id, $purpose, $count, $this->_date);
 	$student['purpose_text'] = $this->getPurposeText($purpose);
         return $student;

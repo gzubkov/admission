@@ -2,6 +2,7 @@
 class Price
 {
     var $msl;
+    var $mssql;
 
     private function _countFinalPrice($iprice, $purpose=1, $count=1, $region=1) 
     {
@@ -23,9 +24,12 @@ class Price
 	return $price;
     }    
 
-    public function __construct(&$msl) 
+    public function __construct(&$msl, &$mssql = 0) 
     {
         $this->msl = $msl;
+        if (isset($mssql)) {
+	    $this->mssql = $mssql;
+	}
         return true;
     }
 
@@ -63,7 +67,7 @@ class Price
 
     public function getPriceByStudent($id, $purpose=2, $count=1, $date=0) 
     {
-        $cat = $this->msl->getarray("SELECT semestr,catalog FROM students_base.student WHERE id='".$id."' LIMIT 1");
+        $cat = $this->mssql->getarray("SELECT semestr,catalog FROM dbo.student WHERE id='".$id."' ");
 
         $profile = $this->msl->getarray("SELECT catalog FROM `admission`.`catalogs_profiles` WHERE base_id='".$cat['catalog']."' LIMIT 1");
 	if ($profile != 0) {
@@ -72,13 +76,13 @@ class Price
 	    $ds = $this->msl->getarray("SELECT term,termm,start_semestr FROM admission.catalogs WHERE `base_id`='".$cat['catalog']."' LIMIT 1");	
 	}
 
-	$query = "SELECT price, percent, `diplom_to_us` FROM students_base.student_price WHERE id='".$id."'";
+	$query = "SELECT * FROM dbo.student_price WHERE id='".$id."'"; // ,`diplom_to_us`
 	if ($date > 0) {
-	    $query .= " AND `date_start` <= '".$date."' AND `date_end` >= '".$date."'";
+	    $query .= " AND date_start <= '".$date."' AND date_end >= '".$date."'";
 	}
-	$query .= " LIMIT 1";
+	//$query .= " LIMIT 1";
 	    
-	$price = $this->msl->getarray($query, 0);
+	$price = $this->mssql->getarray($query, 0);
 	if ($price == 0) die('Цена на студента не сформирована!');
 	    
 	if ($cat['semestr'] + 2 >= 2*$ds['term']+$ds['termm']/6+$ds['start_semestr']) {
@@ -94,7 +98,7 @@ class Price
 
     public function getDateByStudent($id) 
     {
-        return $this->msl->getarray("SELECT date_start,date_end FROM `students_base`.student_price WHERE id='".$id."' ORDER BY date_end DESC LIMIT 1");
+        return $this->mssql->getarray("SELECT date_start,date_end FROM dbo.student_price WHERE id='".$id."' ORDER BY date_end DESC");
     }
 
     // получить список сессий

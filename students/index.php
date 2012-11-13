@@ -1,6 +1,7 @@
 <?php
 require_once('../../conf.php');
 require_once('../class/mysql.class.php');
+require_once('../class/mssql.class.php');
 require_once('../class/forms.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/price.class.php');
@@ -97,9 +98,10 @@ if ($student->isLogin()) {
 
 $student_id = $_SESSION['student_id'];
 $msl = new dMysql();
+$mssql = new dMssql();
 
 $cat = new Catalog($msl);
-    $r = $msl->getarray("SELECT surname, name, second_name, region, catalog, semestr FROM `students_base`.student WHERE id='".$student_id."' LIMIT 1",0);
+    $r = $mssql->getarray("SELECT surname, name, second_name, region, catalog, semestr FROM dbo.student WHERE id='".$student_id."'",0);
     $spec = $cat->getBaseInfo($r['catalog']);
 
     print $r['surname']." ".$r['name']." ".$r['second_name'];
@@ -170,7 +172,7 @@ if ($student->isLogin()) {
     print "<h3>Квитанция на оплату</h3>";
     print "<P>Для формирования квитанции необходимо указать назначение платежа и количество (в случае, если оплачиваются пересдачи). Затем нажмите \"Распечатать квитанцию\". Полученный pdf-документ, содержащий квитанцию со всеми реквизитами, можно распечатать или сохранить.</P>";
 
-    $price = new Price($msl);
+    $price = new Price($msl, $mssql);
     $pdate = $price->getDateByStudent($student_id);
     $sessions = $price->getSessions();
     unset($price);

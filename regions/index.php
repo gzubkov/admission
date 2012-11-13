@@ -551,8 +551,11 @@ $('#dialog-message').html(msg)
 </SCRIPT>";
 
     print "<H1 class=\"title\">Список студентов</H1><DIV id=\"output\"></DIV>";
-    print "<DIV id=\"myaccordion\"><BR>\n";   
-    $rval = $msl->getarray("SELECT id,surname,name,second_name FROM `students_base`.`student` WHERE region = '".$region_id."' ORDER by id DESC", 1);
+    print "<DIV id=\"myaccordion\"><BR>\n"; 
+
+    require_once('../class/mssql.class.php');
+    $mssql = new dMssql();
+    $rval = $mssql->getarray("SELECT id,surname,name,second_name FROM dbo.`student` WHERE region = '".$region_id."' ORDER by id DESC", 1);
     
     print "<DIV><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"display\" id=\"example\">";
     print "<thead><tr>

@@ -2,6 +2,7 @@
 require_once('../../conf.php');
 require_once('../class/pdf.class.php');
 require_once('../class/mysql.class.php');
+require_once('../class/mssql.class.php');
 require_once('../class/catalog.class.php');
 
 class Verification
@@ -39,7 +40,8 @@ if (isset($_REQUEST['mid'])) {
 if (!is_numeric($student_id)) exit(0);
 
 $msl = new dMysql();
-$r = $msl->getarray("SELECT surname,name,second_name,catalog,region FROM students_base.student WHERE id='".$student_id."'");
+$mssql = new dMssql();
+$r = $mssql->getarray("SELECT surname,name,second_name,catalog,region FROM dbo.student WHERE id='".$student_id."'");
 $cat = new Catalog($msl);
 $spec = $cat->getBaseInfo($r['catalog']);
 
@@ -58,10 +60,10 @@ switch($r['region'])
         $region = $reg['name'];
 }
 
-$k = $msl->getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.type,b.name as discipline,c.name as markname 
-               FROM `students_base`.journal a 
-               LEFT JOIN `students_base`.disciplines b ON a.discipline=b.id 
-               LEFT JOIN `students_base`.marks c ON a.mark=c.id 
+$k = $mssql->getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.type,b.name as discipline,c.name as markname 
+               FROM dbo.journal a 
+               LEFT JOIN dbo.disciplines b ON a.discipline=b.id 
+               LEFT JOIN dbo.marks c ON a.mark=c.id 
                WHERE a.id='".$student_id."' ORDER BY a.semestr, b.name ASC",1);
 
 if (!isset($_REQUEST['format'])) $_REQUEST['format'] = 'PDF';

@@ -1,6 +1,7 @@
 <?php
 require_once('../../conf.php');
 require_once('../class/mysql.class.php');
+require_once('../class/mssql.class.php');
 require_once('../class/forms.class.php');
 require_once('../class/catalog.class.php');
 
@@ -13,6 +14,7 @@ if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.
 $university_id = 1;
 
 $msl = new dMysql();
+$mssql = new dMssql();
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html class="js" dir="ltr" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en"><head>
@@ -247,7 +249,7 @@ $profile = $msl->getarray("SELECT `base_id` FROM `admission`.`catalogs_profiles`
 foreach ($profile as $v) {
     $arr[] = $v['base_id'];
 } 
-   $rval = $msl->getarray("SELECT a.id,a.surname,a.name,a.second_name FROM `students_base`.`student` a WHERE a.catalog IN (".implode(',',$arr).");",1);
+   $rval = $mssql->getarray("SELECT a.id,a.surname,a.name,a.second_name FROM dbo.student a WHERE a.catalog IN (".implode(',',$arr).");",1);
 
    print "<TABLE border=0 cellspacing=0 cellpadding=0 id=example class=display>";
 

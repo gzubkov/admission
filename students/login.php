@@ -12,10 +12,10 @@ switch($_POST['act']) {
         print "ok\n";
         break;
     default:
-        require_once('../class/mysql.class.php');
-	$msl = new dMysql();
+        require_once('../class/mssql.class.php');
+	$mssql = new dMssql();
 	if (isset($_POST['num']) && isset($_POST['pass'])) {
-	    $rval = $msl->getarray("SELECT doc_number FROM `students_base`.student WHERE `id`='".$_POST['num']."'");
+	    $rval = $mssql->getarray("SELECT doc_number FROM dbo.student WHERE `id`='".$_POST['num']."'");
       
 	    if ($_POST['pass'] === $rval['doc_number']) {
                 $_SESSION['student_id'] = $_POST['num'];

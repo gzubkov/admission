@@ -1,9 +1,11 @@
 <?php
 require_once('../../conf.php');
 require_once('../class/mysql.class.php');
+require_once('../class/mssql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/price.class.php');
 $msl = new dMysql();
+$mssql = new dMssql();
 
 /*
 if ($_SESSION['rights'] != 'admin' || $_SESSION['md_rights'] != md5($CFG_salted.$_SESSION['rights'])) {
@@ -16,7 +18,7 @@ if (!is_numeric($_REQUEST['id'])) {
 
 $id = $_REQUEST['id'];
 
-$rval = $msl->getarray("SELECT * FROM `students_base`.`student` WHERE id = '".$id."' LIMIT 1;");
+$rval = $mssql->getarray("SELECT * FROM dbo.student WHERE id = '".$id."'");
 $cat = new Catalog($msl);
 $spec = $cat->getBaseInfo($rval['catalog']);
 
