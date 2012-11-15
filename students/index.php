@@ -101,7 +101,7 @@ $msl = new dMysql();
 $mssql = new dMssql();
 
 $cat = new Catalog($msl);
-    $r = $mssql->getarray("SELECT surname, name, second_name, region, catalog, semestr FROM dbo.student WHERE id='".$student_id."'",0);
+    $r = $mssql->getarray("SELECT surname, name, second_name, region, catalog, semestr FROM dbo.student WHERE id=".$student_id.";",0);
     $spec = $cat->getBaseInfo($r['catalog']);
 
     print $r['surname']." ".$r['name']." ".$r['second_name'];
@@ -230,7 +230,7 @@ print '<P>Если у Вас появились вопросы, свяжитес
                     
 ?>
 
-<div id="footer">© 2009-2011, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
+<div id="footer">© 2009-2012, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
 
 <!--<div id="dialog_validate" class="myDialog">Проверьте правильность заполнения всех полей формы и нажмите "Отправить".</div>-->
 
