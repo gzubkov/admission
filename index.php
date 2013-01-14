@@ -526,10 +526,10 @@ if ($step_num == 4) {
     print "</div>";
 }
 
-print '<p>Если у Вас в процессе заполнения формы появились вопросы, свяжитесь с нашими сотрудниками по телефонам: +7 (495) 663-1562, +7 (495) 663-1505 или <a href="mailto:iit@ins-iit.ru">по электронной почте</a>.</p></div></div>';
+print '<p>Если у Вас в процессе заполнения формы появились вопросы, свяжитесь с нашими сотрудниками по телефонам: +7 (499) 1277453, +7 (499) 1277496 или <a href="mailto:iit@ins-iit.ru">по электронной почте</a>.</p></div></div>';
 ?>
 
-<div id="footer">© 2009-2012, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
+<div id="footer">© 2009-2013, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
 
 <!--<div id="dialog_validate" class="myDialog">Проверьте правильность заполнения всех полей формы и нажмите "Отправить".</div>-->
 

@@ -1,322 +1,185 @@
 <?php
-// just require TCPDF instead of FPDF
-require_once('../../../../modules/tcpdf/tcpdf.php');
-require_once('../../../../modules/fpdi/fpdi.php');
-require_once('../../../../modules/russian_date.php');
 require_once('../../../conf.php');
 require_once('../../class/mysql.class.php');
 require_once('../../class/catalog.class.php');
-
-class PDF extends FPDI {
-    /**
-     * "Remembers" the template id of the imported page
-     */
-    var $_tplIdx;
-    
-    /**
-     * include a background template for every page
-     */
-    function Header() {
-        if (is_null($this->_tplIdx)) {
-            $this->setSourceFile('../../documents/pdf/document.pdf');
-            $this->_tplIdx = $this->importPage(1);
-        }
-    }
-    
-    function Footer() {}
-}
-
-
-if (!is_numeric($_REQUEST['applicant'])) exit(0);
-$applicant_id = $_REQUEST['applicant'];
+require_once('../../class/pdf.class.php');
+require_once('../class/documents.class.php');
 
 $msl = new dMysql();
-// --- Базовый запрос (сведения об абитуриенте, регион, цена (руб., коп.)) --- //
-$r = $msl->getarray("SELECT * FROM partner_applicant WHERE id = ".$applicant_id.";");
 
-if ($r['region'] != $_SESSION['joomlaregion'] && $_SESSION['rights'] != "admin") {
-    exit(0);
-}
-// initiate PDF
-$pdf = new PDF();
-$pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
-$pdf->SetAutoPageBreak(true, 0);
+$applicant_id = $_REQUEST['applicant'];
+$appl = new Applicant($msl, $applicant_id);
 
-// add a page
-$pdf->AddPage();
-$pdf->useTemplate($pdf->_tplIdx);
+$r = $appl->getInfo();
 
-$pdf->SetFont("times", "B", 13);
-$pdf->SetXY(190.5, 7.8); // номер анкеты
-$pdf->Write(0, $applicant_id);
+$pdf = new PDF('../../documents/pdf/anketa.pdf');
+
+$pdf->SetFont("times", "B", 12);
+$pdf->Text(187, 10, $applicant_id.($r['internet']?"И":""));
 
 $pdf->SetFont("times", "", 13);
-$pdf->SetXY(14.5, 22.8); // ФИО - полные
-$pdf->Write(0, $r['surname']." ".$r['name']." ".$r['second_name']);
-
-$pdf->SetXY(146.5, 128.8); // ФИО = инициалы (подпись)
-if ($r['second_name'] != "") {
-   $pdf->Write(0, $r['surname']." ".substr($r['name'],0,2).".".substr($r['second_name'],0,2).".");
-} else {
-   $pdf->Write(0, $r['surname']." ".substr($r['name'],0,2).".");
-}
-
-
-$pdf->SetXY(32, 145.4); // Фамилия - 27 + 118,4
-$pdf->Write(0, $r['surname']);
-
-$pdf->SetXY(25, 152.6); // Имя
-$pdf->Write(0, $r['name']);
-
-$pdf->SetXY(30, 159.8); // Отчество
-$pdf->Write(0, $r['second_name']);
+$pdf->Text(32.4, 33.4, $appl->surname);
+$pdf->Text(32.4, 39.2, $appl->name);
+$pdf->Text(32.4, 45.2, $appl->second_name);
 
 // пол
-$pdf->SetFont("verdana", "B", 14);
-if ($r['sex'] == 'M') {
-$pdf->SetXY(34.7, 165.2); // мужской
-$pdf->Write(0, "X");
+if ($appl->sex == 'M') {
+    $pdf->cross(37.32, 47.25, 4);
 } else {
-$pdf->SetXY(72.2, 165.2); // женский
-$pdf->Write(0, "X");
+    $pdf->cross(74.8, 47.25, 4);
 }
 
-$pdf->SetFont("times", "", 13);
-$pdf->SetXY(48, 173.1); // дата рождения
-$pdf->Write(0, date('d      m         y', strtotime($r['birthday'])));
-
-$arr = splitstring($r['birthplace'], 30, 1); 
-
 $pdf->SetFont("times", "", 12);
-$pdf->SetXY(41, 180.3); // место рождения
-$pdf->Write(0, $arr[0]);
-$pdf->SetXY(9, 185.3); // место рождения2
-$pdf->Write(0, $arr[1]);
+
+$pdf->Text(41.4, 56.8, date('d      m        y', strtotime($r['birthday'])));
+$pdf->splitText($r['birthplace'], array(array(43.4,62.8),array(11,68.8)), 30, 1);
 
 // ||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 // гражданство
-$pdf->SetFont("verdana", "B", 13);
 if ($r['citizenry'] == 'Российская Федерация') {
-   $pdf->SetXY(134.1, 145.1); // Российская федерация
-   $pdf->Write(0, "X");
+    $pdf->cross(134.85, 29.5, 4);
 } else {
-   $pdf->SetXY(134.1, 152.2); // другое
-   $pdf->Write(0, "X");
-
-   $pdf->SetFont("times", "", 13);
-   $pdf->SetXY(139.8, 152.3); // другое
-   $pdf->Write(0, $r['citizenry']);
+    $pdf->cross(134.6, 35.4, 4);
+    $pdf->Text(140.45, 39.1, $r['citizenry']);
 }
 
 // паспорт
 $pdf->SetFont("times", "", 13);
-$pdf->SetXY(122, 164.4); // паспорт-серия
-$pdf->Write(0, $r['doc_serie']);
-$pdf->SetXY(155, 164); // паспорт-номер
-$pdf->Write(0, $r['doc_number']);
+$pdf->Text(118.4, 50.9, $r['doc_serie']);
+$pdf->Text(154, 50.9, $r['doc_number']);
 
-$arr = splitstring($r['doc_issued'], 32);
 $pdf->SetFont("times", "", 12);
-$pdf->SetXY(128, 171); // паспорт-кем выдан
-$pdf->Write(0, $arr[0]);
-$pdf->SetXY(106, 177.3); // паспорт-кем выдан2
-$pdf->Write(0, $arr[1]);
+$pdf->splitText($r['doc_issued'], array(array(127,56.8),array(105.6,62.8)), 32, 1);
 
-$pdf->SetXY(144, 184.1); // код подразделения
-$pdf->Write(0, $r['doc_code']);
-$pdf->SetXY(172.8, 184.2); // дата
-$pdf->Write(0, date('d   m   Y', strtotime($r['doc_date'])));
+$pdf->Text(142.4, 68.78, $r['doc_code']); // код подразделения
+$pdf->Text(168.8, 68.78, date('d   m   Y', strtotime($r['doc_date'])));
 
 // ----------------------------------------------------
-$pdf->SetFont("times", "", 12);
-$pdf->SetXY(67, 191.8); // индекс
-$pdf->Write(0, $r['homeaddress-index']);
-$pdf->SetXY(116, 191.8); // код региона - 73
-$pdf->Write(0, $r['homeaddress-region']);
+$addr = $appl->getAddress();
 
+if (is_array($addr)) {
+    $y = 88.9;
+    foreach ($addr as $v) {
+        $pdf->Text(43.2, $y, $v['index']); // индекс
+    	$pdf->Text(82.4, $y, $v['region']); // код региона 
+    	$pdf->Text(10, $y+5.9, $v['regionname']); // регион 
+    	$pdf->Text(111.4, $y+5.9, $v['city']); // населенный пункт 
+    	$pdf->Text(39.6, $y+12.9, $v['street']); // улица 
 
-$rval = $msl->getarray("SELECT reg_rf_subject.name FROM reg_rf_subject WHERE reg_rf_subject.id='".$r['homeaddress-region']."'");
-$pdf->SetXY(9, 197.5); // субъект РФ
-$pdf->Write(0, $rval['name']);
-$pdf->SetXY(97, 197.5); // населенный пункт
-$pdf->Write(0, $r['homeaddress-city']);
-
-$pdf->SetXY(40, 204.8); // улица
-$pdf->Write(0, $r['homeaddress-street']);
-$pdf->SetXY(134, 204.8); // дом
-$pdf->Write(0, $r['homeaddress-home']);
-$pdf->SetXY(160, 204.8); // корпус
-$pdf->Write(0, $r['homeaddress-building']);
-if ($r['homeaddress-flat'] > 0) {
-$pdf->SetXY(187, 204.8); // квартира
-$pdf->Write(0, $r['homeaddress-flat']);
+    	if ($v['home'] > 0) {
+            $pdf->Text(134.2, $y+12.9, $v['home']); // дом 
+        }
+    	if ($v['building'] > 0) {
+            $pdf->Text(160.5, $y+12.9, $v['building']); // строение 
+    	}
+        if ($v['flat'] > 0) {
+            $pdf->Text(188.2, $y+12.9, $v['flat']); // квартира 
+        }
+        $y += 29.55;
+    }
 }
 
-$pdf->SetXY(50, 211.5); // телефон-домашний-код
-$pdf->Write(0, $r['homephone_code']);
-$pdf->SetXY(70, 211.5); // телефон-домашний-номер
-$pdf->Write(0, $r['homephone']);
-$pdf->SetXY(131, 211.5); // телефон-мобильный-код
-$pdf->Write(0, $r['mobile_code']);
-$pdf->SetXY(150, 211.5); // телефон-мобильный-номер
-$pdf->Write(0, $r['mobile']);
-
-$pdf->SetFont("verdana", "B", 13);
-if ($rval['edu_doc'] == 1) {
-   $pdf->SetXY(28, 218); // аттестат
-   $pdf->Write(0, "X");
-} else {
-   $pdf->SetXY(52.3, 218); // диплом
-   $pdf->Write(0, "X");
+if ($r['homephone_code'] != 0) {
+    $pdf->Text(31.2, 145.5, $r['homephone_code']); // телефон-домашний-код
+    $pdf->Text(51, 145.5, $r['homephone']); // телефон-домашний
 }
+if ($r['mobile_code'] != 0) {
+    $pdf->Text(118.2, 145.5, $r['mobile_code']); 
+    $pdf->Text(137.8, 145.5, $r['mobile']); 
+}
+$pdf->Text(24, 152.4, $r['e-mail']);
 
 $pdf->SetFont("times", "", 12);
-$pdf->SetXY(71, 218.6); // диплом-серия
-$pdf->Write(0, $r['edu_serie']);
-$pdf->SetXY(92, 218.6); // диплом-номер
-$pdf->Write(0, $r['edu_number']);
-$pdf->SetXY(134, 218.6); // диплом-выдан
-$pdf->Write(0, date('d   m   Y', strtotime($r['edu_date'])));
+$rval = $appl->getEduDoc();
 
-//if ($rval['copy']) {
-$pdf->SetFont("verdana", "B", 13);
-$pdf->SetXY(194, 218); // диплом-копия
-$pdf->Write(0, "X");
-//}
+if ($rval != 0) {
+    if ($rval['edu_doc'] == 1) {
+        $pdf->cross(28.8, 162.78, 3.9); // аттестат
+    } else {
+        $pdf->cross(52.4, 162.78, 3.9); // диплом
+    }
 
+    $pdf->Text(71.4, 166.4, $rval['serie']); // диплом-серия
+    $pdf->Text(92, 166.4, $rval['number']); // диплом-номер
+    $pdf->Text(131.1, 166.4, date('d     m     Y', strtotime($rval['date']))); // диплом-выдан
+
+    if ($rval['copy']) {
+//        $pdf->cross(194.68, 162.78, 3.9); // копия
+    }
+}
 // -----------------------------------------------------
 
-// изучаемый язык
-$pdf->SetFont("verdana", "B", 13);
 switch ($r['language']) {
-   case 3: 
-      $pdf->SetXY(72.2, 229.3); // французский
-      $pdf->Write(0, "X");
-      break;
-   case 2:
-      $pdf->SetXY(122.2, 229.3); // немецкий
-      $pdf->Write(0, "X");
-      break;
-   case 1: default:
-      $pdf->SetXY(22, 229.3); // английский
-      $pdf->Write(0, "X");
-      break;
+case 2:
+    $pdf->cross(72.9, 244.03, 4); // немецкий
+    break;
+
+default:
+    $pdf->cross(22.85, 244.03, 4); // английский
+    break;
 }
 
 // тип учебного заведения
 switch($r['edu_base']) {
-   case 1:
-   	$pdf->SetXY(9.7, 239.1); // общеобразовательное
-   	$pdf->Write(0, "X");
-	break;
-   case 3:
-   	$pdf->SetXY(106.5, 239.1); // начальное профессиональное образование
-	$pdf->Write(0, "X");
-	break;
-   case 2:
-   	$pdf->SetXY(9.7, 244); // среднее профессиональное образование
-	$pdf->Write(0, "X");
-	break;
-   default:
-   	$pdf->SetXY(106.5, 244); // другое
-	$pdf->Write(0, "X");
+case 1:
+    $pdf->cross(10.47, 222.5, 3.8); // общеобразовательное
+    break;
+
+case 3:
+    $pdf->cross(107.35, 222.5, 3.8); // начальное профессиональное образование
+    break;
+
+case 2:
+    $pdf->cross(10.47, 227.35, 3.8); // среднее профессиональное образование
+    break;
+
+case 4:
+    $pdf->cross(107.35, 227.35, 3.8); // другое
+    break;
 }
 
 //
 // ------------------------------------------------------------
 //
-$pdf->addPage(); 
-$pdf->useTemplate($pdf->importPage(2));
+$pdf->newPage(); 
 
-// специальность
-
-$cat = new Catalog($msl);
-$rval = $cat->getInfo($r['catalog']);
+$cat = new Catalog(&$msl);
+$rval = $cat->getInfo($appl->catalog, $appl->profile);
 unset($cat);
 
+if (isset($rval['profile'])) $rval['name'] .= " (".$rval['profile'].")";
+
 $pdf->SetFont("times", "", 12);
-$pdf->SetXY(10.5, 41.6); // специальность - код
-$pdf->Write(0, $rval['spec_code']);
-$pdf->SetXY(41.5, 41.2); // специальность - название
-$pdf->Write(0, $rval['name']);
+$pdf->Text(12, 65.9, $rval['spec_code']); // специальность - код
+$pdf->Text(43, 65.9, $rval['name']); // специальность - название
 
-// факультета
-$pdf->SetFont("verdana", "B", 13);
-$pdf->SetXY(180, 52.1); // ЦИТО
-$pdf->Write(0, "X");
-
-
-if ($rval['baseedu'] == 2) {
-   $pdf->SetFont("verdana", "B", 13);
-   $pdf->SetXY(9.5, 61.2); // имею СПО по профилю
-   $pdf->Write(0, "X");
+if ($r['spo']) {
+    $pdf->cross(10.3, 79.6);
 }
 
-// ------------------------------------------------------------
-$pdf->Line(46.5, 95, 197.5, 95, array('width' => 0.6));
-$pdf->Line(46.5, 100, 197.5, 100, array('width' => 0.6));
-$pdf->Line(46.5, 105, 101.4, 105, array('width' => 0.6));
-$pdf->SetFont("times", "", 12);
-$pdf->SetXY(147.1, 102.2); // приоритет
-$pdf->Write(0, "1");
-
-// баллы ЕГЭ
-// XX-XXXXXXXXX-XX
-// Первые две цифры - регион выдачи свидетельства (77 - Москва и т.д.), дальше номер свидетельства из 9 цияр, дальше выдачи год свидетельства (08, 09, 10).
-$rval = $msl->getarray("SELECT name, score, document FROM partner_applicant_scores a LEFT JOIN reg_subjects b ON a.subject = b.id WHERE `applicant_id` = ".$applicant_id." AND `ege` = 1 ORDER BY a.subject ASC", 1);
+$rval = $appl->getEge();
 
 if ($rval != 0) {
-$pdf->SetFont("times", "", 13);
-$pdf->SetXY(61, 132.5); // оценка - Русский язык
-$pdf->Write(0, $rval[0]['score']);
-
-$pdf->SetXY(100, 132.5); // номер документа - Русский язык
-$pdf->Write(0, $rval[0]['document']);
-
-// ------------------------------
-
-$pdf->SetFont("times", "", 12);
-$pdf->SetXY(7.4, 139.8); // оценка - 2
-$pdf->Write(0, $rval[1]['name']);
-
-$pdf->SetFont("times", "", 13);
-$pdf->SetXY(61, 139.8); // оценка - 2
-$pdf->Write(0, $rval[1]['score']);
-
-$pdf->SetXY(99, 139.8); // номер документа - 2
-$pdf->Write(0, $rval[1]['document']);
-
-// ------------------------------
-
-$pdf->SetFont("times", "", 12);
-$pdf->SetXY(7.4, 147); // предмет - 3
-$pdf->Write(0, $rval[2]['name']);
-
-$pdf->SetFont("times", "", 13);
-$pdf->SetXY(61, 147); // оценка - 3
-$pdf->Write(0, $rval[2]['score']);
-
-$pdf->SetXY(99, 147); // номер документа - 3
-$pdf->Write(0, $rval[2]['document']);
-}
-// -------------------------------
-
-if ($r['traditional_form']) {
-   $pdf->SetFont("verdana", "B", 14);
-   $pdf->SetXY(13.8, 193.75); // б) допустить меня до...
-   $pdf->Write(0, "X");
+    $pdf->cross(15.1, 150.5, 3.8); 
+    $y = 169.4;
+    foreach($rval as $v) {
+        $pdf->Text(10.6, $y, $v['name']);
+	$pdf->Text(80, $y, $v['score']);
+	$pdf->Text(111.8, $y, $v['document']); // номер документа
+	$y += 5.2;
+    }
+} else {
+    $pdf->cross(15.1, 136.3, 3.8); 
 }
 
 // высшее профессиональное образование получаю
 $pdf->SetFont("verdana", "B", 14);
 if ($r['highedu'] == 0) {
-   $pdf->SetXY(116.15, 217.6); // впервые
-   $pdf->Write(0, "X");
+   $pdf->cross(117.12, 191.5, 3.8); // впервые 
 } else {
-   $pdf->SetXY(144.45, 217.6); // невпервые
-   $pdf->Write(0, "X");
+   $pdf->cross(145.25, 191.5, 3.8); // невпервые
 }
 
-$pdf->Output('MAMIanketa.pdf', 'D');
+$pdf->Output('newpdf.pdf', 'D');
 ?>

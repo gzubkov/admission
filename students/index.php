@@ -178,7 +178,7 @@ if ($student->isLogin()) {
     unset($price);
 
     $days = floor((strtotime($pdate['date_end'])-mktime())/84600);
-    if ($days < 80) {
+    if ($days < 80 && $pdate['date_end'] != 0 ) {
         print "<P style=\"color: #ff0000; font-weight: bold;\">Внимание! Расценки действительны только до ".date('d.m.Y',strtotime($pdate['date_end'])).". Дальнейшая стоимость услуг может изменяться.</P>";
     }
 
@@ -206,7 +206,7 @@ if ($student->isLogin()) {
     print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
     if ($r['region'] == 1 || $r['region'] == 176) {
         print "<TR><TD>Адрес:</TD><TD>";
-        print "117152, г.Москва, Загородное шоссе, д.7, корп.5, стр.1.</TD></TR><TR><TD>Телефон:</TD><TD>+7 (495) 663-1562, +7 (495) 663-1505.</TD></TR>";
+        print "117152, г.Москва, Загородное шоссе, д.7, корп.5, стр.1.</TD></TR><TR><TD>Телефон:</TD><TD>+7 (499) 1277453.</TD></TR>";
     } else {
         if ($reg['inn'] != 0) {
 	    print "<TR><TD>Адрес:</TD><TD>";
@@ -226,7 +226,7 @@ if ($student->isLogin()) {
 
 
 
-print '<P>Если у Вас появились вопросы, свяжитесь с нашими сотрудниками по телефонам (добавочный 10): +7 (495) 663-1562, +7 (495) 663-1505 или <A href="mailto:iit@ins-iit.ru">по электронной почте</A>.</p></div></div>';
+print '<P>Если у Вас появились вопросы, свяжитесь с нашими сотрудниками по телефонам (добавочный 10): +7 (499) 1277453, +7 (499) 1277496 или <A href="mailto:iit@ins-iit.ru">по электронной почте</A>.</p></div></div>';
                     
 ?>
 

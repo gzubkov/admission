@@ -174,10 +174,10 @@ $("thead input").keyup( function () {
   <h2>Действия</h2>
 
   <div class="content"><ul class="menu">
-<!--  <li class="collapsed last"><a href="?act=addapplicant">Добавить абитуриента</a></li>
-  <li class="collapsed last"><a href="?act=listapplicant">Список абитуриентов</a></li> -->
-  <li class="collapsed last"><a href="?act=basestudent">Список студентов</a></li> 
-  <li class="collapsed last"><a href="?act=card">Мои данные</a></li> 
+   <li class="collapsed last"><a href="?act=addapplicant">Добавить абитуриента</a></li>
+   <li class="collapsed last"><a href="?act=listapplicant">Список абитуриентов</a></li> 
+   <li class="collapsed last"><a href="?act=basestudent">Список студентов</a></li> 
+   <li class="collapsed last"><a href="?act=card">Мои данные</a></li> 
 <!--  <li class="collapsed last"><a href="?act=receipt">Распечатать квитанцию</a></li> -->
   <li class="collapsed last"><a href="?">Вернуться на главную</a></li>
   </ul></div>
@@ -213,9 +213,9 @@ class Applicant
         print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
     	switch($r['semestr']) {
 	case 0:
-	    print "<TR><TD><A href=\"documents/anketa.php?applicant=".$id."\" target=\"_blank\">Заявление абитуриента (на первый семестр)</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"documents/anketa2.php?applicant=".$id."\" target=\"_blank\">Заявление абитуриента (на второй и выше)</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"documents/ds_ckt.php?applicant=".$id."\" target=\"_blank\">Дополнительное соглашение</A></TD></TR>\n";
+	    print "<TR><TD><A href=\"../documents/anketa.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента (на первый семестр)</A></TD></TR>\n";
+	    print "<TR><TD><A href=\"../documents/anketa2.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента (на второй и выше)</A></TD></TR>\n";
+	    print "<TR><TD><A href=\"../documents/ds_ckt.php?applicant=r".$id."\" target=\"_blank\">Дополнительное соглашение</A></TD></TR>\n";
 	    print "<TR><TD><A href=\"../receipt/kvit.php?applicant=".$id."&purpose=3\" target=\"_blank\">Квитанция согласно доп.соглашения</A></TD></TR>\n";
 	    break;
         case 1:
@@ -268,57 +268,57 @@ case "addapplicant":
     $form = new FormFields('index.php','formular', 180, 0, "Добавить абитуриента");
     $rpval = $msl->getarray("SELECT rf FROM `partner_regions` WHERE id='".$region_id."'");
 
-    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+    print "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
     $form->hidden('region', $region_id);
     $form->hidden('act', 'addstudentinsert');
 
-    $form->tdBox( 'text', 'Фамилия',          'surname',  200, 60, K ); 
-    $form->tdBox( 'text', 'Имя',              'name',     200, 60, K ); 
+    $form->tdBox( 'text', 'Фамилия',          'surname',  200, 60, 'K' ); 
+    $form->tdBox( 'text', 'Имя',              'name',     200, 60, 'K' ); 
     $form->tdBox( 'text', 'Отчество',         'second_name', 200, 60, 0 ); 
 
-    $form->tdRadio(   'Пол',              'sex',         array('M'=>'Мужской','F'=>'Женский'), M, 1);
-    $form->tdDateBox( 'Дата рождения',    'birthday',        1950, date('Y')-16, D, 75, '1980' );
+    $form->tdRadio(   'Пол',              'sex',         array('M'=>'Мужской','F'=>'Женский'), 'M', 1);
+    $form->tdDateBox( 'Дата рождения',    'birthday',        1950, date('Y')-16, 'D', 75, '1980' );
     $form->tdRadio(   'Гражданство',      'citizenry',   array('Российская Федерация'=>'Российская Федерация','other'=>'Другое'), null, 1);
 
     $form->tdBox( 'remark', 'Паспортные данные'); 
     $form->hidden('doc_type', 1);
-    $form->tdBox( 'text', array('Серия','Номер'), array('doc_serie','doc_number'),    array(45,70), array(4,6), array(N,N) ); 
-    $form->tdBox( 'text', 'Кем выдан',         'doc_issued',  200, 200, A ); 
+    $form->tdBox( 'text', array('Серия','Номер'), array('doc_serie','doc_number'),    array(45,70), array(4,6), array('N','N') ); 
+    $form->tdBox( 'text', 'Кем выдан',         'doc_issued',  200, 200, 'A' ); 
     $form->tdBox( 'text', 'Код подразделения', 'doc_code',    100, 8, 'kodp' ); 
-    $form->tdDateBox( 'Дата выдачи',           'doc_date',    1990, date('Y'), D );
-    $form->tdBox( 'text', 'Место рождения',    'birthplace',  200, 100, A ); 
+    $form->tdDateBox( 'Дата выдачи',           'doc_date',    1990, date('Y'), 'D' );
+    $form->tdBox( 'text', 'Место рождения',    'birthplace',  200, 100, 'A' ); 
 
     $form->tdBox( 'remark', 'Адрес места жительства'); 
-    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress-index', 100, 6, N ); 
+    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress[index]', 100, 6, 'N' ); 
 
     $aspec = $msl->getArrayById("SELECT id,CONCAT(id,' - ',name) as name FROM `reg_rf_subject` ORDER BY id ASC",'id','name');
-    $form->tdSelect(  'Субъект РФ', 'homeaddress-region', $aspec, $rpval['rf'], 1);
+    $form->tdSelect(  'Субъект РФ', 'homeaddress[region]', $aspec, $rpval['rf'], 1);
 
-    $form->tdBox( 'text', 'Населенный пункт',  'homeaddress-city', 200, 50, K );
-    $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress-street', 200, 60, 0 );
-    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array(A,0,0) );  
+    $form->tdBox( 'text', 'Населенный пункт',  'homeaddress[city]', 200, 50, 'K' );
+    $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress[street]', 200, 60, 0 );
+    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress[home]','homeaddress[building]','homeaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0) );  
 
     $form->tdBox( 'remark', 'Адрес регистрации'); 
-    $form->tdBox( 'text', 'Почтовый индекс',  'regaddress[index]', 100, 6, N ); 
+    $form->tdBox( 'text', 'Почтовый индекс',  'regaddress[index]', 100, 6, 'N' ); 
     $form->tdSelect(  'Субъект РФ', 'regaddress[region]', $aspec, $rpval['rf'], 1);
-    $form->tdBox( 'text', 'Населенный пункт',  'regaddress[city]', 200, 50, K );
+    $form->tdBox( 'text', 'Населенный пункт',  'regaddress[city]', 200, 50, 'K' );
     $form->tdBox( 'text', 'Улица (квартал)',  'regaddress[street]', 200, 60, 0 );
-    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress[home]','regaddress[building]','regaddress[flat]'), array(25,25,25), array(5,4,4), array(A,0,0) );  
+    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress[home]','regaddress[building]','regaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0) );  
 
     $form->tdBox( 'remark', 'Контактные данные'); 
     $form->tdBox( 'phone', 'Домашний телефон',         'homephone', array(40,70), array(5,10), 1 );
     $form->tdBox( 'phone', 'Мобильный телефон',        'mobile',    array(40,70), array(3,7), 1 );
-    $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, OE ); 
+    $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, 'OE' ); 
 
     $form->tdBox( 'remark', 'Сведения об образовании');
 
     $catalog = new Catalog($msl);
-    $bval = $catalog->getAvailableByRegion($region_id, "%name% (%base%) - %qualify%");
+    $bval = $catalog->getAvailableByRegion($region_id, "%abbr2% - %name% (%base%) - %qualify%");
     unset($catalog);
     $form->tdSelect(  'Образовательная программа', 'catalog', $bval, 0, 1);
 
     print "<TR><TD colspan=2  style=\"border:0px; margin: 0; padding: 0;\">";
-    print "<DIV id=\"ege_fields\" style=\"border:0px solid #d3d3d3; margin: 0; padding: 0 0 0 0;\">";
+    print "<DIV id=\"ege_fields\" style=\"border:0px; margin: 0; padding: 0 0 0 0;\">";
 
     $_POST['width']=180;
     $_POST['catalog']=@array_shift(array_keys($bval));
@@ -334,11 +334,11 @@ case "addapplicant":
     $bdoc = $msl->getarrayById("SELECT id,name FROM `reg_edu_doc` WHERE `group`=1",'id','name');
     $form->tdSelect(  'Тип документа об образовании', 'edu_doc', $bdoc, 0, 1);
 
-    $form->tdBox( 'text', array('Серия','№'),  array('edu_serie','edu_number'), array(45,65), array(10,10), array(A,N) );
-    $form->tdDateBox( 'Дата выдачи',           'edu_date',    1990, date('Y'), D );
+    $form->tdBox( 'text', array('Серия','№'),  array('edu_serie','edu_number'), array(45,65), array(10,10), array('A','N') );
+    $form->tdDateBox( 'Дата выдачи',           'edu_date',    1990, date('Y'), 'D' );
 
-    $form->tdBox( 'text', 'Учебное заведение',           'edu_institution',      250, 90, O ); 
-    $form->tdBox( 'text', 'Специальность',           'edu_specialty',      250, 90, O ); 
+    $form->tdBox( 'text', 'Учебное заведение',           'edu_institution',      250, 90, 'O' ); 
+    $form->tdBox( 'text', 'Специальность',           'edu_specialty',      250, 90, 'O' ); 
 
     $form->tdRadio(   'Иностранный язык',   'language', $msl->getArrayById("SELECT id, name FROM reg_flang",'id','name'), 1, 1);
     $form->tdRadio(   'Высшее образование', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), 0, 1);
@@ -362,32 +362,32 @@ case "editapplicant":
     $form->hidden('act', 'applicantupdate');
 
     $form->tdBox( 'remark', 'Идентификационный номер '.$_REQUEST['id']); 
-    $form->tdBox( 'text', 'Фамилия',          'surname',  200, 60, K, $apval['surname'] ); 
-    $form->tdBox( 'text', 'Имя',              'name',     200, 60, K, $apval['name'] ); 
+    $form->tdBox( 'text', 'Фамилия',          'surname',  200, 60, 'K', $apval['surname'] ); 
+    $form->tdBox( 'text', 'Имя',              'name',     200, 60, 'K', $apval['name'] ); 
     $form->tdBox( 'text', 'Отчество',         'second_name', 200, 60, 0, $apval['second_name'] ); 
 
     $form->tdRadio(   'Пол',              'sex',         array('M'=>'Мужской','F'=>'Женский'), $apval['sex'], 1 );
-    $form->tdDateBox( 'Дата рождения',    'birthday',        1950, date('Y')-16, D, 0, '1980', date('d.m.Y', strtotime($apval['birthday'])) );
-    $form->tdBox( 'text', 'Гражданство',  'citizenry',   300, 60, K, $apval['citizenry']);
+    $form->tdDateBox( 'Дата рождения',    'birthday',        1950, date('Y')-16, 'D', 0, '1980', date('d.m.Y', strtotime($apval['birthday'])) );
+    $form->tdBox( 'text', 'Гражданство',  'citizenry',   300, 60, 'K', $apval['citizenry']);
 
     $form->tdBox( 'remark', 'Паспортные данные'); 
     $form->hidden('doc_type', 1);
-    $form->tdBox( 'text', array('Серия','Номер'), array('doc_serie','doc_number'),    array(45,70), array(4,6), array(N,N), array($apval['doc_serie'],$apval['doc_number']) ); 
-    $form->tdBox( 'text', 'Кем выдан',         'doc_issued',  200, 200, A, $apval['doc_issued'] ); 
+    $form->tdBox( 'text', array('Серия','Номер'), array('doc_serie','doc_number'),    array(45,70), array(4,6), array('N','N'), array($apval['doc_serie'],$apval['doc_number']) ); 
+    $form->tdBox( 'text', 'Кем выдан',         'doc_issued',  200, 200, 'A', $apval['doc_issued'] ); 
     $form->tdBox( 'text', 'Код подразделения', 'doc_code',    100, 8, 'kodp', $apval['doc_code'] ); 
-    $form->tdDateBox( 'Дата выдачи',           'doc_date',    1990, date('Y'), D, 0, '1980', date('d.m.Y', strtotime($apval['doc_date']))  );
-    $form->tdBox( 'text', 'Место рождения',    'birthplace',  200, 100, A, $apval['birthplace'] ); 
+    $form->tdDateBox( 'Дата выдачи',           'doc_date',    1990, date('Y'), 'D', 0, '1980', date('d.m.Y', strtotime($apval['doc_date']))  );
+    $form->tdBox( 'text', 'Место рождения',    'birthplace',  200, 100, 'A', $apval['birthplace'] ); 
 
     $form->tdBox( 'remark', 'Адрес места жительства'); 
-    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress-index', 100, 6, N, $apval['homeaddress-index'] ); 
+    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress-index', 100, 6, 'N', $apval['homeaddress-index'] ); 
 
     $aspec = $msl->getArrayById("SELECT id,CONCAT(id,' - ',name) as name FROM `reg_rf_subject` ORDER BY id ASC",'id','name');
     $form->tdSelect(  'Субъект РФ', 'homeaddress-region', $aspec, $apval['homeaddress-region'], 1);
 
-    $form->tdBox( 'text', 'Населенный пункт',  'homeaddress-city', 200, 50, K, $apval['homeaddress-city'] );
+    $form->tdBox( 'text', 'Населенный пункт',  'homeaddress-city', 200, 50, 'K', $apval['homeaddress-city'] );
     $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress-street', 200, 60, 0, $apval['homeaddress-street'] );
 if ($apval['homeaddress-flat'] == 0) $apval['homeaddress-flat'] == '';
-    $form->tdBox( 'text', array('Дом','корпус','квартира'), array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array(A,0,0), array($apval['homeaddress-home'],$apval['homeaddress-building'],$apval['homeaddress-flat']));  
+    $form->tdBox( 'text', array('Дом','корпус','квартира'), array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array('A',0,0), array($apval['homeaddress-home'],$apval['homeaddress-building'],$apval['homeaddress-flat']));  
 // 
 
     $form->tdBox( 'remark', 'Адрес регистрации'); 
@@ -396,7 +396,7 @@ if ($apval['homeaddress-flat'] == 0) $apval['homeaddress-flat'] == '';
     $form->tdBox( 'remark', 'Контактные данные'); 
     $form->tdBox( 'phone', 'Домашний телефон',         'homephone', array(40,70), array(5,10), 1, array($apval['homephone_code'],$apval['homephone']) );
     $form->tdBox( 'phone', 'Мобильный телефон',        'mobile',    array(40,70), array(3,7), 1, array($apval['mobile_code'],$apval['mobile']) );
-    $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, OE, $apval['e-mail'] ); 
+    $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, 'OE', $apval['e-mail'] ); 
 
     $form->tdBox( 'remark', 'Сведения об образовании');
 
@@ -424,11 +424,11 @@ if ($apval['homeaddress-flat'] == 0) $apval['homeaddress-flat'] == '';
     $bdoc = $msl->getarrayById("SELECT id,name FROM `reg_edu_doc` WHERE `group`=1",'id','name');
     $form->tdSelect(  'Тип документа об образовании', 'edu_doc', $bdoc, $apval['edu_doc'], 1);
 
-    $form->tdBox( 'text', array('Серия','№'),  array('edu_serie','edu_number'), array(45,65), array(10,10), array(A,N), array($apval['edu_serie'],$apval['edu_number']) );
-    $form->tdDateBox( 'Дата выдачи',           'edu_date',    1990, date('Y'), D, 0, 0, date('d.m.Y', strtotime($apval['edu_date'])));
+    $form->tdBox( 'text', array('Серия','№'),  array('edu_serie','edu_number'), array(45,65), array(10,10), array('A','N'), array($apval['edu_serie'],$apval['edu_number']) );
+    $form->tdDateBox( 'Дата выдачи',           'edu_date',    1990, date('Y'), 'D', 0, 0, date('d.m.Y', strtotime($apval['edu_date'])));
 
-    $form->tdBox( 'text', 'Учебное заведение',           'edu_institution',      250, 90, O, $apval['edu_institution'] ); 
-    $form->tdBox( 'text', 'Специальность',           'edu_specialty',      250, 90, O, $apval['edu_specialty'] ); 
+    $form->tdBox( 'text', 'Учебное заведение',           'edu_institution',      250, 90, 'O', $apval['edu_institution'] ); 
+    $form->tdBox( 'text', 'Специальность',           'edu_specialty',      250, 90, 'O', $apval['edu_specialty'] ); 
 
     $form->tdRadio(   'Иностранный язык',   'language', $msl->getArrayById("SELECT id, name FROM reg_flang",'id','name'), $apval['language'], 1);
     $form->tdRadio(   'Высшее образование', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), $apval['highedu'], 1);
@@ -555,7 +555,7 @@ $('#dialog-message').html(msg)
 
     require_once('../class/mssql.class.php');
     $mssql = new dMssql();
-    $rval = $mssql->getarray("SELECT id,surname,name,second_name FROM dbo.`student` WHERE region = '".$region_id."' ORDER by id DESC", 1);
+    $rval = $mssql->getarray("SELECT id,surname,name,second_name FROM dbo.student WHERE region = '".$region_id."' ORDER by id DESC", 1);
     
     print "<DIV><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"display\" id=\"example\">";
     print "<thead><tr>
@@ -673,11 +673,11 @@ default:
     print "<h3>Пароль для базы данных</h3>";
     print "<P>При установке базы данных требуется Ваш пароль: <B>".$rval['base_password']."</B></P>";
 
-//    print "<h3>Порядок работы</h3>";
-    /*print "<P>Для формирования договоров на нового абитуриента выберите в меню слева пункт \"Добавить абитуриента\". После заполнения всех необходимых полей (поле количество досдач оставить 0, если количество платных досдач неизвестно. При этом будет формироваться дополнительное соглашение и квитанция для дополнительного соглашения без указания сумм), нажмите кнопку \"Добавить абитуриента\". После добавления Вы сможете распечатать или сохранить весь необходимый комплект документов.</P>";
-    print "<P>Также, имеется возможность просмотреть список уже оформленных абитуриентов и их документов. Для этого в меню слева выберите пункт \"Список абитуриентов\". При выборе конкретного абитуриента Вы получите список его документов.</P>";*/
-/*    
-    print "<h3>Квитанция на оплату</h3>";
+    print "<h3>Порядок работы с абитуриентами</h3>";
+    print "<P>Для формирования договоров на нового абитуриента выберите в меню слева пункт \"Добавить абитуриента\". После заполнения всех необходимых полей (поле количество досдач оставить 0, если количество платных досдач неизвестно. При этом будет формироваться дополнительное соглашение и квитанция для дополнительного соглашения без указания сумм), нажмите кнопку \"Добавить абитуриента\". После добавления Вы сможете распечатать или сохранить весь необходимый комплект документов.</P>";
+    print "<P>Также, имеется возможность просмотреть список уже оформленных абитуриентов и их документов. Для этого в меню слева выберите пункт \"Список абитуриентов\". При выборе конкретного абитуриента Вы получите список его документов.</P>";
+    
+/*    print "<h3>Квитанция на оплату</h3>";
     print "<P>Для формирования квитанции необходимо выбрать в меню слева пункт \"Распечатать квитанцию\". Выберите организацию (ИИТ или ЦКТ), назначение платежа, образовательную программу. Поля номер договора, семестр, ФИО плательщика, адрес плательщика являются необязательными. Поле количество требуется для указания количества пересдач или досдач, в иных случаях указывайте 1. После заполнения всех необходимых полей, нажмите кнопку \"Распечатать квитанцию\". Полученный pdf-документ, содержащий квитанцию со всеми реквизитами, можно открыть или сохранить.</P>";
 */
 
@@ -690,11 +690,11 @@ default:
 unset($msl);
 
 
-print '<P>Если у Вас появились вопросы, свяжитесь с нашими сотрудниками по телефонам: +7 (495) 663-1562, +7 (495) 663-1505 или <A href="mailto:iit@ins-iit.ru">по электронной почте</A>.</p></div></div>';
+print '<P>Если у Вас появились вопросы, свяжитесь с нашими сотрудниками по телефонам: +7 (499) 127-7496, +7 (499) 127-7453 или <A href="mailto:iit@ins-iit.ru">по электронной почте</A>.</p></div></div>';
                     
 ?>
 
-<div id="footer">© 2009-2011, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
+<div id="footer">© 2009-2012, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
 </div>
 </div>
       </div></div></div></div> <!-- /.left-corner, /.right-corner, /#squeeze, /#center -->

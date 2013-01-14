@@ -8,10 +8,11 @@ class Catalog
         return true;
     }
 
-    public function getAvailableByPgid($pgid, $string="%abbr% - %name% (%base%)", $archivetext=NULL) {
+    public function getAvailableByPgid($pgid, $string="%abbr% - %name% (%base%)", $archivetext=NULL) 
+    {
         $catalogs = array();
 	
-	$query = "SELECT g.abbreviation, a.id, a.basicsemestr, c.name, d.short, c.spec_code, c.qualify FROM catalogs a 
+	$query = "SELECT g.abbreviation, g.abbreviation2, a.id, a.basicsemestr, c.name, d.short, c.spec_code, c.qualify FROM catalogs a 
                   LEFT JOIN price_groups b ON a.id=b.catalog  
                   LEFT JOIN specialties c ON a.specialty=c.id 
 		  LEFT JOIN education_type d ON a.baseedu=d.id 
@@ -24,6 +25,7 @@ class Catalog
 
 	foreach($rval as $v) {
 	    $replace = array("%abbr%" => $v['abbreviation'],
+	                     "%abbr2%" => $v['abbreviation2'],
 	                     "%name%" => $v['name'],
 	                     "%base%" => $v['short'],
 			     "%code%" => $v['spec_code'],
@@ -40,12 +42,14 @@ class Catalog
 	return $catalogs;
     }
 
-    public function getAvailableByRegion($region, $string="%abbr% - %name% (%base%)", $archivetext=NULL) {
+    public function getAvailableByRegion($region, $string="%abbr% - %name% (%base%)", $archivetext=NULL) 
+    {
         $pgid = $this->msl->getarray("SELECT pgid FROM partner_regions WHERE id='".$region."' LIMIT 1",0);
 	return $this->getAvailableByPgid($pgid['pgid'], $string, $archivetext);
     }
 
-    public function getInfo($catalog, $profile=0) {
+    public function getInfo($catalog, $profile=0) 
+    {
         $info = $this->msl->getarray("SELECT a.id, a.name, a.spec_code, a.qualify, a.shortname, b.term, b.termm 
                           FROM `admission`.`specialties` a LEFT JOIN catalogs b ON a.id=b.specialty
                           WHERE b.id='".$catalog."'");
@@ -82,7 +86,8 @@ class Catalog
 	return $info;
     }
 
-    public function getBaseInfo($base_id) {
+    public function getBaseInfo($base_id) 
+    {
         $profile = $this->msl->getarray("SELECT a.catalog, b.name FROM `admission`.`catalogs_profiles` a LEFT JOIN `admission`.`specialties_profiles` b ON a.profile=b.id WHERE a.base_id='".$base_id."'");
 
 	if ($profile['catalog'] != 0) {
@@ -105,7 +110,8 @@ class Catalog
 	return $spec;
     }
 
-    public function getSpecialtiesByPgid($pgid) {
+    public function getSpecialtiesByPgid($pgid) 
+    {
         $catalogs = array();
 
 	$query = "SELECT a.id, CONCAT(c.spec_code,' ',c.name,' (',c.qualify,')') as specialty FROM catalogs a 
@@ -115,7 +121,8 @@ class Catalog
         return $this->msl->getArrayById($query,'id','specialty'); 
     }
 
-    public function getSubCatalogsByRegion($region, $catalog, $archive=0) {
+    public function getSubCatalogsByRegion($region, $catalog, $archive=0) 
+    {
         $pgid = $this->msl->getarray("SELECT pgid FROM partner_regions WHERE id='".$region."' LIMIT 1",0);
 	$specialty = $this->msl->getarray("SELECT specialty FROM catalogs WHERE id='".$catalog."' LIMIT 1", 0);
 	
@@ -129,7 +136,8 @@ class Catalog
 	return $this->msl->getArrayById($query,'id','short'); 
     }
 
-    public function getUniversityInfo($catalog, $base=0) {
+    public function getUniversityInfo($catalog, $base=0) 
+    {
         return $this->msl->getarray("SELECT f.* FROM admission.catalogs a 
                   LEFT JOIN admission.specialties b ON a.specialty=b.id 
                   LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
@@ -138,10 +146,11 @@ class Catalog
                   WHERE a.".(($base == 0)?"id":"base_id")."='".$catalog."' LIMIT 1", 0);
     }   
 
-    public function getAvailableSpecialtiesByPgid($pgid, $string="%abbr% - %name% (%qualify%)", $archivetext=NULL) {
+    public function getAvailableSpecialtiesByPgid($pgid, $string="%abbr% - %name% (%qualify%)", $archivetext=NULL) 
+    {
         $catalogs = array();
 	
-	$query = "SELECT g.abbreviation, a.id, c.name, d.short, c.spec_code, c.qualify FROM catalogs a 
+	$query = "SELECT g.abbreviation,g.abbreviation2, a.id, c.name, d.short, c.spec_code, c.qualify FROM catalogs a 
                   LEFT JOIN price_groups b ON a.id=b.catalog  
                   LEFT JOIN specialties c ON a.specialty=c.id 
 		  LEFT JOIN education_type d ON a.baseedu=d.id 
@@ -154,6 +163,7 @@ class Catalog
 
 	foreach($rval as $v) {
 	    $replace = array("%abbr%" => $v['abbreviation'],
+	                     "%abbr2%" => $v['abbreviation2'],
 	                     "%name%" => $v['name'],
 	                     "%shortname%" => mb_substr($v['name'],0,25),
 	                     "%base%" => $v['short'],

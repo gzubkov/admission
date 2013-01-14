@@ -5,22 +5,24 @@
 
 class Insertion
 {
-   public $mslk;
+    public $mslk;
 
-   public function __construct() {
-      $this->mslk = new dMysql();
-      return 0;
-   }
+    public function __construct() {
+        $this->mslk = new dMysql();
+        return 0;
+    }
    
-   public function __destruct() {
-      return 0;
-   }
+    public function __destruct() {
+        return 0;
+    }
 
-    private function _makeDate($date) {
+    private function _makeDate($date) 
+    {
         return implode("-", array_reverse(explode(".",$date)));
     }
    
-    private function _makeTitle($text) {
+    private function _makeTitle($text) 
+    {
         return mb_convert_case($text, MB_CASE_TITLE, "UTF-8");
     }
    
@@ -34,21 +36,24 @@ class Insertion
 	$array['doc_date']    = $this->_makeDate($array['doc_date']);
 	$array['ip']          = sprintf('%u', ip2long($_SERVER['REMOTE_ADDR'])); 
 
-	$array['regaddress']['region'] = $this->mslk->getarray("SELECT name FROM reg_rf_subject WHERE id=".$array['regaddress']['region']);
+	$arr  = $array['homeaddress'];
+	$arr2 = $array['regaddress'];
 
-	$regaddress  = $array['regaddress']['index'].", ".$array['regaddress']['region']['name'].", ".$array['regaddress']['city'].", ";
-	if ($array['regaddress']['street'] != '') $regaddress .= $array['regaddress']['street'].", ";
-	$regaddress .= "дом ".$array['regaddress']['home'];
-	if ($array['regaddress']['building'] != '') $regaddress .= "/".$array['regaddress']['building'];
-	if ($array['regaddress']['flat'] != '') $regaddress .= ", ".$array['regaddress']['flat'];
-
-	$array['regaddress'] = $regaddress;
-
+	unset($array['homeaddress']);	
+	unset($array['regaddress']);	
 	unset($array['citizenrynull']);
 	unset($array['ege']);
 	unset($array['act']);
 
-	return $this->mslk->insertArray('partner_applicant', $array);
+	$applicant_id = $this->mslk->insertArray('partner_applicant', $array);
+		     
+	$arr['applicant_id'] = $applicant_id;
+	$arr['type']  = 2;
+        $arr2['applicant_id'] = $applicant_id;
+	$arr2['type'] = 1;
+        $this->mslk->insertArray('reg_applicant_address', $arr2);
+    	$this->mslk->insertArray('reg_applicant_address', $arr);
+    	return $applicant_id;
     }
 
    

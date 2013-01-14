@@ -25,17 +25,17 @@ if ($rval['shortname'] != '') $pdf->Text(115, 17.8, "-".$rval['shortname']."-");
 
 if ($rval['typen'] == 1) { 
     $rval['name'] = "специальности ".$rval['name'];
-    $pdf->Text(140.2, 192, "5 лет"); // специальность - нормативный срок
+    $pdf->Text(168.2, 192, "5 лет"); // специальность - нормативный срок
     $pdf->Text(167, 196.8, $rval['term']." лет"); // специальность - срок
 } else {
     $rval['name'] = "направлению подготовки ".$rval['name'];
-    $pdf->Text(140.2, 192, "4 года"); 
+    $pdf->Text(168.2, 192, "4 года"); 
     $pdf->Text(167, 196.8, $rval['termtext']); // специальность - срок
 }
 
 
 $pdf->SetFont("times", "I", 13);
-$pdf->splitText($rval['name'], array(array(57,166.8),array(22,171.8)), 85, 1);
+$pdf->splitText($rval['name'], array(array(107,166.8),array(22,172.6)), 55, 1);
 
 $pdf->Text(166.2, 211.6, $rval['qualify']); // специальность - квалификация
 
@@ -72,7 +72,6 @@ if ($r['homephone_code'] != 0) {
 if ($r['mobile_code'] != 0) $pdf->Write(0, "+7 (".$r['mobile_code'].") ".$r['mobile']);
 
 $pdf->SetFont("times", "", 12);
-$pdf->SetXY(166, 264.8);
-$pdf->Write(0, $appl->getShortR()); 
+$pdf->Text(165, 264.1, $appl->getShortR()); 
 $pdf->Output('dogovor.pdf', 'D');
 ?>

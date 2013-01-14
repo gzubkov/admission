@@ -16,7 +16,7 @@ class Price
       	    } else {
       	        $price[0] = $iprice['price'] * $pval['percent']/100 * $count;
       	    	$price[1] = $price[0] * $iprice['percent']/100;
-      	    	$price[0] = $price[0] - $price[1];
+      	    	$price[0] = round($price[0] - $price[1]);
       	    }
 	} else {
 	    $price[0] = $iprice['price'] * $pval['percent']/100 * $count;
@@ -67,16 +67,9 @@ class Price
 
     public function getPriceByStudent($id, $purpose=2, $count=1, $date=0) 
     {
-        $cat = $this->mssql->getarray("SELECT semestr,catalog FROM dbo.student WHERE id='".$id."' ");
+        $cat = $this->mssql->getarray("SELECT semestr,catalog,semestr_end FROM dbo.student WHERE id='".$id."' ");
 
-        $profile = $this->msl->getarray("SELECT catalog FROM `admission`.`catalogs_profiles` WHERE base_id='".$cat['catalog']."' LIMIT 1");
-	if ($profile != 0) {
-	    $ds = $this->msl->getarray("SELECT term,termm,start_semestr FROM admission.catalogs WHERE id='".$profile['catalog']."' LIMIT 1");
-	} else {
-	    $ds = $this->msl->getarray("SELECT term,termm,start_semestr FROM admission.catalogs WHERE `base_id`='".$cat['catalog']."' LIMIT 1");	
-	}
-
-	$query = "SELECT * FROM dbo.student_price WHERE id='".$id."'"; // ,`diplom_to_us`
+        $query = "SELECT * FROM dbo.student_price WHERE id='".$id."'"; // ,`diplom_to_us`
 	if ($date > 0) {
 	    $query .= " AND date_start <= '".$date."' AND date_end >= '".$date."'";
 	}
@@ -85,7 +78,7 @@ class Price
 	$price = $this->mssql->getarray($query, 0);
 	if ($price == 0) die('Цена на студента не сформирована!');
 	    
-	if ($cat['semestr'] + 2 >= 2*$ds['term']+$ds['termm']/6+$ds['start_semestr']) {
+	if ($cat['semestr'] >= $cat['semestr_end']) {
 	    if ($purpose == 2) {
 	        return array($price['diplom_to_us'], $price['price']*1.5-$price['diplom_to_us']);
 	    } else {
