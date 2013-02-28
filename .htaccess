@@ -1,0 +1,1 @@
+RedirectMatch /students/journal_html.php?mid=(.*)&mhash=(.*) http://admission.iitedu.ru/students/journal.php?format=html&mid=$1&mhash=$2

@@ -35,12 +35,14 @@ if ($rval['typen'] == 1) {
 
 
 $pdf->SetFont("times", "I", 13);
-$pdf->splitText($rval['name'], array(array(107,166.8),array(22,172.6)), 55, 1);
+$pdf->splitText($rval['name'], array(array(107,166.8),array(22,172.6)), 35, 1);
 
 $pdf->Text(166.2, 211.6, $rval['qualify']); // специальность - квалификация
 
-$pdf->Text(69.2, 264.1, $appl->semestr); // семестр 
-$pdf->Text(94, 264.1, ceil($appl->semestr/2)); // курс
+if ($appl->semestr > 0) {
+    $pdf->Text(69.2, 264.1, $appl->semestr); // семестр 
+    $pdf->Text(94, 264.1, ceil($appl->semestr/2)); // курс
+}
 
 $pdf->newPage(); 
 $pdf->newPage(); 

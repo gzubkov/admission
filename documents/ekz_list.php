@@ -8,7 +8,7 @@ require_once('../../conf.php');
 
 $msl = new dMysql();
 
-$appl = new Applicant(&$msl, $_REQUEST['applicant']);
+new FabricApplicant($appl, $msl, $_REQUEST['applicant']);
 $r = $appl->getInfo('passport','email');
 
 $catalog = new Catalog(&$msl);

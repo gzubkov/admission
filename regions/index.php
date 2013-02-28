@@ -215,23 +215,23 @@ class Applicant
 	case 0:
 	    print "<TR><TD><A href=\"../documents/anketa.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента (на первый семестр)</A></TD></TR>\n";
 	    print "<TR><TD><A href=\"../documents/anketa2.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента (на второй и выше)</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"../documents/ds_ckt.php?applicant=r".$id."\" target=\"_blank\">Дополнительное соглашение</A></TD></TR>\n";
+	    print "<TR><TD><A href=\"../documents/ds_ckt_rp.php?applicant=r".$id."\" target=\"_blank\">Дополнительное соглашение</A></TD></TR>\n";
 	    print "<TR><TD><A href=\"../receipt/kvit.php?applicant=".$id."&purpose=3\" target=\"_blank\">Квитанция согласно доп.соглашения</A></TD></TR>\n";
 	    break;
         case 1:
-            print "<TR><TD><A href=\"documents/anketa.php?applicant=".$id."\" target=\"_blank\">Заявление абитуриента</A></TD></TR>\n";
+            print "<TR><TD><A href=\"../documents/anketa.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента</A></TD></TR>\n";
 	    break;
 	default:
-	    print "<TR><TD><A href=\"documents/anketa2.php?applicant=".$id."\" target=\"_blank\">Заявление абитуриента</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"documents/ds_ckt.php?applicant=".$id."\" target=\"_blank\">Дополнительное соглашение</A></TD></TR>\n";
+	    print "<TR><TD><A href=\"../documents/anketa2.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента</A></TD></TR>\n";
+	    print "<TR><TD><A href=\"../documents/ds_ckt_rp.php?applicant=".$id."\" target=\"_blank\">Дополнительное соглашение</A></TD></TR>\n";
 	    print "<TR><TD><A href=\"../receipt/kvit.php?applicant=".$id."&purpose=3\" target=\"_blank\">Квитанция согласно доп.соглашения</A></TD></TR>\n";
 	    break;
     	}
-    	print "<TR><TD><A href=\"documents/diplom.php?applicant=".$id."\" target=\"_blank\">Заявление на возврат оригинала документа об образовании</A> (даты не ставить)</TD></TR>\n";
-    	print "<TR><TD><A href=\"documents/dog_ckt.php?applicant=".$id."\">Договор на оказание платных образовательных услуг</A> (3 экземпляра)</TD></TR>\n";
-    	print "<TR><TD><A href=\"documents/dog_ckt_rp.php?applicant=".$id."\">Договор об организации обучения гражданина на платной основе</A> (3 экземпляра)</TD></TR>\n";	    
-    	print "<TR><TD><A href=\"documents/opis.php?applicant=".$id."\" target=\"_blank\">Опись документов личного дела</A></TD></TR>\n";
-    	print "<TR><TD><A href=\"../receipt/kvit.php?applicant=".$id."&purpose=1\" target=\"_blank\">Квитанция на оплату обучения</A></TD></TR>\n";
+    	//print "<TR><TD><A href=\"../documents/diplom.php?applicant=r".$id."\" target=\"_blank\">Заявление на возврат оригинала документа об образовании</A> (даты не ставить)</TD></TR>\n";
+    	print "<TR><TD><A href=\"../documents/dog_ckt.php?applicant_id=r".$id."\">Договор на оказание платных образовательных услуг</A> (3 экземпляра)</TD></TR>\n";
+    	print "<TR><TD><A href=\"../documents/dog_ckt_rp.php?applicant=".$id."\">Договор об организации обучения гражданина на платной основе</A> (3 экземпляра)</TD></TR>\n";	    
+    	//print "<TR><TD><A href=\"../documents/opis.php?applicant_id=r".$id."\" target=\"_blank\">Опись документов личного дела</A></TD></TR>\n";
+    	print "<TR><TD><A href=\"../receipt/kvit.php?applicant=r".$id."&purpose=1\" target=\"_blank\">Квитанция на оплату обучения</A></TD></TR>\n";
 
 	if ((time()-strtotime($r['birthday']))<567648000) {
 	    print "<TR><TD><A href=\"../documents/pdf/dop_net_18.pdf\" target=\"_blank\">Дополнение к договору</A> (2 экземпляра, если нет 18 лет)</TD></TR>\n";	

@@ -18,7 +18,7 @@ $ival = $appl->getRups();
 $pdf->Text(162, 102.2, $ival['pay']);
 
 $price = new Price($msl);
-$pay = $price->getPriceByRegion($r['region'], $appl->catalog, 3, $ival['pay'], 0, 0);
+$pay = $price->getPriceByRegion($r['region'], $appl->catalog, 3, $ival['pay'], 0, 0, 1);
 unset($price);
 
 $pdf->Text(80, 138.2, $pay[0]);

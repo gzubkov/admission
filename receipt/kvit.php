@@ -48,7 +48,7 @@ class Receipt
     }
 
     public function getApplicant($purpose=1, $count=1) {
-        $r = $this->_msl->getarray("SELECT region,surname,name,second_name,regaddress,catalog,semestr,pay FROM partner_applicant WHERE id='".$this->_id."'");
+        $r = $this->_msl->getarray("SELECT region,surname,name,second_name,catalog,semestr,pay FROM partner_applicant WHERE id='".$this->_id."'");
 	$this->_region = array(1, $r['region']);   
 	
         if ($purpose == 3) {
@@ -242,7 +242,7 @@ case 'pdf': case 'PDF':
     	    $pdf->Text(94, $y+125.2, $student['address']);    
 	}
 
-	 if ($price[$i] > 0) {
+	 if ($price[$i] > 1) {
    	     $pdf->Text(88, $y+60.2, floor($price[$i])); //61.4
 	     $pdf->Text(88, $y+130,  floor($price[$i]));
    	     $pdf->Text(105.4, $y+60.2, sprintf("%02d", $price[$i]-floor($price[$i])));
@@ -404,9 +404,9 @@ print '</td></tr></table></td></tr>
 
 <tr><td><table cellspacing="0" width="100%"><tr>
 <td class="stext" width="1%">Сумма&nbsp;платежа&nbsp;</td>
-<td class="string" width="8%"><span class="nowr">'.(($price[$j] > 0) ? floor($price[$j]):"").'</span></td>
+<td class="string" width="8%"><span class="nowr">'.(($price[$j] > 1) ? floor($price[$j]):"").'</span></td>
 <td class="stext" width="1%">&nbsp;руб.&nbsp;</td>
-<td class="string" width="8%"><span class="nowr">'.(($price[$j] > 0) ? sprintf("%02d", $price[$j]-floor($price[$j])):"").'</span></td>
+<td class="string" width="8%"><span class="nowr">'.(($price[$j] > 1) ? sprintf("%02d", $price[$j]-floor($price[$j])):"").'</span></td>
 <td class="stext" width="1%">&nbsp;коп.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сумма&nbsp;платы&nbsp;за&nbsp;услуги&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="1%">&nbsp;руб.&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="1%">&nbsp;коп.</td></tr></table></td></tr>
 
 <tr><td><table cellspacing="0" width="100%"><tr><td class="stext" width="5%">Итого&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="5%">&nbsp;руб.&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="5%">&nbsp;коп.&nbsp;</td><td class="stext" width="20%" align="right">&laquo;&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="1%">&nbsp;&raquo;&nbsp;</td><td class="string" width="20%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td class="stext" width="3%">&nbsp;20&nbsp;</td><td class="string" width="5%">&nbsp;</td><td class="stext" width="1%">&nbsp;г.</td></tr></table></td></tr><tr><td class="stext7" style="text-align: justify">С условиями приема указанной в платежном документе суммы, в т.ч. с суммой взимаемой платы за&nbsp;услуги банка,&nbsp;ознакомлен&nbsp;и&nbsp;согласен.</td></tr><tr><td style="padding-bottom: 0.5mm;"><table cellspacing="0" width="100%"><tr><td class="stext7" width="50%">&nbsp;</td><td class="stext7" width="1%"><b>Подпись&nbsp;плательщика&nbsp;</b></td><td class="string" width="40%">&nbsp;</td></tr></table></td></tr></table>

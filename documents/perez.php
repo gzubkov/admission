@@ -6,7 +6,7 @@ require_once('../class/documents.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
-$appl = new Applicant($msl, $_REQUEST['applicant_id']);
+new FabricApplicant($appl, $msl, $_REQUEST['applicant_id']);
 
 $cat = new Catalog($msl);
 $univ = $cat->getUniversityInfo($appl->catalog);

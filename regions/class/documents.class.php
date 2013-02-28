@@ -1,25 +1,9 @@
 <?php
-
-class FabricApplicant
-{
-    public function __construct(&$f, &$msl, $id)
-    {
-        $f = $this->_router($msl, $id);
-    }
-
-    private function _router(&$msl, $id)
-    {
-        //if ($c == 1) return new ProductB();
-	return new Applicant(&$msl, $id);
-    }
-}
-
 class Applicant
 {
-    public $msl;
-    public $_id;
-    public $connum = 2; // количество договоров мы-студент
-    public $tbl_prefix = "reg_";
+    var $_msl;
+    var $_id;
+    var $connum = 2; // количество договоров мы-студент
 
     var $surname;
     var $name;
@@ -33,21 +17,14 @@ class Applicant
 
     public function __construct(&$msl, $id) 
     {
-        $this->msl = $msl; 
+        $this->_msl = $msl; 
 	$this->_id  = $id;
-        
-	if ($id[0] == 'r') {
-	    $this->_id  = substr($id, 1);
-	    $this->tbl_prefix = "partner_";
-	    $this->connum = 3;
-	    //return new RegApplicant($msl, substr($id, 1));
-	} else {
+
 	if (!$this->_checkSecurity()) {
 	    exit(0);
 	}
-	}
 
-	$r = $this->msl->getarray("SELECT surname,name,second_name,sex,type,catalog,profile,semestr FROM ".$this->tbl_prefix."applicant WHERE id = ".$this->_id." LIMIT 1;");
+	$r = $this->_msl->getarray("SELECT surname,name,second_name,sex,type,catalog,profile,semestr FROM reg_applicant WHERE id = ".$this->_id." LIMIT 1;");
 	$this->surname     = $r['surname'];
 	$this->name        = $r['name'];
 	$this->second_name = $r['second_name'];
@@ -127,12 +104,11 @@ class Applicant
 
     public function getInfo() 
     {
+        $arr = func_get_args();
+	$query = "";
     	if (func_num_args() == 0) {
 	    $query = "*";
         } else {
-	    $arr = func_get_args();
-	    $query = "";
-
             foreach($arr as $v) {
 	        if ($query != '') {
 	            $query .= ",";
@@ -149,7 +125,7 @@ class Applicant
 	        }
 	    }
 	}
-	return $this->msl->getarray("SELECT ".$query." FROM ".$this->tbl_prefix."applicant WHERE id='".$this->_id."' LIMIT 1",0);
+	return $this->_msl->getarray("SELECT ".$query." FROM reg_applicant WHERE id='".$this->_id."' LIMIT 1",0);
     }
 
     public function getAddress($type=0) 
@@ -159,7 +135,7 @@ class Applicant
 	} else {
 	    $cond = "";
 	}
-        return $this->msl->getarray("SELECT a.*,b.name as regionname FROM ".$this->tbl_prefix."applicant_address a LEFT JOIN reg_rf_subject b ON a.region=b.id WHERE a.applicant_id='".$this->_id."'".$cond." ORDER BY type",1);
+        return $this->_msl->getarray("SELECT a.*,b.name as regionname FROM reg_applicant_address a LEFT JOIN reg_rf_subject b ON a.region=b.id WHERE a.applicant_id='".$this->_id."'".$cond." ORDER BY type",1);
     }
 
     public function getRegAddress() 
@@ -170,17 +146,17 @@ class Applicant
 
     public function getEduDoc() 
     {
-        return $this->msl->getarray("SELECT edu_doc, serie, number, institution, specialty, date, copy FROM reg_applicant_edu_doc WHERE applicant='".$this->_id."' AND `primary`='1' LIMIT 1",0);
+        return $this->_msl->getarray("SELECT edu_doc, serie, number, institution, specialty, date, copy FROM reg_applicant_edu_doc WHERE applicant='".$this->_id."' AND `primary`='1' LIMIT 1",0);
     }
 
     public function getRups() 
     {
-        return $this->msl->getarray("SELECT rups, pay FROM reg_institution_additional WHERE applicant_id='".$this->_id."' LIMIT 1",0);
+        return $this->_msl->getarray("SELECT rups, pay FROM reg_institution_additional WHERE applicant_id='".$this->_id."' LIMIT 1",0);
     }
 
     public function getEge() 
     {
-        return $this->msl->getarray("SELECT name, score, document FROM reg_applicant_scores LEFT JOIN reg_subjects ON reg_applicant_scores.subject = reg_subjects.id WHERE `applicant_id` = ".$this->_id." AND `ege` = 1 ORDER BY subject ASC", 1);
+        return $this->_msl->getarray("SELECT name, score, document FROM reg_applicant_scores LEFT JOIN reg_subjects ON reg_applicant_scores.subject = reg_subjects.id WHERE `applicant_id` = ".$this->_id." AND `ege` = 1 ORDER BY subject ASC", 1);
     }
 
     public function printDocs($prefix="", $remarks=0) 
@@ -189,7 +165,7 @@ class Applicant
 
         if ($remarks == 1) print "<tr><td colspan=2 style=\"font-color:red;\">Обратите внимание! Заявление абитуриента и договоры двухсторонние</td></tr>";
         if ($this->semestr == 1) { 
-	    print "<tr><td><A href=\"".$prefix."documents/anketa.php?applicant=".$this->_id."\">Заявление абитуриента</A></td></tr>\n";
+	    print "<tr><td><A href=\"".$prefix."documents/anketa3.php?applicant=".$this->_id."\">Заявление абитуриента</A></td></tr>\n";
 	} else {
 	    print "<tr><td><A href=\"".$prefix."documents/anketa2.php?applicant=".$this->_id."\">Заявление абитуриента</A></td></tr>\n";
 	    print "<tr><td><A href=\"".$prefix."documents/perez.php?applicant_id=".$this->_id."\">Заявление о перезачете дисциплин</A></td></tr>\n";
@@ -221,75 +197,5 @@ class Applicant
 	    print "<TR><TD><A href=\"".$prefix."documents/pdf/dop_net_18.pdf\" target=\"_blank\">Дополнение к договору</A> (2 экземпляра, если нет 18 лет)</TD></TR>\n";	
 	}
     }
-}
-
-class RegApplicant extends Applicant 
-{
-/*    var $msl;
-    var $_id;
-    var $connum = 3; // количество договоров мы-студент
-    var $tbl_prefix = "partner_";
-
-    var $region;
-*/
-    public function __construct(&$msl, $id) 
-    {
-        $this->msl = $msl; 
-	$this->_id  = $id;
-//	parent::__construct(&$msl, $id); 
-
-	if (!$this->_checkSecurity()) {
-	    exit(0);
-	}
-
-//parent::msl = $msl;
-
-	$r = $this->msl->getarray("SELECT surname,name,second_name,sex,type,catalog,profile,semestr,region FROM ".$this->tbl_prefix."applicant WHERE id = ".$this->_id." LIMIT 1;");
-//print_r($r);
-	$this->surname     = $r['surname'];
-	$this->name        = $r['name'];
-	$this->second_name = $r['second_name'];
-	$this->sex         = $r['sex'];
-	$this->type        = $r['type'];
-
-	$this->catalog     = $r['catalog'];
-	$this->profile     = $r['profile'];
-	$this->semestr     = $r['semestr'];
-
-	$this->region      = $r['region'];
-        return true;
-    }
-
-    public function __destruct() 
-    {
-        return true;
-    }
-
-    private function _checkSecurity() 
-    {
-        return true;
-    }
-
-    public function getInfo() 
-    {
-        return true;
-    }
-
-    public function getEduDoc() 
-    {
-        return array(); 
-    }
-
-    public function getAddress() 
-    {
-        return 0;
-    }
-
-    public function getEge() 
-    {
-        return 0;
-    }
-    
-    
 }
 ?>

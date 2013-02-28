@@ -15,7 +15,7 @@ class Price
 	        $price[1] = $iprice['price'] * $pval['region_percent']/100 * $count;
       	    } else {
       	        $price[0] = $iprice['price'] * $pval['percent']/100 * $count;
-      	    	$price[1] = $price[0] * $iprice['percent']/100;
+      	    	$price[1] = round($price[0] * $iprice['percent']/100);
       	    	$price[0] = round($price[0] - $price[1]);
       	    }
 	} else {
@@ -78,9 +78,9 @@ class Price
 	$price = $this->mssql->getarray($query, 0);
 	if ($price == 0) die('Цена на студента не сформирована!');
 	    
-	if ($cat['semestr'] >= $cat['semestr_end']) {
+	if ($cat['semestr'] + 1>= $cat['semestr_end']) {
 	    if ($purpose == 2) {
-	        return array($price['diplom_to_us'], $price['price']*1.5-$price['diplom_to_us']);
+	        return array($price['diplom_to_us'], 1); // $price['price']*1.5-$price['diplom_to_us']
 	    } else {
 	        $price = array('price'=>$price['price']);
 	    }

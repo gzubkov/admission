@@ -51,8 +51,8 @@ class Insertion
 	$arr['type']  = 2;
         $arr2['applicant_id'] = $applicant_id;
 	$arr2['type'] = 1;
-        $this->mslk->insertArray('reg_applicant_address', $arr2);
-    	$this->mslk->insertArray('reg_applicant_address', $arr);
+        $this->mslk->insertArray('partner_applicant_address', $arr2);
+    	$this->mslk->insertArray('partner_applicant_address', $arr);
     	return $applicant_id;
     }
 
