@@ -9,7 +9,9 @@ class FabricApplicant
 
     private function _router(&$msl, $id)
     {
-        //if ($c == 1) return new ProductB();
+        if ($id[0] == 'r') {
+	    return new RegApplicant(&$msl, $id);
+	}
 	return new Applicant(&$msl, $id);
     }
 }
@@ -203,10 +205,10 @@ class Applicant
 	    }
 	}
 //	print "<tr><td><A href=\"".$prefix."documents/opd.php?applicant_id=".$this->_id."\">Анкета-согласие на обработку персональных данных</A></td></tr>\n";
-	print "<tr><td><A href=\"".$prefix."documents/dog_ckt.php?applicant_id=".$this->_id."\">Договор на оказание платных образовательных услуг</A>"; 
+	print "<tr><td><A href=\"".$prefix."documents/dog_ckt.php?applicant=".$this->_id."\">Договор на оказание платных образовательных услуг</A>"; 
 	if ($remarks == 1) print " (3 экземпляра)";
 	print "</td></tr>\n";
-	print "<tr><td><A href=\"".$prefix."documents/dog_ckt_s.php?applicant_id=".$this->_id."\">Договор об организации обучения гражданина на платной основе</A>";
+	print "<tr><td><A href=\"".$prefix."documents/dog_ckt_s.php?applicant=".$this->_id."\">Договор об организации обучения гражданина на платной основе</A>";
 	if ($remarks == 1) print " (2 экземпляра)";
 	print "</td></tr>\n";
 	/* print "<tr><td><A href=\"".$prefix."documents/diplom.php?applicant_id=".$this->_id."\">Заявление на возврат оригинала документа об образовании</A>";
@@ -225,27 +227,23 @@ class Applicant
 
 class RegApplicant extends Applicant 
 {
-/*    var $msl;
+    var $msl;
     var $_id;
     var $connum = 3; // количество договоров мы-студент
     var $tbl_prefix = "partner_";
 
     var $region;
-*/
+
     public function __construct(&$msl, $id) 
     {
         $this->msl = $msl; 
-	$this->_id  = $id;
-//	parent::__construct(&$msl, $id); 
+	$this->_id = substr($id, 1);
 
 	if (!$this->_checkSecurity()) {
 	    exit(0);
 	}
 
-//parent::msl = $msl;
-
 	$r = $this->msl->getarray("SELECT surname,name,second_name,sex,type,catalog,profile,semestr,region FROM ".$this->tbl_prefix."applicant WHERE id = ".$this->_id." LIMIT 1;");
-//print_r($r);
 	$this->surname     = $r['surname'];
 	$this->name        = $r['name'];
 	$this->second_name = $r['second_name'];
@@ -257,6 +255,7 @@ class RegApplicant extends Applicant
 	$this->semestr     = $r['semestr'];
 
 	$this->region      = $r['region'];
+	if ($this->region == 3) $this->connum = 2;
         return true;
     }
 
@@ -270,26 +269,77 @@ class RegApplicant extends Applicant
         return true;
     }
 
-    public function getInfo() 
+    public function getEge() 
     {
-        return true;
+        return $this->msl->getarray("SELECT name, score, document FROM partner_applicant_scores a LEFT JOIN reg_subjects ON a.subject = reg_subjects.id WHERE `applicant_id` = ".$this->_id." AND `ege` = 1 ORDER BY subject ASC", 1);
     }
 
     public function getEduDoc() 
     {
-        return array(); 
-    }
-
-    public function getAddress() 
-    {
-        return 0;
-    }
-
-    public function getEge() 
-    {
-        return 0;
+        return $this->msl->getarray("SELECT edu_doc, edu_serie as serie, edu_number as number, edu_institution as institution, edu_specialty as specialty, edu_date as date FROM partner_applicant WHERE id='".$this->_id."' LIMIT 1",0);	
     }
     
-    
+    public function getRegion() 
+    {
+        $rval = $this->msl->getarray("SELECT a.firm, a.longfirm, a.rsurname, a.rname, a.`rsecond_name`, a.`name_rp`, a.pgid, 
+	      			       b.name as gpos, b.name_rp as gposrp, 
+				       c.name_tp as orgdoc, 
+				       a.ckt_num, a.ckt_date, a.inn, a.kpp, a.bank, a.legaladdress, a.rs, a.ks, a.bik 
+                  FROM `partner_regions` a LEFT JOIN `partner_position` b ON a.gposition=b.id LEFT JOIN `partner_organizational_documents` c ON a.orgdoc=c.id WHERE a.id = ".$this->region.";");
+        return $rval;
+    }
+
+    public function printDocs($prefix="../", $remarks=0) 
+    {
+        $rvalx = $this->getInfo('birthday', 'pay');
+
+        if ($remarks == 1) print "<tr><td colspan=2 style=\"font-color:red;\">Обратите внимание! Заявление абитуриента и договоры двухсторонние</td></tr>";
+
+	switch($this->semestr) {
+	case 1:
+	    print "<tr><td><A href=\"".$prefix."documents/anketa.php?applicant=r".$this->_id."\">Заявление абитуриента</A></td></tr>\n";
+	    break;
+
+	case 0:
+	    print "<tr><td><A href=\"".$prefix."documents/anketa.php?applicant=r".$this->_id."\">Заявление абитуриента (на первый семестр)</A></td></tr>\n";
+
+	default:
+	    print "<tr><td><A href=\"".$prefix."documents/anketa2.php?applicant=r".$this->_id."\">Заявление абитуриента</A></td></tr>\n";
+	    print "<tr><td><A href=\"".$prefix."documents/perez.php?applicant_id=r".$this->_id."\">Заявление о перезачете дисциплин</A></td></tr>\n";
+	}
+	
+	if ($rvalx['pay'] > 0) {
+	    print "<tr><td><A href=\"".$prefix."documents/ds_ckt_rp.php?applicant=r".$this->_id."\">Дополнительное соглашение</A>";
+	    if ($remarks == 1) print " (3 экземпляра)";
+	    print "</td></tr>\n";
+	    print "<tr><td><A href=\"".$prefix."receipt/kvit.php?purpose=3&applicant=r".$this->_id."\">Квитанция для оплаты досдач</A></td></tr>\n";
+	}
+	print "<tr><td><A href=\"".$prefix."documents/dog_ckt.php?applicant=r".$this->_id."\">Договор на оказание платных образовательных услуг</A>"; 
+	if ($remarks == 1) print " (3 экземпляра)";
+	print "</td></tr>\n<tr><td>";
+	
+	if ($this->region == 3) {
+	    print "<A href=\"".$prefix."documents/dog_ckt_s.php?applicant=r".$this->_id."\">"; 
+        } else {
+	    print "<A href=\"".$prefix."documents/dog_ckt_rp.php?applicant=r".$this->_id."\">"; 
+        } 
+	print "Договор об организации обучения гражданина на платной основе</A>";
+
+	if ($remarks == 1) print " (3 экземпляра)";
+	print "</td></tr>\n";
+	/* print "<tr><td><A href=\"".$prefix."documents/diplom.php?applicant_id=r".$this->_id."\">Заявление на возврат оригинала документа об образовании</A>";
+	if ($remarks == 1) print " (даты не ставить)";
+	print "</td></tr>\n";
+	*/
+	print "<tr><td><A href=\"".$prefix."documents/opis.php?applicant_id=r".$this->_id."\">Опись документов личного дела</A></td></tr>\n";
+	print "<tr><td><A href=\"".$prefix."documents/ekz_list.php?applicant=r".$this->_id."\">Экзаменационный лист</A> (только для проходивших вступительные испытания)</td></tr>\n";
+	print "<tr><td><A href=\"".$prefix."documents/exam.php?applicant=r".$this->_id."\">Листы тестирования</A> (только для проходивших вступительные испытания)</td></tr>\n";
+	print "<tr><td><A href=\"".$prefix."receipt/kvit.php?applicant_id=r".$this->_id."\">Квитанция на оплату обучения</A></td></tr>\n";
+	
+        if ((time()-strtotime($rvalx['birthday']))<567648000) {
+	    print "<TR><TD><A href=\"".$prefix."documents/pdf/dop_net_18.pdf\" target=\"_blank\">Дополнение к договору</A> (2 экземпляра, если нет 18 лет)</TD></TR>\n";	
+	}
+    }
+
 }
 ?>

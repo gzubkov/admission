@@ -68,7 +68,7 @@ for($i = 0; $i < count($rval); $i++) {
     print "<INPUT type=\"hidden\" name=\"ege[".($i+1)."][subject]\" value=\"".$rval[$i]['subject']."\">";
 
     print "<TR><TD style=\"width: ".$_POST['width']."px;\">Оценка (в 100-й шкале)</TD>";
-    print "<TD><INPUT type=\"text\" name=\"ege[".($i+1)."][scores]\" maxlength=\"3\" style=\"width: 30px;\" id=\"ege[".($i+1)."][scores]\" class=\"validate[optional,custom[scores]] text-input\">.</TD></TR>";
+    print "<TD><INPUT type=\"text\" name=\"ege[".($i+1)."][score]\" maxlength=\"3\" style=\"width: 30px;\" id=\"ege[".($i+1)."][score]\" class=\"validate[optional,custom[scores]] text-input\">.</TD></TR>";
     print "<TR><TD style=\"width: ".$_POST['width']."px;\">Номер документа</TD>";
     print "<TD><INPUT type=\"text\" name=\"ege[".($i+1)."][document]\" maxlength=\"15\" style=\"width: 120px;\" id=\"ege[".($i+1)."][document]\" class=\"validate[optional,custom[ege]] text-input\">.</TD></TR>";   
 }
@@ -76,7 +76,7 @@ print "</TBODY></TABLE>";
 
 print "<H3>Сдача вступительных экзаменов</H3>";
 print "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
-print "<TR><LABEL><TD><INPUT type=\"checkbox\" id=\"traditional_form\" name=\"traditional_form\" value=\"1\" checked></TD><TD>Допустить абитуриента до сдачи вступительных экзаменов в традиционно принятой форме.</LABEL></TD></TR>";
+print "<TR><LABEL><TD><input type=\"hidden\" name=\"traditional_form\" value=\"0\"> <INPUT type=\"checkbox\" id=\"traditional_form\" name=\"traditional_form\" checked=\"false\"></TD><TD>Допустить абитуриента до сдачи вступительных экзаменов в традиционно принятой форме.</LABEL></TD></TR>";
 print "</TBODY></TABLE>";
 }
 ?>

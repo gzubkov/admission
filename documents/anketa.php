@@ -152,8 +152,8 @@ unset($cat);
 if (isset($rval['profile'])) $rval['name'] .= " (".$rval['profile'].")";
 
 $pdf->SetFont("times", "", 12);
-$pdf->Text(12, 65.9, $rval['spec_code']); // специальность - код
-$pdf->Text(43, 65.9, $rval['name']); // специальность - название
+$pdf->Text(12, 65.8, $rval['spec_code']); // специальность - код
+$pdf->splitText($rval['name'], array(array(43,65.8),array(10,74)), 60, 1);
 
 if ($r['spo']) {
     $pdf->cross(10.3, 79.6);

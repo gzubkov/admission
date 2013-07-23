@@ -50,9 +50,9 @@ class Price
 	return $this->_countFinalPrice($iprice, $purpose, $count, $region);
     }  
 
-    public function getPricePercentByPgid($pgid, $catalog, $purpose=1, $count=1, $date=0, $region=1) 
+    public function getPricePercentByPgid($pgid, $catalog, $purpose=1, $count=1, $date=0, $region=1, $applicant=0) 
     {
-        $query = "SELECT price,percent FROM admission.price_groups WHERE id='".$pgid."' AND catalog='".$catalog."' AND applicant=0";
+        $query = "SELECT price,percent FROM admission.price_groups WHERE id='".$pgid."' AND catalog='".$catalog."' AND applicant='".$applicant."'";
 	if ($date > 0) $query .= " AND `start` <= '".$date."' AND `end` >= '".$date."'";
 	if ($date == 0) $query.= " ORDER BY `start` DESC";
 	$query .= " LIMIT 1";
@@ -69,24 +69,31 @@ class Price
     {
         $cat = $this->mssql->getarray("SELECT semestr,catalog,semestr_end FROM dbo.student WHERE id='".$id."' ");
 
-        $query = "SELECT * FROM dbo.student_price WHERE id='".$id."'"; // ,`diplom_to_us`
+        $query = "SELECT * FROM dbo.student_price WHERE id='".$id."'"; 
 	if ($date > 0) {
 	    $query .= " AND date_start <= '".$date."' AND date_end >= '".$date."'";
 	}
-	//$query .= " LIMIT 1";
 	    
 	$price = $this->mssql->getarray($query, 0);
 	if ($price == 0) die('Цена на студента не сформирована!');
 	    
-	if ($cat['semestr'] + 1>= $cat['semestr_end']) {
+	// Дипломный семестр
+	if ($cat['semestr'] + 1 >= $cat['semestr_end']) {
 	    if ($purpose == 2) {
-	        return array($price['diplom_to_us'], 1); // $price['price']*1.5-$price['diplom_to_us']
+	        return array($price['diplom_to_us'], $price['diplom_reg']); 
 	    } else {
-	        $price = array('price'=>$price['price']);
+	        return $this->_countFinalPrice(array('price'=>$price['price']), $purpose, $count);
 	    }
 	}
 	
-	return $this->_countFinalPrice($price, $purpose, $count);
+	if ($purpose == 2) {
+	    return array($price['price'], $price['price_reg']);
+	} 
+	
+	$pval = $this->msl->getarray("SELECT percent,count FROM `receipt_purpose` WHERE `id` = '".$purpose."' LIMIT 1");
+	$count = ($pval['count'] ? $count : 1);
+	  
+	return array((($price['price']+$price['price_reg']) * $pval['percent']/100 * $count));  
     }
 
     public function getDateByStudent($id) 

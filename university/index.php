@@ -23,7 +23,7 @@ $mssql = new dMssql();
  
   
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Личный кабинет регионального партнера</title>
+<title>Личный кабинет представителя вуза-партнера</title>
 <link type="text/css" rel="stylesheet" media="all" href="../images/defaults.css">
 <link type="text/css" rel="stylesheet" media="all" href="../images/system.css">
 <link type="text/css" rel="stylesheet" media="all" href="../images/style.css">

@@ -7,7 +7,7 @@ require_once('../class/pdf.class.php');
 require_once('../class/documents.class.php');
 $msl = new dMysql();
 
-$appl = new Applicant($msl, $_REQUEST['applicant_id']);
+$appl = new Applicant($msl, $_REQUEST['applicant']);
 $r = $appl->getInfo();
 
 $pdf = new PDF('pdf/dog_ckt_s.pdf');

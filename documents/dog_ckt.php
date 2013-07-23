@@ -7,7 +7,7 @@ require_once('../class/documents.class.php');
 
 $msl = new dMysql();
 
-$appl = new Applicant($msl, $_REQUEST['applicant_id']);
+$appl = new Applicant($msl, $_REQUEST['applicant']);
 
 $r = $appl->getInfo();
 
@@ -25,11 +25,11 @@ if ($rval['shortname'] != '') $pdf->Text(115, 17.8, "-".$rval['shortname']."-");
 
 if ($rval['typen'] == 1) { 
     $rval['name'] = "специальности ".$rval['name'];
-    $pdf->Text(168.2, 192, "5 лет"); // специальность - нормативный срок
+    $pdf->Text(169.2, 192, "5 лет"); // специальность - нормативный срок
     $pdf->Text(167, 196.8, $rval['term']." лет"); // специальность - срок
 } else {
     $rval['name'] = "направлению подготовки ".$rval['name'];
-    $pdf->Text(168.2, 192, "4 года"); 
+    $pdf->Text(169.2, 192, "4 года"); 
     $pdf->Text(167, 196.8, $rval['termtext']); // специальность - срок
 }
 

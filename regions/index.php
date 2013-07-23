@@ -3,20 +3,16 @@ require_once('../../conf.php');
 require_once('../class/mysql.class.php');
 require_once('../class/forms.class.php');
 require_once('../class/catalog.class.php');
+require_once('../class/documents.class.php');
 
 if (isset($_SESSION['rights'])) {
-if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
-    if (isset($_REQUEST['region'])) {
-        $_SESSION['joomlaregion'] = $_REQUEST['region'];
-    } 
+    if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
+        if (isset($_REQUEST['region'])) {
+            $_SESSION['joomlaregion'] = $_REQUEST['region'];
+        } 
+    }
 }
-}
-if (!isset($_SESSION['joomlaregion'])) exit(0); 
-$region_id = $_SESSION['joomlaregion'];
-
-$msl = new dMysql();
 ?>
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html class="js" dir="ltr" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en"><head>
 
@@ -137,13 +133,61 @@ $("thead input").keyup( function () {
 		
 
 });
+function loginA() {
+   $.ajax({url: 'login.php', type: 'POST', data: 'act=login&'+$('#login').serialize(),
+           success: function(msg){
+	      msg = msg.replace(/\s+/, '');
+	      switch (msg) {
+	         case "ok":
+		    window.location.reload();
+		    break;
+		 case "wrongpwd":
+		    alert('Неправильный пароль!');
+		    break;
+		 default:
+		    alert('Фигвам!');
+	      }
+	   }});     
+}
 
+function unloginA() {
+   $.ajax({url: 'login.php', type: 'POST', data: 'act=exit',
+           success: function(msg){
+	      msg = msg.replace(/\s+/, '');
+	      switch (msg) {
+	         case "ok":
+		    window.location.reload();
+		    break;
+		 default:
+		    alert('Фигвам!');
+	      }
+	   }});     
+}
 </script>
 
 </head>
 <body class="sidebar-left">
 
+<?php
+if (!isset($_SESSION['joomlaregion'])) {
+    if ($_SERVER['REMOTE_ADDR'] == $CFG_trustedip) {
+        print "<div style=\"border: 1px solid #d3d3d3; width: 250px; height: 140px; background-color: #ffffff; margin:20px auto 0pt;\"><form id=\"login\" action=\"\">\n";
+        print "<table style=\"border: none;\"><tbody style=\"border: none;\">";
+        print "<tr><td colspan=\"2\" style=\"text-align: center;\"><b>Вход в систему</b></td></tr>";
+        print "<tr><td style=\"width: 70px;\">Логин:</td>";
+        print "<td><input type=\"text\" name=\"login\" />.</td></tr>";
+        print "<tr><td style=\"width: 70px;\">Пароль:</td>";
+        print "<td><input type=\"password\" name=\"password\" />.</td></tr>";
+        print "<tr><td colspan=\"2\" style=\"text-align: center;\"><input type=\"submit\" value=\"Войти\" onclick=\"javascript: loginA(); return false;\" /></td></tr>";
+        print "</tbody></table>";   
+        print "</form></div>";
+    }
+    exit(0);
+} 
+$region_id = $_SESSION['joomlaregion'];
 
+$msl = new dMysql();
+?>
 
 <!-- Layout -->
   <div id="header-region" class="clear-block"></div>
@@ -190,68 +234,6 @@ $("thead input").keyup( function () {
 
 <?php
 
-class Applicant
-{
-    private $id;
-
-    public function __construct($id) 
-    {
-        $this->id = $id;
-        return 0;
-    }
-   
-    public function __destruct() 
-    {
-        return 0;
-    }
-
-    public function printDocumentList() 
-    {
-        global $msl;
-        $id = $this->id;
-	$r = $msl->getarray("SELECT birthday, semestr, pay FROM admission.`partner_applicant` WHERE id='".$id."' LIMIT 1;");
-        print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
-    	switch($r['semestr']) {
-	case 0:
-	    print "<TR><TD><A href=\"../documents/anketa.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента (на первый семестр)</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"../documents/anketa2.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента (на второй и выше)</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"../documents/ds_ckt_rp.php?applicant=r".$id."\" target=\"_blank\">Дополнительное соглашение</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"../receipt/kvit.php?applicant=".$id."&purpose=3\" target=\"_blank\">Квитанция согласно доп.соглашения</A></TD></TR>\n";
-	    break;
-        case 1:
-            print "<TR><TD><A href=\"../documents/anketa.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента</A></TD></TR>\n";
-	    break;
-	default:
-	    print "<TR><TD><A href=\"../documents/anketa2.php?applicant=r".$id."\" target=\"_blank\">Заявление абитуриента</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"../documents/ds_ckt_rp.php?applicant=".$id."\" target=\"_blank\">Дополнительное соглашение</A></TD></TR>\n";
-	    print "<TR><TD><A href=\"../receipt/kvit.php?applicant=".$id."&purpose=3\" target=\"_blank\">Квитанция согласно доп.соглашения</A></TD></TR>\n";
-	    break;
-    	}
-    	//print "<TR><TD><A href=\"../documents/diplom.php?applicant=r".$id."\" target=\"_blank\">Заявление на возврат оригинала документа об образовании</A> (даты не ставить)</TD></TR>\n";
-    	print "<TR><TD><A href=\"../documents/dog_ckt.php?applicant_id=r".$id."\">Договор на оказание платных образовательных услуг</A> (3 экземпляра)</TD></TR>\n";
-    	print "<TR><TD><A href=\"../documents/dog_ckt_rp.php?applicant=".$id."\">Договор об организации обучения гражданина на платной основе</A> (3 экземпляра)</TD></TR>\n";	    
-    	//print "<TR><TD><A href=\"../documents/opis.php?applicant_id=r".$id."\" target=\"_blank\">Опись документов личного дела</A></TD></TR>\n";
-    	print "<TR><TD><A href=\"../receipt/kvit.php?applicant=r".$id."&purpose=1\" target=\"_blank\">Квитанция на оплату обучения</A></TD></TR>\n";
-
-	if ((time()-strtotime($r['birthday']))<567648000) {
-	    print "<TR><TD><A href=\"../documents/pdf/dop_net_18.pdf\" target=\"_blank\">Дополнение к договору</A> (2 экземпляра, если нет 18 лет)</TD></TR>\n";	
-	}
-
-	print "<TR><TD>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.\n</TD></TR>";
-	
-	print "</TBODY></TABLE></DIV>\n\n";         
-    }
-
-    public function getSurnameNS($array = 0) 
-    {
-        global $msl;
-        $r = $msl->getarray("SELECT surname,name,second_name FROM `partner_applicant` WHERE id='".$this->id."'");
-	if (!$array) {
-	    return $r['surname']." ".$r['name']." ".$r['second_name'];
-	}
-	return $r;
-    } 
-}
 if (!isset($_REQUEST['act'])) $_REQUEST['act'] = '';
 
 switch($_REQUEST['act']) {
@@ -289,24 +271,24 @@ case "addapplicant":
     $form->tdBox( 'text', 'Место рождения',    'birthplace',  200, 100, 'A' ); 
 
     $form->tdBox( 'remark', 'Адрес места жительства'); 
-    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress[index]', 100, 6, 'N' ); 
+    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress[index]', 100, 6, 'ON' ); 
 
     $aspec = $msl->getArrayById("SELECT id,CONCAT(id,' - ',name) as name FROM `reg_rf_subject` ORDER BY id ASC",'id','name');
     $form->tdSelect(  'Субъект РФ', 'homeaddress[region]', $aspec, $rpval['rf'], 1);
 
-    $form->tdBox( 'text', 'Населенный пункт',  'homeaddress[city]', 200, 50, 'K' );
+    $form->tdBox( 'text', 'Населенный пункт',  'homeaddress[city]', 200, 50, 1 );
     $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress[street]', 200, 60, 0 );
     $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress[home]','homeaddress[building]','homeaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0) );  
 
     $form->tdBox( 'remark', 'Адрес регистрации'); 
-    $form->tdBox( 'text', 'Почтовый индекс',  'regaddress[index]', 100, 6, 'N' ); 
+    $form->tdBox( 'text', 'Почтовый индекс',  'regaddress[index]', 100, 6, 'ON' ); 
     $form->tdSelect(  'Субъект РФ', 'regaddress[region]', $aspec, $rpval['rf'], 1);
-    $form->tdBox( 'text', 'Населенный пункт',  'regaddress[city]', 200, 50, 'K' );
+    $form->tdBox( 'text', 'Населенный пункт',  'regaddress[city]', 200, 50, 1 );
     $form->tdBox( 'text', 'Улица (квартал)',  'regaddress[street]', 200, 60, 0 );
     $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress[home]','regaddress[building]','regaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0) );  
 
     $form->tdBox( 'remark', 'Контактные данные'); 
-    $form->tdBox( 'phone', 'Домашний телефон',         'homephone', array(40,70), array(5,10), 1 );
+    $form->tdBox( 'phone', 'Домашний телефон',         'homephone', array(40,70), array(5,10), 0 );
     $form->tdBox( 'phone', 'Мобильный телефон',        'mobile',    array(40,70), array(3,7), 1 );
     $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, 'OE' ); 
 
@@ -329,7 +311,7 @@ case "addapplicant":
     $form->tdBox( 'text', 'Количество досдач (неизвестно = 0)',           'pay',      20, 3, 0, 0 ); 
 
     $kval = $msl->getArrayById("SELECT id, name FROM reg_education", 'id', 'name');
-    $form->tdSelect(   'Тип учебного заведения', 'edu_base', $kval, 0, 1);
+    $form->tdSelect(   'Тип образовательного учреждения', 'edu_base', $kval, 0, 1);
 
     $bdoc = $msl->getarrayById("SELECT id,name FROM `reg_edu_doc` WHERE `group`=1",'id','name');
     $form->tdSelect(  'Тип документа об образовании', 'edu_doc', $bdoc, 0, 1);
@@ -337,8 +319,8 @@ case "addapplicant":
     $form->tdBox( 'text', array('Серия','№'),  array('edu_serie','edu_number'), array(45,65), array(10,10), array('A','N') );
     $form->tdDateBox( 'Дата выдачи',           'edu_date',    1990, date('Y'), 'D' );
 
-    $form->tdBox( 'text', 'Учебное заведение',           'edu_institution',      250, 90, 'O' ); 
-    $form->tdBox( 'text', 'Специальность',           'edu_specialty',      250, 90, 'O' ); 
+    $form->tdBox( 'text', 'Образовательное учреждение',           'edu_institution',      250, 90, 'O' ); 
+    $form->tdBox( 'text', 'Специальность, профессия',           'edu_specialty',      250, 90, 'O' ); 
 
     $form->tdRadio(   'Иностранный язык',   'language', $msl->getArrayById("SELECT id, name FROM reg_flang",'id','name'), 1, 1);
     $form->tdRadio(   'Высшее образование', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), 0, 1);
@@ -446,7 +428,6 @@ case "addstudentinsert":
     $id = $ins->newApplicant("", $_POST);
     
     if ($id > 0) {
-        $ins->insertEge("", $_POST['ege'], $id);
         print "абитуриент ".$_POST['surname']." ".$_POST['name']." ".$_POST['second_name']." успешно добавлен.</P>\n\n";
     } else {
         print "произошла ошибка. Попробуйте обновить страницу.</P>\n\n";
@@ -457,8 +438,12 @@ case "addstudentinsert":
     print "<DIV id=\"myaccordion\">\n";   
 
     print "<h3>Документы для подписания</h3>";
-    $appl = new Applicant($id);
-    $appl->printDocumentList();
+    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
+    
+    new FabricApplicant($appl, $msl, "r".$id);
+    $appl->printDocs();
+    print "<TR><TD>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.\n</TD></TR>";
+    print "</TBODY></TABLE></DIV>\n\n"; 
     unset($appl);
     break;
 
@@ -481,34 +466,43 @@ case "applicantupdate":
     print "<DIV id=\"myaccordion\">\n";   
 
     print "<h3>Документы для подписания</h3>";
-    $appl = new Applicant($_POST['id']);
-    $appl->printDocumentList();
+    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
+    	
+    new FabricApplicant($appl, $msl, "r".$_POST['id']);
+    $appl->printDocs();
+    print "<TR><TD>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.\n</TD></TR>";
+    print "</TBODY></TABLE></DIV>\n\n"; 
     unset($appl);
     break;
 
 case "showstudentdocuments":
-    $appl = new Applicant($_REQUEST['id']);
+    new FabricApplicant($appl, $msl, "r".$_REQUEST['id']);
     
-    print "<H1 class=\"title\">Работа с абитуриентом \"".$appl->getSurnameNS()."\"</H1><DIV id=\"output\"></DIV>";
+    print "<H1 class=\"title\">Работа с абитуриентом \"".$appl->surname." ".$appl->name." ".$appl->second_name."\"</H1><DIV id=\"output\"></DIV>";
     print "<DIV id=\"myaccordion\">\n";   
     print "<BR>";
     print "<h4>Документы для подписания</h4>";
-    $appl->printDocumentList();
+    print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
+    	
+    $appl->printDocs();
+    print "<TR><TD>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.\n</TD></TR>";
+    print "</TBODY></TABLE></DIV>\n\n"; 
     break;
 
 case "deletestudent":
-    $appl = new Applicant($_REQUEST['id']);
+    new FabricApplicant($appl, $msl, "r".$_REQUEST['id']);
     
-    print "<H1 class=\"title\">Удаление абитуриента \"".$appl->getSurnameNS()."\"</H1><DIV id=\"output\"></DIV>";
+    print "<H1 class=\"title\">Удаление абитуриента \"".$appl->surname." ".$appl->name." ".$appl->second_name."\"</H1><DIV id=\"output\"></DIV>";
     unset($appl);
     print "<P>Результат удаления: ";
 
-
-    if ($msl->deleteArray('admission`.`partner_applicant', array('id'=>$_REQUEST['id'],'region'=>$region_id))) {
+    if ($msl->deleteArray('admission`.`partner_applicant', array('id'=>$_REQUEST['id'],'region'=>$region_id)) && 
+       	$msl->deleteArray('admission`.`partner_applicant_address', array('applicant_id'=>$_REQUEST['id'])) && 
+       	$msl->deleteArray('admission`.`partner_applicant_scores', array('applicant_id'=>$_REQUEST['id']))) {
         print "успешно";
     } else {
         print "произошла ошибка. Попробуйте обновить страницу";
-    }
+    } 
     print ".</P>\n\n";
     break;
 
@@ -670,8 +664,8 @@ default:
     print "<h3>Добро пожаловать в Личный кабинет регионального партнера</h3>";
 
 //    print "<P>Данная система предназначена для работы регионального партнераформирования комплекта документов абитуриента, поступающего через Центр Компьютерных Технологий в \"Московский государственный машиностроительный университет (МАМИ)\".</P>";
-    print "<h3>Пароль для базы данных</h3>";
-    print "<P>При установке базы данных требуется Ваш пароль: <B>".$rval['base_password']."</B></P>";
+//    print "<h3>Пароль для базы данных</h3>";
+//    print "<P>При установке базы данных требуется Ваш пароль: <B>".$rval['base_password']."</B></P>";
 
     print "<h3>Порядок работы с абитуриентами</h3>";
     print "<P>Для формирования договоров на нового абитуриента выберите в меню слева пункт \"Добавить абитуриента\". После заполнения всех необходимых полей (поле количество досдач оставить 0, если количество платных досдач неизвестно. При этом будет формироваться дополнительное соглашение и квитанция для дополнительного соглашения без указания сумм), нажмите кнопку \"Добавить абитуриента\". После добавления Вы сможете распечатать или сохранить весь необходимый комплект документов.</P>";
@@ -694,14 +688,10 @@ print '<P>Если у Вас появились вопросы, свяжитес
                     
 ?>
 
-<div id="footer">© 2009-2012, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
+<div id="footer">© 2009-2013, ins-iit.ru Team<div id="block-system-0" class="clear-block block block-system">
 </div>
 </div>
       </div></div></div></div> <!-- /.left-corner, /.right-corner, /#squeeze, /#center -->
-
-      
-    </div> <!-- /container -->
+    </div>
   </div>
-<!-- /layout -->
-
 </body></html>

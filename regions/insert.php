@@ -38,6 +38,7 @@ class Insertion
 
 	$arr  = $array['homeaddress'];
 	$arr2 = $array['regaddress'];
+	$arr3 = $array['ege'];
 
 	unset($array['homeaddress']);	
 	unset($array['regaddress']);	
@@ -53,6 +54,10 @@ class Insertion
 	$arr2['type'] = 1;
         $this->mslk->insertArray('partner_applicant_address', $arr2);
     	$this->mslk->insertArray('partner_applicant_address', $arr);
+	
+	if ($array['traditional_form'] == 0) {
+	    $this->insertEge($uid, $arr3, $applicant_id);
+	}
     	return $applicant_id;
     }
 

@@ -7,7 +7,7 @@ require_once('../class/documents.class.php');
 $msl = new dMysql();
 $applicant_id = $_REQUEST['applicant_id'];
 
-$appl = new Applicant($msl, $applicant_id);
+new FabricApplicant($appl, $msl, $applicant_id);
 $val = $appl->getEduDoc();
 
 if (!is_array ($val)) die("Нет добавленных документов.");
@@ -16,11 +16,6 @@ $pdf = new PDF('pdf/opis.pdf');
 
 $pdf->SetFont("times", "I", 13);
 $pdf->Text(61, 35.9, $appl->surname." ".$appl->name." ".$appl->second_name);
-
-/*
-$pdf->SetFillColor(255,255,255);
-$pdf->Rect(150,164.4,10,4,'F');
-*/
 
 $pdf->SetFont("times", "I", 13);
 
