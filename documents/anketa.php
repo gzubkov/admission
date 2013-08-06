@@ -105,9 +105,12 @@ if ($rval != 0) {
     $pdf->Text(92, 166.4, $rval['number']); // диплом-номер
     $pdf->Text(131.1, 166.4, date('d     m     Y', strtotime($rval['date']))); // диплом-выдан
 
-    if ($rval['copy']) {
+//    if ($rval['copy']) {
 //        $pdf->cross(194.68, 162.78, 3.9); // копия
-    }
+//    }
+
+    $pdf->splitText($rval['institution'], array(array(131,175.38),array(9.7,182.4)), 32, 1);
+    $pdf->splitText($rval['city'], array(array(146,189.38),array(9.7,196.4)), 30, 1);
 }
 // -----------------------------------------------------
 

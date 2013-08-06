@@ -69,11 +69,26 @@ class Insertion
 	$array['doc_date']    = $this->_makeDate($array['doc_date']);
 	$array['edu_date']    = $this->_makeDate($array['edu_date']);
 	
+	$arr  = $array['homeaddress'];
+	$arr2 = $array['regaddress'];
+	$arr3 = $array['ege'];
+
+	unset($array['homeaddress']);	
+	unset($array['regaddress']);	
+	unset($array['citizenrynull']);
+	
 	unset($array['id']);
 	unset($array['ege']);
 	unset($array['act']);
 	unset($array['region']);
 	
+	$this->mslk->updateArray('partner_applicant_address', $arr2, array('applicant_id'=>$request['id']));
+    	$this->mslk->updateArray('partner_applicant_address', $arr, array('applicant_id'=>$request['id']));
+	
+	if ($array['traditional_form'] == 0) {
+	    $this->insertEge($uid, $arr3, $applicant_id);
+	}
+    	
 	$array['create_date'] = time();
 	return $this->mslk->updateArray('partner_applicant', $array, array('id'=>$request['id']));
     }

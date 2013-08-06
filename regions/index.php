@@ -220,7 +220,16 @@ $msl = new dMysql();
   <div class="content"><ul class="menu">
    <li class="collapsed last"><a href="?act=addapplicant">Добавить абитуриента</a></li>
    <li class="collapsed last"><a href="?act=listapplicant">Список абитуриентов</a></li> 
-   <li class="collapsed last"><a href="?act=basestudent">Список студентов</a></li> 
+
+<?php
+/*
+ * Заглушка для региона ЦКТ
+ */
+ 
+if ($region_id != 3) {
+    print "<li class=\"collapsed last\"><a href=\"?act=basestudent\">Список студентов</a></li>";
+}
+?> 
    <li class="collapsed last"><a href="?act=card">Мои данные</a></li> 
 <!--  <li class="collapsed last"><a href="?act=receipt">Распечатать квитанцию</a></li> -->
   <li class="collapsed last"><a href="?">Вернуться на главную</a></li>
@@ -319,8 +328,9 @@ case "addapplicant":
     $form->tdBox( 'text', array('Серия','№'),  array('edu_serie','edu_number'), array(45,65), array(10,10), array('A','N') );
     $form->tdDateBox( 'Дата выдачи',           'edu_date',    1990, date('Y'), 'D' );
 
-    $form->tdBox( 'text', 'Образовательное учреждение',           'edu_institution',      250, 90, 'O' ); 
-    $form->tdBox( 'text', 'Специальность, профессия',           'edu_specialty',      250, 90, 'O' ); 
+    $form->tdBox( 'text', 'Образовательное учреждение',           'edu_institution',      250, 120, 'O' ); 
+    $form->tdBox( 'text', 'Город, в котором окончено образовательное учреждение',           'edu_city',      250, 120, 'O' ); 
+    $form->tdBox( 'text', 'Специальность, профессия',           'edu_specialty',      250, 120, 'O' ); 
 
     $form->tdRadio(   'Иностранный язык',   'language', $msl->getArrayById("SELECT id, name FROM reg_flang",'id','name'), 1, 1);
     $form->tdRadio(   'Высшее образование', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), 0, 1);
@@ -337,6 +347,8 @@ case "editapplicant":
     $form = new FormFields('index.php','formular', 180, 0, "Завершить редактирование");
     $rpval = $msl->getarray("SELECT rf FROM `partner_regions` WHERE id='".$region_id."'");
     $apval = $msl->getarray("SELECT * FROM `partner_applicant` WHERE id='".$_REQUEST['id']."'");
+
+    new FabricApplicant($appl, $msl, "r".$_REQUEST['id']);
 
     print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
     $form->hidden('region', $region_id);
@@ -360,23 +372,27 @@ case "editapplicant":
     $form->tdDateBox( 'Дата выдачи',           'doc_date',    1990, date('Y'), 'D', 0, '1980', date('d.m.Y', strtotime($apval['doc_date']))  );
     $form->tdBox( 'text', 'Место рождения',    'birthplace',  200, 100, 'A', $apval['birthplace'] ); 
 
+    $addr = $appl->getAddress();
+    
     $form->tdBox( 'remark', 'Адрес места жительства'); 
-    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress-index', 100, 6, 'N', $apval['homeaddress-index'] ); 
+    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress[index]', 100, 6, 'ON', $addr[0]['index'] ); 
 
     $aspec = $msl->getArrayById("SELECT id,CONCAT(id,' - ',name) as name FROM `reg_rf_subject` ORDER BY id ASC",'id','name');
-    $form->tdSelect(  'Субъект РФ', 'homeaddress-region', $aspec, $apval['homeaddress-region'], 1);
+    $form->tdSelect(  'Субъект РФ', 'homeaddress[region]', $aspec, $addr[0]['region'], 1);
 
-    $form->tdBox( 'text', 'Населенный пункт',  'homeaddress-city', 200, 50, 'K', $apval['homeaddress-city'] );
-    $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress-street', 200, 60, 0, $apval['homeaddress-street'] );
-if ($apval['homeaddress-flat'] == 0) $apval['homeaddress-flat'] == '';
-    $form->tdBox( 'text', array('Дом','корпус','квартира'), array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array('A',0,0), array($apval['homeaddress-home'],$apval['homeaddress-building'],$apval['homeaddress-flat']));  
-// 
+    $form->tdBox( 'text', 'Населенный пункт',  'homeaddress[city]', 200, 50, 1, $addr[0]['city'] );
+    $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress[street]', 200, 60, 0, $addr[0]['street'] );
+    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress[home]','homeaddress[building]','homeaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0), array($addr[0][home],$addr[0][building],$addr[0][flat]) );  
 
     $form->tdBox( 'remark', 'Адрес регистрации'); 
-    $form->tdBox( 'text', 'Почтовый индекс',  'regaddress', 450, 250, 1, $apval['regaddress'] ); 
+    $form->tdBox( 'text', 'Почтовый индекс',  'regaddress[index]', 100, 6, 'ON', $addr[1]['index'] ); 
+    $form->tdSelect(  'Субъект РФ', 'regaddress[region]', $aspec, $addr[1]['region'], 1);
+    $form->tdBox( 'text', 'Населенный пункт',  'regaddress[city]', 200, 50, 1, $addr[1]['city'] );
+    $form->tdBox( 'text', 'Улица (квартал)',  'regaddress[street]', 200, 60, 0, $addr[1]['street'] );
+    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress[home]','regaddress[building]','regaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0), array($addr[1][home],$addr[1][building],$addr[1][flat]) );  
    
     $form->tdBox( 'remark', 'Контактные данные'); 
-    $form->tdBox( 'phone', 'Домашний телефон',         'homephone', array(40,70), array(5,10), 1, array($apval['homephone_code'],$apval['homephone']) );
+    $form->tdBox( 'phone', 'Домашний телефон',         'homephone', array(40,70), array(5,10), 0, array($apval['homephone_code'],$apval['homephone']) );
     $form->tdBox( 'phone', 'Мобильный телефон',        'mobile',    array(40,70), array(3,7), 1, array($apval['mobile_code'],$apval['mobile']) );
     $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, 'OE', $apval['e-mail'] ); 
 
@@ -401,7 +417,7 @@ if ($apval['homeaddress-flat'] == 0) $apval['homeaddress-flat'] == '';
     $form->tdBox( 'text', 'Количество досдач (неизвестно = 0)',           'pay',      20, 3, 0, $apval['pay'] ); 
 
     $kval = $msl->getArrayById("SELECT id, name FROM reg_education", 'id', 'name');
-    $form->tdSelect(   'Тип учебного заведения', 'edu_base', $kval, $apval['edu_base'], 1);
+    $form->tdSelect(   'Тип образовательного учреждения', 'edu_base', $kval, $apval['edu_base'], 1);
 
     $bdoc = $msl->getarrayById("SELECT id,name FROM `reg_edu_doc` WHERE `group`=1",'id','name');
     $form->tdSelect(  'Тип документа об образовании', 'edu_doc', $bdoc, $apval['edu_doc'], 1);
@@ -409,9 +425,10 @@ if ($apval['homeaddress-flat'] == 0) $apval['homeaddress-flat'] == '';
     $form->tdBox( 'text', array('Серия','№'),  array('edu_serie','edu_number'), array(45,65), array(10,10), array('A','N'), array($apval['edu_serie'],$apval['edu_number']) );
     $form->tdDateBox( 'Дата выдачи',           'edu_date',    1990, date('Y'), 'D', 0, 0, date('d.m.Y', strtotime($apval['edu_date'])));
 
-    $form->tdBox( 'text', 'Учебное заведение',           'edu_institution',      250, 90, 'O', $apval['edu_institution'] ); 
-    $form->tdBox( 'text', 'Специальность',           'edu_specialty',      250, 90, 'O', $apval['edu_specialty'] ); 
-
+    $form->tdBox( 'text', 'Образовательное учреждение',           'edu_institution',      250, 120, 'O', $apval['edu_institution'] ); 
+    $form->tdBox( 'text', 'Город, в котором окончено образовательное учреждение',           'edu_city',      250, 120, 'O', $apval['edu_city'] ); 
+    $form->tdBox( 'text', 'Специальность, профессия',           'edu_specialty',      250, 120, 'O', $apval['edu_specialty'] ); 
+    
     $form->tdRadio(   'Иностранный язык',   'language', $msl->getArrayById("SELECT id, name FROM reg_flang",'id','name'), $apval['language'], 1);
     $form->tdRadio(   'Высшее образование', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), $apval['highedu'], 1);
     print "</TBODY></TABLE></DIV>\n\n"; 

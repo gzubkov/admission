@@ -81,18 +81,24 @@ class Applicant
 
     public function makeAddress($array) 
     {
-        $str = $array['index'].", ".$array['regionname'].", ";
+        $str = "";
+	if ($array['index'] != 0) {
+	    $str .= $array['index'].", ";
+	}
+	$str .= $array['regionname'].", ";
 	if (($array['region'] != 77) && ($array['region'] != 78)) {
 	    $str .= $array['city'].", ";
         }
 	if ($array['street'] != '') {
 	    $str .= $array['street'].", ";
         }
-   	$str .= "дом ".$array['home'];
+   	if ($array['home'] != 0) {
+	    $str .= "дом ".$array['home'];
+	}
 	if ($array['building'] != '') {
 	    $str .= "/".$array['building'];
         }
-   	if ($array['flat'] != '') {
+   	if ($array['flat'] != '' && $array['flat'] != 0) {
 	    $str .= ", ".$array['flat'];
         }
 	return $str;
@@ -276,7 +282,7 @@ class RegApplicant extends Applicant
 
     public function getEduDoc() 
     {
-        return $this->msl->getarray("SELECT edu_doc, edu_serie as serie, edu_number as number, edu_institution as institution, edu_specialty as specialty, edu_date as date FROM partner_applicant WHERE id='".$this->_id."' LIMIT 1",0);	
+        return $this->msl->getarray("SELECT edu_doc, edu_serie as serie, edu_number as number, edu_institution as institution, edu_city as city, edu_specialty as specialty, edu_date as date FROM partner_applicant WHERE id='".$this->_id."' LIMIT 1",0);	
     }
     
     public function getRegion() 
