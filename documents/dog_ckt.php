@@ -21,7 +21,13 @@ $catalog = new Catalog(&$msl);
 $rval = $catalog->getInfo($appl->catalog, $appl->profile);
 unset($catalog);
 
-if ($rval['shortname'] != '') $pdf->Text(115, 17.8, "-".$rval['shortname']."-");
+//if ($rval['shortname'] != '') $pdf->Text(115, 17.8, "-".$rval['shortname']."-");
+
+if ($r['num'] > 0) {
+    $pdf->Text(99.2, 18.1, sprintf("0510%1$04d-03-13/14", $r['num']));
+} else {
+    $pdf->Text(99.2, 18.1, "0510          -03-13/14");
+}
 
 if ($rval['typen'] == 1) { 
     $rval['name'] = "специальности ".$rval['name'];

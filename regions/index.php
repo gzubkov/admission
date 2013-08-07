@@ -334,6 +334,14 @@ case "addapplicant":
 
     $form->tdRadio(   'Иностранный язык',   'language', $msl->getArrayById("SELECT id, name FROM reg_flang",'id','name'), 1, 1);
     $form->tdRadio(   'Высшее образование', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), 0, 1);
+    
+    /*
+    * Ввод номера договора в системе МАМИ для региона ЦКТ
+    */
+ 
+    if ($region_id == 3) {
+        $form->tdBox( 'text', 'Номер договора в МАМИ',           'num',      50, 4, 'ON' );
+    }
     print "</TBODY></TABLE></DIV>\n\n"; 
     unset($form);
 
@@ -382,14 +390,14 @@ case "editapplicant":
 
     $form->tdBox( 'text', 'Населенный пункт',  'homeaddress[city]', 200, 50, 1, $addr[0]['city'] );
     $form->tdBox( 'text', 'Улица (квартал)',  'homeaddress[street]', 200, 60, 0, $addr[0]['street'] );
-    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress[home]','homeaddress[building]','homeaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0), array($addr[0][home],$addr[0][building],$addr[0][flat]) );  
+    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('homeaddress[home]','homeaddress[building]','homeaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0), array($addr[0]['home'],$addr[0]['building'],$addr[0]['flat']) );  
 
     $form->tdBox( 'remark', 'Адрес регистрации'); 
     $form->tdBox( 'text', 'Почтовый индекс',  'regaddress[index]', 100, 6, 'ON', $addr[1]['index'] ); 
     $form->tdSelect(  'Субъект РФ', 'regaddress[region]', $aspec, $addr[1]['region'], 1);
     $form->tdBox( 'text', 'Населенный пункт',  'regaddress[city]', 200, 50, 1, $addr[1]['city'] );
     $form->tdBox( 'text', 'Улица (квартал)',  'regaddress[street]', 200, 60, 0, $addr[1]['street'] );
-    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress[home]','regaddress[building]','regaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0), array($addr[1][home],$addr[1][building],$addr[1][flat]) );  
+    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress[home]','regaddress[building]','regaddress[flat]'), array(25,25,25), array(5,4,4), array('A',0,0), array($addr[1]['home'],$addr[1]['building'],$addr[1]['flat']) );  
    
     $form->tdBox( 'remark', 'Контактные данные'); 
     $form->tdBox( 'phone', 'Домашний телефон',         'homephone', array(40,70), array(5,10), 0, array($apval['homephone_code'],$apval['homephone']) );
@@ -431,6 +439,14 @@ case "editapplicant":
     
     $form->tdRadio(   'Иностранный язык',   'language', $msl->getArrayById("SELECT id, name FROM reg_flang",'id','name'), $apval['language'], 1);
     $form->tdRadio(   'Высшее образование', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), $apval['highedu'], 1);
+
+    /*
+    * Ввод номера договора в системе МАМИ для региона ЦКТ
+    */
+ 
+    if ($region_id == 3) {
+        $form->tdBox( 'text', 'Номер договора в МАМИ',           'num',      50, 4, 'ON', $apval['num'] );
+    }
     print "</TBODY></TABLE></DIV>\n\n"; 
     unset($form);
 

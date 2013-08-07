@@ -177,9 +177,11 @@ if ($student->isLogin()) {
     $sessions = $price->getSessions();
     unset($price);
 
-    $days = floor((strtotime($pdate['date_end'])-mktime())/84600);
-    if ($days < 80 && $pdate['date_end'] != 0 ) {
-        print "<P style=\"color: #ff0000; font-weight: bold;\">Внимание! Расценки действительны только до ".date('d.m.Y',strtotime($pdate['date_end'])).". Дальнейшая стоимость услуг может изменяться.</P>";
+    if (isset($pdate['date_end'])) {
+        $days = floor((strtotime($pdate['date_end'])-mktime())/84600);
+    	if ($days < 80 && $pdate['date_end'] != 0 ) {
+            print "<P style=\"color: #ff0000; font-weight: bold;\">Внимание! Расценки действительны только до ".date('d.m.Y',strtotime($pdate['date_end'])).". Дальнейшая стоимость услуг может изменяться.</P>";
+        }
     }
 
     $form = new FormFields('../receipt/kvit.php','formular', 180, 0, "Распечатать квитанцию");
