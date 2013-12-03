@@ -8,7 +8,7 @@ require_once('../class/documents.class.php');
 $msl = new dMysql();
 
 $applicant_id = $_REQUEST['applicant'];
-//$appl = new Applicant($msl, $applicant_id);
+
 new FabricApplicant($appl, $msl, $applicant_id);
 
 $r = $appl->getInfo();
@@ -90,12 +90,26 @@ $pdf->Text(138, 149.2, $r['mobile']); // телефон-мобильный-но�
 $pdf->Text(23.4, 155.8, $r['e-mail']);
 
 $rval = $appl->getEduDoc(); 
-$ival = $appl->getRups();
+
+if ($rval != 0) {
+    if ($rval['edu_doc'] == 1) {
+        $pdf->cross(28.8, 162.38, 3.9); // аттестат
+    } else {
+        $pdf->cross(52.4, 162.38, 3.9); // диплом
+    }
+
+    $pdf->Text(71.4, 165.9, $rval['serie']); // диплом-серия
+    $pdf->Text(95, 165.9, $rval['number']); // диплом-номер
+    $pdf->Text(135.1, 165.9, date('d   m    Y', strtotime($rval['date']))); // диплом-выдан
+
+    $pdf->splitText($rval['institution'], array(array(132,172.38),array(9.7,179.4)), 32, 1);
+    $pdf->splitText($rval['city'], array(array(146,189.38),array(9.7,196.4)), 30, 1);
+}
 
 $pdf->SetFont("times", "", 12);
-$pdf->Text(90, 218.7, $rval['institution']);
+//$pdf->Text(90, 218.7, $rval['institution']);
 
-$pdf->splitText($rval['specialty'], array(array(86,224.4),array(10,229.4)), 66, 1); 
+//$pdf->splitText($rval['specialty'], array(array(86,224.4),array(10,229.4)), 66, 1); 
 
 
 // изучаемый язык
@@ -126,6 +140,8 @@ $cat = new Catalog(&$msl);
 $rval = $cat->getInfo($appl->catalog, $appl->profile);
 unset($cat);
 
+if (isset($rval['profile'])) $rval['name'] .= " (".$rval['profile'].")";
+
 $pdf->Text(12, 64.7, $rval['spec_code']); // специальность - код
 $pdf->Text(43.2, 64.7, $rval['name']); // специальность - название
 
@@ -133,6 +149,7 @@ $pdf->Text(43.2, 64.7, $rval['name']); // специальность - назв�
 $pdf->cross(($r['highedu'])?146.4:118.2, 78.6); // впервые/невпервые
 
 // ---------------------------------
+$ival = $appl->getRups();
 
 $pdf->SetFont("times", "", 13);
 $pdf->Text(69.8, 173.4, $ival['rups']); // РУПы

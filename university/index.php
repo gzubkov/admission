@@ -207,7 +207,7 @@ print "<BR><DIV style=\"border: 1px solid #d3d3d3; width: 250px; height: 140px; 
 
 <?php
     $rval = $msl->getarray("SELECT type,abbreviation FROM `universities` WHERE id='".$university_id."'");
-    print "<div class=\"form-item\">".$rval['type']." ".$rval['abbreviation']."</div>";
+    print "<div class=\"form-item\">".$rval['abbreviation']."</div>";
 ?>
 </div>
 

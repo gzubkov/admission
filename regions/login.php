@@ -13,6 +13,10 @@ case "exit":
     print "ok\n";
     break;
 
+case "openregion":
+    $_SESSION['joomlaregion'] = $_REQUEST['region'];
+    break;
+
 default:
     require_once('../class/mysql.class.php');
     $msl = new dMysql();

@@ -22,6 +22,15 @@ if ($gval['basicsemestr'] > 1) {
 if ($gval['internet'] > 0) {
     print "<TR><TD style=\"width: ".$_POST['width']."px;\">Обучение через Интернет<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
     print "<TD><LABEL><INPUT type=radio name=\"internet\" value=\"1\" checked>да</LABEL><LABEL><INPUT type=radio name=\"internet\" value=\"0\">нет</LABEL></TD></TR>";    
+
+    print "<TR><TD style=\"width: ".$_POST['width']."px;\">Начальный семестр обучения<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
+    print "<TD><INPUT type=text name=\"semestr\" value=\"";
+    if ($_POST['semestr'] != 0) {
+        print "1";
+    } else {
+        print $_POST['semestr'];
+    }
+    print "\" size=2 maxlength=2> из ".($gval['term']*2+$gval['termm']/6)." (указывать 0, если неизвестно).</TD></TR>"; 
 } else {
     print "<INPUT type=\"hidden\" name=\"internet\" value=\"0\">";
 }

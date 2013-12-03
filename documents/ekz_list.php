@@ -55,7 +55,7 @@ if (is_array($mdl_grades)) {
     $pdf->SetFont("times", "", 12);
     foreach($mdl_grades as $v) {
         $y = 184+6.6*$num[$v['id']];
-    	$pdf->Text(110.4, $y, round($v['grade'])); 
+    	$pdf->Text(110.4, $y, ($v['grade'] > 0) ? round($v['grade']) : ""); 
     	$pdf->Text(125.4, $y, $v['surname']." ".substr($v['name'],0,2).".".substr($v['second_name'],0,2)."."); 
     	if ($v['grade'] < $v['min']) $pass = 0;
     }

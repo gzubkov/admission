@@ -60,7 +60,8 @@ class Insertion
 	               'name' => $this->_makeTitle($request[$uid.'name']),
 		       'second_name' => $this->_makeTitle($request[$uid.'second_name']),
 		       'e-mail' => $request[$uid.'e-mail'],
-		       'ip' => sprintf('%u', ip2long($_SERVER['REMOTE_ADDR'])));
+		       'ip' => sprintf('%u', ip2long($_SERVER['REMOTE_ADDR'])),
+		       'region' => 1);
         return $msl->insertArray('reg_applicant', $array);
     }
 

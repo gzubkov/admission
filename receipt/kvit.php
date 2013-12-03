@@ -1,10 +1,4 @@
 <?php
-require_once('../../conf.php');
-require_once('../class/price.class.php');
-require_once('../class/mysql.class.php');
-
-if (!isset($_REQUEST['format']) || ($_REQUEST['format'] != 'html' && $_REQUEST['format'] != 'HTML')) $_REQUEST['format'] = 'pdf';
-
 class Receipt
 {
     private $_id;
@@ -13,122 +7,116 @@ class Receipt
     private $_pgid = 0;
     private $_msl;
 
-    public function __construct($id, $date=0) {
+    public function __construct($id, $date = 0)
+    {
         $this->_id = $id;
-	$this->_date = $date;
-	$this->_msl = new dMysql();
-	return true;
+        $this->_date = $date;
+        $this->_msl = new dMysql();
+        return true;
     }
 
-    public function getStudent($purpose=2, $count=1) {
+    public function getStudent($purpose = 2, $count = 1)
+    {
         require_once('../class/mssql.class.php');
-	
-	$student = array();
-	$mssql   = new dMssql(); 
-	
-        $r = $mssql->getarray("SELECT surname, name, second_name, address, semestr, catalog, iit_ckt, region FROM dbo.student WHERE id='".$this->_id."'");   
+
+        $student = array();
+        $mssql   = new dMssql();
+
+        $r = $mssql->getarray("SELECT surname, name, second_name, address, semestr, catalog, iit_ckt, region FROM dbo.student WHERE id='".$this->_id."'");
         
-	if ($r['region'] == 1) {
-	    $this->_region  = (($r['iit_ckt'] == 1) ? 4 : 3);
-	} elseif($r['region'] == 176) {
-	    $this->_region  = (($r['iit_ckt'] == 1) ? 2 : 1);
-	} else {
-	    $this->_region  = array((($r['iit_ckt'] == 1) ? 2 : 1), $r['region']);
-	}
-	$this->_semestr = $r['semestr']+1;
-
-	$student['fio'] = $r['surname']." ".$r['name']." ".$r['second_name'];
-	$student['address'] = $r['address'];
-	$student['region'] = $this->getRegion();
-
-	$price = new Price($this->_msl, $mssql);
-	$student['price'] = $price->getPriceByStudent($this->_id, $purpose, $count, $this->_date);
-	$student['purpose_text'] = $this->getPurposeText($purpose);
-        return $student;
-    }
-
-    public function getApplicant($purpose=1, $count=1) {
-        $r = $this->_msl->getarray("SELECT region,surname,name,second_name,catalog,semestr,pay FROM partner_applicant WHERE id='".$this->_id."'");
-	$this->_region = array(1, $r['region']);   
-	
-        if ($purpose == 3) {
-            $count = $r['pay'];
+        if ($r['region'] == 1) {
+            $this->_region  = (($r['iit_ckt'] == 1) ? 4 : 3);
+        } elseif ($r['region'] == 176) {
+            $this->_region  = (($r['iit_ckt'] == 1) ? 2 : 1);
+        } else {
+            $this->_region  = array((($r['iit_ckt'] == 1) ? 2 : 1), $r['region']);
         }
+        $this->_semestr = $r['semestr']+1;
+
         $student['fio'] = $r['surname']." ".$r['name']." ".$r['second_name'];
-	$student['address'] = $r['regaddress'];
-	$student['region'] = $this->getRegion();
+        $student['address'] = $r['address'];
+        $student['region'] = $this->getRegion();
 
-	$price = new Price($this->_msl);
-	$student['price'] = $price->getPriceByPgid($this->_pgid, $r['catalog'], $purpose, $count, $this->_date);
-
+        $price = new Price($this->_msl, $mssql);
+        $student['price'] = $price->getPriceByStudent($this->_id, $purpose, $count, $this->_date);
         $student['purpose_text'] = $this->getPurposeText($purpose);
         return $student;
     }
-    
-    public function getSelfApplicant($purpose=1, $count=1) {
+
+    public function getSelfApplicant($purpose = 1, $count = 1)
+    {
         require_once("../class/documents.class.php");
 
-	$appl = new Applicant($this->_msl, $this->_id);
+        new FabricApplicant($appl, $this->_msl, $this->_id);
         
-	$k = $appl->getInfo('region');
-	$this->_region = $k['region'];   
-	
+        $k = $appl->getInfo('region');
+        if ($this->_id[0] == 'r') {
+            $this->_region = array(3, $k['region']);
+        } else {
+            $this->_region = $k['region'];
+        }
+
         if ($purpose == 3) {
-	    $m = $appl->getRups();
+            $m = $appl->getRups();
             $count = $m['pay'];
         }
-        $student['fio'] = $appl->surname." ".$appl->name." ".$appl->second_name;
-	$student['address'] = $appl->getRegAddress();
-	$student['region'] = $this->getRegion();
+        $student['fio']     = $appl->surname." ".$appl->name." ".$appl->second_name;
+        $student['address'] = $appl->getRegAddress();
+        $student['region']  = $this->getRegion();
 
-	$price = new Price($this->_msl);
-	$student['price'] = $price->getPriceByPgid($this->_pgid, $appl->catalog, $purpose, $count, $this->_date, 0, 1);
+        $price                   = new Price($this->_msl);
+        $student['price']        = $price->getPriceByPgid($this->_pgid, $appl->catalog, $purpose, $count, $this->_date, (($this->_id[0] == 'r')? 1 : 0), 1);
         $student['purpose_text'] = $this->getPurposeText($purpose);
 
         return $student;
     }
     
-    public function getDefault($partner_id, $region, $catalog, $purpose=1, $count=1) {
+    public function getDefault($partner_id, $region, $catalog, $purpose = 1, $count = 1)
+    {
         if ($partner_id != 0) {
-             $this->_region = array($partner_id, $region);  
-	} else {
-             $this->_region = $region;  
-	} 
-        $student['fio'] = $_REQUEST['fio'];
-	$student['address'] = $_REQUEST['address'];
-	$student['region'] = $this->getRegion();
+            $this->_region = array($partner_id, $region);
+        } else {
+            $this->_region = $region;
+        }
 
-	$price = new Price($this->_msl);
-	$student['price'] = $price->getPriceByPgid($this->_pgid, $catalog, $purpose, $count, $this->_date, sizeof($this->_region)-1, $_REQUEST['tpapplicant']);
-// temp
-	$r = $this->_msl->getarray("SELECT `start_semestr`, term FROM admission.catalogs WHERE id=".$catalog." LIMIT 1;",0);
-//	
+        $student['fio']     = $_REQUEST['fio'];
+        $student['address'] = $_REQUEST['address'];
+        $student['region']  = $this->getRegion();
 
-	if ($purpose == 2 && $_REQUEST['s'] >= ($r['start_semestr'] - 1 + $r['term'] * 2)) {
-	    $student['price'][0] = $student['price'][0]*1.5;
-	    $this->_semestr = $r['start_semestr'] + $r['term'] * 2 - 1;
-	} else {
-	    $this->_semestr = $_REQUEST['s'];
-	}
-// temp
+        $price            = new Price($this->_msl);
+        $student['price'] = $price->getPriceByPgid($this->_pgid, $catalog, $purpose, $count, $this->_date, sizeof($this->_region)-1, $_REQUEST['tpapplicant']);
+        
+        // temp
+        $r = $this->_msl->getarray("SELECT `start_semestr`, term FROM admission.catalogs WHERE id=".$catalog." LIMIT 1;", 0);
+        //
 
-        $student['purpose_text'] =  $this->getPurposeText($purpose);
+        if ($purpose == 2 && $_REQUEST['s'] >= ($r['start_semestr'] - 1 + $r['term'] * 2)) {
+            $student['price'][0] = $student['price'][0]*1.5;
+            $this->_semestr = $r['start_semestr'] + $r['term'] * 2 - 1;
+        } else {
+            $this->_semestr = $_REQUEST['s'];
+        }
+        // temp
+
+        $student['purpose_text'] = $this->getPurposeText($purpose);
         return $student;
     }
 
-    public function getRegion() {
+    public function getRegion()
+    {
         $id = $this->_region;
         if (is_array($id)) {
-    	    $r = $this->_msl->getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id[0]." OR partner_regions.id = ".$id[1]." ORDER BY id ASC;",1);
-	    $this->_pgid = $r[1]['pgid'];	
-      	} else { 
-	    $r = $this->_msl->getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id." LIMIT 1;",1);
-	    $this->_pgid = $r[0]['pgid'];
-	}
-	return $r;
+            $r = $this->_msl->getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id[0]." OR partner_regions.id = ".$id[1]." ORDER BY id ASC;", 1);
+            $this->_pgid = $r[1]['pgid'];
+        } else {
+            $r = $this->_msl->getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id." LIMIT 1;", 1);
+            $this->_pgid = $r[0]['pgid'];
+        }
+        return $r;
     }
 
-    public function getPurposeText($purpose) {
+    public function getPurposeText($purpose)
+    {
         $purpose = $this->_msl->getarray("SELECT text FROM admission.receipt_purpose WHERE id='".$purpose."' LIMIT 1;");
         $string = $purpose['text']." НДС не облагается";
 
@@ -136,19 +124,31 @@ class Receipt
             $string = str_replace("%dn%", "        ", $string);
         } else {
             $string = str_replace("%dn%", $this->_id, $string);
-	}
-	
+        }
+
         if ($this->_semestr == '') {
-   	    $string = str_replace("%s%", "  ", $string);
-	} else {
-   	    $string = str_replace("%s%", $this->_semestr, $string);
-	}
-	return $string;
+            $string = str_replace("%s%", "  ", $string);
+        } else {
+            $string = str_replace("%s%", $this->_semestr, $string);
+        }
+        return $string;
     }
 }
 
-if (!isset($_REQUEST['count'])) $_REQUEST['count'] = 1;
-if (!isset($_REQUEST['purpose'])) $_REQUEST['purpose'] = 1;
+require_once('../../conf.php');
+require_once('../class/price.class.php');
+require_once('../class/mysql.class.php');
+
+if (!isset($_REQUEST['format']) || ($_REQUEST['format'] != 'html' && $_REQUEST['format'] != 'HTML')) {
+    $_REQUEST['format'] = 'pdf';
+}
+
+if (!isset($_REQUEST['count'])) {
+    $_REQUEST['count'] = 1;
+}
+if (!isset($_REQUEST['purpose'])) {
+    $_REQUEST['purpose'] = 1;
+}
 
 if (isset($_REQUEST['mid'])) {
     if ($_REQUEST['mhash'] == md5(md5("moodle.ins-iit.rudddddsdsd".$_REQUEST['mid'])) || $_SERVER['REMOTE_ADDR'] == $CFG_trustedip) {
@@ -165,15 +165,7 @@ if (isset($_REQUEST['student'])) {
     $receipt = new Receipt($_REQUEST['student'], $_REQUEST['date']);
     $student = $receipt->getStudent($_REQUEST['purpose'], $_REQUEST['count']);
 
-} else if (isset($_REQUEST['applicant'])) {
-    /*if ($_SESSION['joomlaregion'] > 0 && $_REQUEST['region_id'] != $_SESSION['joomlaregion']) {
-        exit(0);
-    }*/
-
-    $receipt = new Receipt($_REQUEST['applicant'], $_REQUEST['date']);
-    $student = $receipt->getApplicant($_REQUEST['purpose'], $_REQUEST['count']);
-    
-} else if (isset($_REQUEST['applicant_id'])) {
+} elseif (isset($_REQUEST['applicant_id'])) {
     $receipt = new Receipt($_REQUEST['applicant_id']);
     $student = $receipt->getSelfApplicant($_REQUEST['purpose'], $_REQUEST['count']);
     
@@ -193,69 +185,72 @@ if (sizeof($price) == 1 || $price[1] == 0) {
 }
 
 switch ($_REQUEST['format']) {
-case 'pdf': case 'PDF':
-    require_once('../class/pdf.class.php');
+    case 'pdf':
+    case 'PDF':
+        require_once('../class/pdf.class.php');
 
-    $pdf = new PDF();
-    $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
-    $pdf->SetAutoPageBreak(true, 0);
-    $pdf->setSourceFile('kvit_'.$kn.'.pdf');
+        $pdf = new PDF();
+        $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
+        $pdf->SetAutoPageBreak(true, 0);
+        $pdf->setSourceFile('kvit_'.$kn.'.pdf');
 
-    $pdf->AddPage();
-    $pdf->useTemplate($pdf->importPage(1));
-    $pdf->SetFont("times", "", 10);
+        $pdf->AddPage();
+        $pdf->useTemplate($pdf->importPage(1));
+        $pdf->SetFont("times", "", 10);
 
-    $y = 0;
+        $y = 0;
 
-    for ($i = 0; $i < $kn; $i++) {
-        $pdf->Text(68, $y+21.6, $rval[$i]['firm']); 
-	$pdf->Text(68, $y+81.0, $rval[$i]['firm']); 
+        for ($i = 0; $i < $kn; $i++) {
+            $pdf->Text(68, $y+21.6, $rval[$i]['firm']);
+            $pdf->Text(68, $y+81.0, $rval[$i]['firm']);
 
-	if ($rval[$i]['inn'] != 0) {
-	    $pdf->printInCells($rval[$i]['inn'], 69, $y+27.8, 3.69);
-	    $pdf->printInCells($rval[$i]['inn'], 69, $y+89, 3.69);
-	}
-	if ($rval[$i]['rs'] != 0) {
-	    $pdf->printInCells($rval[$i]['rs'], 118.2, $y+27.8, 3.69);
-	    $pdf->printInCells($rval[$i]['rs'], 118.2, $y+89, 3.69);
-	}
+            if ($rval[$i]['inn'] != 0) {
+                $pdf->printInCells($rval[$i]['inn'], 69, $y+27.8, 3.69);
+                $pdf->printInCells($rval[$i]['inn'], 69, $y+89, 3.69);
+            }
 
-	$pdf->Text(70.2, $y+35.6, $rval[$i]['bank']);
-	$pdf->Text(70.2, $y+98.4, $rval[$i]['bank']); //102.8
+            if ($rval[$i]['rs'] != 0) {
+                $pdf->printInCells($rval[$i]['rs'], 118.2, $y+27.8, 3.69);
+                $pdf->printInCells($rval[$i]['rs'], 118.2, $y+89, 3.69);
+            }
 
-	if ($rval[$i]['bik'] != 0) {
-	    $pdf->printInCells($rval[$i]['bik'], 158.6, $y+35.2, 3.69);
-	    $pdf->printInCells($rval[$i]['bik'], 158.6, $y+98, 3.69); // 102.6
-	}
-	if ($rval[$i]['ks'] != 0) {
-	    $pdf->printInCells($rval[$i]['ks'], 118.2, $y+41.8, 3.69);
-	    $pdf->printInCells($rval[$i]['ks'], 118.2, $y+106.6, 3.69); // 110.3
-	}
+            $pdf->Text(70.2, $y+35.6, $rval[$i]['bank']);
+            $pdf->Text(70.2, $y+98.4, $rval[$i]['bank']);
 
-	$pdf->Text(68, $y+46.4, $purpose);
-	$pdf->Text(68, $y+112.6, $purpose);
+            if ($rval[$i]['bik'] != 0) {
+                $pdf->printInCells($rval[$i]['bik'], 158.6, $y+35.2, 3.69);
+                $pdf->printInCells($rval[$i]['bik'], 158.6, $y+98, 3.69);
+            }
+            if ($rval[$i]['ks'] != 0) {
+                $pdf->printInCells($rval[$i]['ks'], 118.2, $y+41.8, 3.69);
+                $pdf->printInCells($rval[$i]['ks'], 118.2, $y+106.6, 3.69);
+            }
 
-	if (is_array($student)) {
-    	    $pdf->Text(94, $y+52.4, $student['fio']); 
-    	    $pdf->Text(94, $y+56.2, $student['address']);
-    	    $pdf->Text(94, $y+120.0, $student['fio']); 
-    	    $pdf->Text(94, $y+125.2, $student['address']);    
-	}
+            $pdf->Text(68, $y+46.4, $purpose);
+            $pdf->Text(68, $y+112.6, $purpose);
 
-	 if ($price[$i] > 1) {
-   	     $pdf->Text(88, $y+60.2, floor($price[$i])); //61.4
-	     $pdf->Text(88, $y+130,  floor($price[$i]));
-   	     $pdf->Text(105.4, $y+60.2, sprintf("%02d", $price[$i]-floor($price[$i])));
-   	     $pdf->Text(105.4, $y+130, sprintf("%02d", $price[$i]-floor($price[$i])));
-	 }
+            if (is_array($student)) {
+                $pdf->Text(94, $y+52.4, $student['fio']);
+                $pdf->Text(94, $y+56.2, $student['address']);
+                $pdf->Text(94, $y+120.0, $student['fio']);
+                $pdf->Text(94, $y+125.2, $student['address']);
+            }
 
-	 $y += 139.7;
-    }
-    $pdf->Output('kvit.pdf', 'D');
-    break;
+            if ($price[$i] > 1) {
+                $pdf->Text(88, $y+60.2, floor($price[$i])); //61.4
+                $pdf->Text(88, $y+130, floor($price[$i]));
+                $pdf->Text(105.4, $y+60.2, sprintf("%02d", $price[$i]-floor($price[$i])));
+                $pdf->Text(105.4, $y+130, sprintf("%02d", $price[$i]-floor($price[$i])));
+            }
 
-case 'html': case 'HTML':
-?>
+            $y += 139.7;
+        }
+        $pdf->Output('kvit.pdf', 'D');
+        break;
+
+    case 'html':
+    case 'HTML':
+    ?>
 <html lang="ru">
 <head>
 <title>Печать квитанции</title>
@@ -330,67 +325,67 @@ if (document.domain && document.referrer && document.referrer.search(document.do
 <center><span style="font-size: 80%;">информационный блок от начала страницы до пунктирной линии на печать не выводится</span></center></div>
 <div class="topmargin"></div>
 <table class="ramka" cellspacing="0" style="width: 180mm;">
-<?php
-function printincells($text, $n, $width=-1) {
-    if ($width == -1) $width = 100/$n;
-    print "<table class=\"cells\" cellspacing=\"0\"><tr>";
-    for($i = 0; $i < $n; $i++) {
-        print "<td class=\"cell\" style=\"width: ".$width."%;\">".(isset($text[$i]) ? $text[$i] : "")."</td>";
-    }
-    print "</tr></table>";
-}
+        <?php
+        function printincells($text, $n, $width = -1)
+        {
+            if ($width == -1) {
+                $width = 100/$n;
+            }
+            print "<table class=\"cells\" cellspacing=\"0\"><tr>";
+            for ($i = 0; $i < $n; $i++) {
+                print "<td class=\"cell\" style=\"width: ".$width."%;\">".(isset($text[$i]) ? $text[$i] : "")."</td>";
+            }
+            print "</tr></table>";
+        }
  
-for ($i = 0; $i < 2*$kn; $i++) {
-$j = floor($i/2);
+        for ($i = 0; $i < 2*$kn; $i++) {
+            $j = floor($i/2);
 
-if (!isset($rval[$j]['rs'])) {
-    print "<div id=\"toolbox\"><p><B>Ваш региональный партнер не предоставил сведений, необходимых для формирования квитанции.</B><BR> Сумма для оплаты услуг регионального партнера составляет ".floor($price[$j])." рублей ".sprintf("%02d", $price[$j]-floor($price[$j]))." копеек.</P></div><BR>";
-    break;
-}
+            if (!isset($rval[$j]['rs'])) {
+                print "<div id=\"toolbox\"><p><B>Ваш региональный партнер не предоставил сведений, необходимых для формирования квитанции.</B><BR> Сумма для оплаты услуг регионального партнера составляет ".floor($price[$j])." рублей ".sprintf("%02d", $price[$j]-floor($price[$j]))." копеек.</P></div><BR>";
+                break;
+            }
 
-print "<tr>
-	<td style=\"width: 50mm; height: 65mm; border-bottom: black 1.5px solid;\">
-      	    <table style=\"width: 50mm; height: 100%;\" cellspacing=\"0\">";
-if ($i % 2 == 0) {
-    print "<tr><td class=\"kassir\" style=\"vertical-align: top; letter-spacing: 0.2em;\">Извещение</td></tr><tr><td class=\"kassir\" style=\"vertical-align: bottom;\">Кассир</td></tr>";
-} else {
-    print "<tr><td class=\"kassir\"  style=\"vertical-align: bottom; height: 100%;\">Квитанция<br><br>Кассир</td></tr>";
-}
-print "</table></td>\n";
+            print "<tr><td style=\"width: 50mm; height: 65mm; border-bottom: black 1.5px solid;\">
+      	           <table style=\"width: 50mm; height: 100%;\" cellspacing=\"0\">";
+            if ($i % 2 == 0) {
+                print "<tr><td class=\"kassir\" style=\"vertical-align: top; letter-spacing: 0.2em;\">Извещение</td></tr><tr><td class=\"kassir\" style=\"vertical-align: bottom;\">Кассир</td></tr>";
+            } else {
+                print "<tr><td class=\"kassir\"  style=\"vertical-align: bottom; height: 100%;\">Квитанция<br><br>Кассир</td></tr>";
+            }
 
-print "<td style=\"width: 130mm; height: 65mm; padding: 0mm 4mm 0mm 3mm; border-left: black 1.5px solid; border-bottom: black 1.5px solid;\"> 
-<table cellspacing=\"0\" style=\"width: 123mm; height: 100%;\">";
+            print "</table></td>\n<td style=\"width: 130mm; height: 65mm; padding: 0mm 4mm 0mm 3mm; border-left: black 1.5px solid; border-bottom: black 1.5px solid;\"> 
+                   <table cellspacing=\"0\" style=\"width: 123mm; height: 100%;\">";
 
-if ($i%2 == 0) {
-print "<tr><td><table width=\"100%\" cellspacing=\"0\">
-        <tr><td class=\"stext7\" style=\"text-align: right; vertical-align: middle;\"><i>Форма &#8470; ПД-4</i></td></tr>
-       </table></td></tr>";
-}
+            if ($i%2 == 0) {
+                print "<tr><td><table width=\"100%\" cellspacing=\"0\">
+                            <tr><td class=\"stext7\" style=\"text-align: right; vertical-align: middle;\"><i>Форма &#8470; ПД-4</i></td></tr>
+                       </table></td></tr>";
+            }
 
-print "<tr><td style=\"vertical-align: bottom;\"><table style=\"width: 100%;\" cellspacing=\"0\"><tr><td class=\"string\"><span class=\"nowr\">".$rval[$j]['firm']."</span></td></tr></table></td></tr>
+            print "<tr><td style=\"vertical-align: bottom;\"><table style=\"width: 100%;\" cellspacing=\"0\"><tr><td class=\"string\"><span class=\"nowr\">".$rval[$j]['firm']."</span></td></tr></table></td></tr>
 <tr><td class=\"subscript nowr\">(наименование получателя платежа)</td></tr>
 <tr><td><table cellspacing=\"0\" width=\"100%\"><tr><td width=\"30%\" class=\"floor\">";
 
-printincells($rval[$j]['inn'], 10, 10);
+            printincells($rval[$j]['inn'], 10, 10);
 
-print "</td><td width=\"10%\" class=\"stext7\">&nbsp;</td><td width=\"60%\" class=\"floor\">";
+            print "</td><td width=\"10%\" class=\"stext7\">&nbsp;</td><td width=\"60%\" class=\"floor\">";
 
-printincells($rval[$j]['rs'], 20, 5);
+            printincells($rval[$j]['rs'], 20, 5);
 
-print '</td></tr>
+            print '</td></tr>
 <tr><td class="subscript nowr">(ИНН получателя платежа)</td><td class="subscript">&nbsp;</td><td class="subscript nowr">(номер счета получателя платежа)</td></tr></table></td></tr>
 
 <tr><td><table cellspacing="0" width="100%"><tr><td width="2%" class="stext">в</td><td width="64%" class="string"><span class="nowr">'.$rval[$j]['bank'].'</span></td>
 <td width="7%" class="stext" align="right">БИК&nbsp;</td><td width="27%" class="floor">';
 
-printincells($rval[$j]['bik'], 9, 11);
+            printincells($rval[$j]['bik'], 9, 11);
 
-print "</td></tr><tr><td class=\"subscript\">&nbsp;</td><td class=\"subscript nowr\">(наименование банка получателя платежа)</td></tr></table></td></tr><tr><td><table cellspacing=\"0\" width=\"100%\"><tr><td class=\"stext7 nowr\" width=\"40%\">Номер кор./сч. банка получателя платежа</td><td width=\"60%\" class=\"floor\">";
+            print "</td></tr><tr><td class=\"subscript\">&nbsp;</td><td class=\"subscript nowr\">(наименование банка получателя платежа)</td></tr></table></td></tr><tr><td><table cellspacing=\"0\" width=\"100%\"><tr><td class=\"stext7 nowr\" width=\"40%\">Номер кор./сч. банка получателя платежа</td><td width=\"60%\" class=\"floor\">";
 
-printincells($rval[$j]['ks'], 20, 5);
+            printincells($rval[$j]['ks'], 20, 5);
 
-print '</td></tr></table></td></tr>
-
+            print '</td></tr></table></td></tr>
 <tr><td>
  <table cellspacing="0" width="100%">
   <tr><td class="string"><span class="nowr">'.$purpose.'</span></tr>
@@ -412,8 +407,7 @@ print '</td></tr></table></td></tr>
 <tr><td><table cellspacing="0" width="100%"><tr><td class="stext" width="5%">Итого&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="5%">&nbsp;руб.&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="5%">&nbsp;коп.&nbsp;</td><td class="stext" width="20%" align="right">&laquo;&nbsp;</td><td class="string" width="8%">&nbsp;</td><td class="stext" width="1%">&nbsp;&raquo;&nbsp;</td><td class="string" width="20%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td class="stext" width="3%">&nbsp;20&nbsp;</td><td class="string" width="5%">&nbsp;</td><td class="stext" width="1%">&nbsp;г.</td></tr></table></td></tr><tr><td class="stext7" style="text-align: justify">С условиями приема указанной в платежном документе суммы, в т.ч. с суммой взимаемой платы за&nbsp;услуги банка,&nbsp;ознакомлен&nbsp;и&nbsp;согласен.</td></tr><tr><td style="padding-bottom: 0.5mm;"><table cellspacing="0" width="100%"><tr><td class="stext7" width="50%">&nbsp;</td><td class="stext7" width="1%"><b>Подпись&nbsp;плательщика&nbsp;</b></td><td class="string" width="40%">&nbsp;</td></tr></table></td></tr></table>
     </td>
   </tr>';
+        }
+        print "</table></body></html>";
+        break;
 }
-print "</table></body></html>";
-    break;
-}
-?>

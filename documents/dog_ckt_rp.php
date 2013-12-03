@@ -49,7 +49,13 @@ $pdf->Text(155, 62.7, $cval['price']);
 $pdf->newPage(); 
 
 $pdf->SetFont("times", "", 11);
-$pdf->splitText("ИНН ".$rval['inn'].", КПП ".$rval['kpp'].", ".$rval['firm'].".", array(array(62.2, 125.33),array(15,   130.33)), 63, 1);
+
+$str = "ИНН ".$rval['inn'].", ";
+if ($rval['kpp'] > 0) {
+    $str .= "КПП ".$rval['kpp'].", ";
+}
+$str .= $rval['firm'].".";
+$pdf->splitText($str, array(array(62.2, 125.33),array(15,   130.33)), 63, 1);
 
 $pdf->Text(24.8, 134.6, "Юридический адрес: ".$rval['legaladdress'].".");
 

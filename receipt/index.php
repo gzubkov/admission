@@ -57,16 +57,19 @@ if (!isset($_SESSION['joomlaregion'])) {
 	   <option value=\"4\">ИИТ - Москва</option>
 	   </select>";
 } else {
-   print "<tr><td>Регион:</td><td><input type=\"hidden\" name=\"region_id\" value=\"".$_SESSION['joomlaregion']."\">";
-   $region = $_SESSION['joomlaregion'];
-   $regname = $msl->getarray("SELECT name FROM `partner_regions` WHERE `id`='".$_SESSION['joomlaregion']."'");
-   print $regname['name'].".";
-   print "<tr><td>Посредник:</td><td>";
-   print "<select name=\"partner_id\">
+    print "<tr><td>Регион:</td><td><input type=\"hidden\" name=\"region_id\" value=\"".$_SESSION['joomlaregion']."\">";
+    $region = $_SESSION['joomlaregion'];
+    $regname = $msl->getarray("SELECT name FROM `partner_regions` WHERE `id`='".$_SESSION['joomlaregion']."'");
+    print $regname['name'].".";
+
+    if ($region != 3) {
+        print "<tr><td>Посредник:</td><td>";
+        print "<select name=\"partner_id\">
    	 	  <option value=1>ЦКТ</option>
 		  <option value=2>ИИТ</option>
-	  </select>";
-   $_SESSION['region'] = $_SESSION['joomlaregion'];
+	       </select>";
+    }
+    $_SESSION['region'] = $_SESSION['joomlaregion'];
 }
 
    print "</td></tr>";
@@ -85,7 +88,11 @@ print "<script type=\"text/javascript\">
        </script>";
 print "<select name=\"purpose\" id=\"purpose\">";
 $rval = $msl->getarray("select * FROM `receipt_purpose`");
-foreach($rval as $v) print "<option value=\"".$v['id']."\">".$v['text']."</option>";	      // countv=\"".$v['count']."\"
+
+foreach ($rval as $v) {
+    print "<option value=\"".$v['id']."\">".$v['text']."</option>";
+}
+
 print "</select>";
 print "</td></tr>\n";
 
@@ -93,10 +100,12 @@ print "<tr><td>Специальность:</td><td>";
 print "<select name=\"catalog\" id=\"catalog\">";
 
 $catalog = new Catalog(&$msl);
-$rval = $catalog->getAvailableByRegion($region, "%name% (%base%) %basicsemestr%");
+$rval = $catalog->getAvailableByRegion($region, "%name% (%base%) %basicsemestr%", 0, 0, 0);
 unset($catalog);
 
-foreach($rval as $k => $v) print "<option value=\"".$k."\">".$v."</option>";	      
+foreach ($rval as $k => $v) {
+    print "<option value=\"".$k."\">".$v."</option>";
+}
 print "</select>";
 print "</td></tr>\n";
 
@@ -120,8 +129,7 @@ print "<tr><td colspan=\"2\" style=\"height: 50px; text-align: center; vertical-
 print "</tbody></table></form></div></div>";
 
 if ($_SERVER['REMOTE_ADDR'] == $CFG_trustedip) {
-print "<BR>";
-    print "<div style=\"border: 1px solid #d3d3d3; background-color: #ffffff; width: 700px; margin:0 auto;\">";
+    print "<br><div style=\"border: 1px solid #d3d3d3; background-color: #ffffff; width: 700px; margin:0 auto;\">";
     print "<BR><CENTER><B>Печать квитанции с данными из базы</B></CENTER>";
 
     print "<div style=\"border: none; width: 98%; margin:0 auto;\">";
@@ -144,7 +152,11 @@ print "<BR>";
        </script>";
     print "<select name=\"purpose\" id=\"purpose2\">";
     $rval = $msl->getarray("select * FROM `receipt_purpose` WHERE `student`=1");
-    foreach($rval as $v) print "<option value=\"".$v['id']."\" countv=\"".$v['count']."\">".$v['text']."</option>";	      
+
+    foreach ($rval as $v) {
+        print "<option value=\"".$v['id']."\" countv=\"".$v['count']."\">".$v['text']."</option>";
+    }
+
     print "</select>";
     print "</td></tr>\n";
     print "<tr><td>Назначенная сессия:</td><td><select name=\"date\">";

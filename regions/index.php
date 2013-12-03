@@ -4,6 +4,9 @@ require_once('../class/mysql.class.php');
 require_once('../class/forms.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/documents.class.php');
+require_once('../class/moodle.class.php');
+
+$msl = new dMysql();
 
 if (isset($_SESSION['rights'])) {
     if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
@@ -11,6 +14,45 @@ if (isset($_SESSION['rights'])) {
             $_SESSION['joomlaregion'] = $_REQUEST['region'];
         } 
     }
+}
+
+if ($_REQUEST['act'] == 'createmoodleuser') {
+    new FabricApplicant($appl, $msl, $_REQUEST['id']);
+    $mdl = new Moodle($msl);
+    
+    $addr = end($appl->getAddress());	
+    $rval = $appl->getInfo('email');
+    $num  = $_REQUEST['num'];
+
+    $id = $mdl->createUser($appl->name, $appl->surname, $rval['e-mail'], '7428bd7aa76b3ae591ada0f46a2b22e8', $addr['city'], $num);
+    if ($id == 0) {
+        echo "error";
+	exit(0);
+    }
+ 
+    $appl->setNum($num);    
+    
+    $cat = new Catalog(&$msl);
+    $spc = $cat->getInfo($appl->catalog);
+    unset($cat);
+
+    $to      = $appl->surname." ".$appl->name." ".$appl->second_name."<".$rval['e-mail'].">, <gzubkov@gmail.com>";
+    $subject = "Интернет-обучение";
+    $message = "<html><body>
+        <p>Уважаем".$appl->inflection().", ".$appl->name." ".$appl->second_name."!</p>
+        <p>Вы зачислены на ".$spc['type']." «".$spc['name']."» системы электронного обучения (<A href=\"http://moodle.ins-iit.ru/\">http://moodle.ins-iit.ru/</A>)</p>
+        <p>Для входа в систему используйте адрес электронной почты как логин и временный пароль \"123456\".</p>
+ 	<P>По всем возникающим вопросам обращайтесь +7 (499) 1277453 доб.20, Татьяна Викторовна.</P>
+	<P>С уважением, Электронная приемная комиссия</P></body></html>";
+
+    $headers  = "Content-type: text/html; charset=utf-8 \r\n From: Система интернет-обучения <iit@ins-iit.ru>\r\n";
+   
+    if (mail($to, $subject, $message, $headers) && $id > 0) {
+	print "ok";
+    } else {
+        print "error";
+    }
+    exit(0);
 }
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -145,7 +187,7 @@ function loginA() {
 		    alert('Неправильный пароль!');
 		    break;
 		 default:
-		    alert('Фигвам!');
+		    alert('Неправильный пароль!');
 	      }
 	   }});     
 }
@@ -159,7 +201,7 @@ function unloginA() {
 		    window.location.reload();
 		    break;
 		 default:
-		    alert('Фигвам!');
+		    alert('Ошибка при выходе!');
 	      }
 	   }});     
 }
@@ -184,9 +226,8 @@ if (!isset($_SESSION['joomlaregion'])) {
     }
     exit(0);
 } 
-$region_id = $_SESSION['joomlaregion'];
 
-$msl = new dMysql();
+$region_id = $_SESSION['joomlaregion'];
 ?>
 
 <!-- Layout -->
@@ -304,8 +345,9 @@ case "addapplicant":
     $form->tdBox( 'remark', 'Сведения об образовании');
 
     $catalog = new Catalog($msl);
-    $bval = $catalog->getAvailableByRegion($region_id, "%abbr2% - %name% (%base%) - %qualify%");
+    $bval = $catalog->getAvailableByRegion($region_id, "%abbr2% - %name% (%base%) - %qualify%", 0, 0);
     unset($catalog);
+
     $form->tdSelect(  'Образовательная программа', 'catalog', $bval, 0, 1);
 
     print "<TR><TD colspan=2  style=\"border:0px; margin: 0; padding: 0;\">";
@@ -328,9 +370,9 @@ case "addapplicant":
     $form->tdBox( 'text', array('Серия','№'),  array('edu_serie','edu_number'), array(45,65), array(10,10), array('A','N') );
     $form->tdDateBox( 'Дата выдачи',           'edu_date',    1990, date('Y'), 'D' );
 
-    $form->tdBox( 'text', 'Образовательное учреждение',           'edu_institution',      250, 120, 'O' ); 
-    $form->tdBox( 'text', 'Город, в котором окончено образовательное учреждение',           'edu_city',      250, 120, 'O' ); 
-    $form->tdBox( 'text', 'Специальность, профессия',           'edu_specialty',      250, 120, 'O' ); 
+    $form->tdBox( 'text', 'Образовательная организация', 'edu_institution', 250, 120, 'O' ); 
+    $form->tdBox( 'text', 'Населенный пункт',            'edu_city',        250, 120, 'O' ); 
+    $form->tdBox( 'text', 'Специальность, профессия',    'edu_specialty',   250, 120, 'O' ); 
 
     $form->tdRadio(   'Иностранный язык',   'language', $msl->getArrayById("SELECT id, name FROM reg_flang",'id','name'), 1, 1);
     $form->tdRadio(   'Высшее образование', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), 0, 1);
@@ -433,8 +475,8 @@ case "editapplicant":
     $form->tdBox( 'text', array('Серия','№'),  array('edu_serie','edu_number'), array(45,65), array(10,10), array('A','N'), array($apval['edu_serie'],$apval['edu_number']) );
     $form->tdDateBox( 'Дата выдачи',           'edu_date',    1990, date('Y'), 'D', 0, 0, date('d.m.Y', strtotime($apval['edu_date'])));
 
-    $form->tdBox( 'text', 'Образовательное учреждение',           'edu_institution',      250, 120, 'O', $apval['edu_institution'] ); 
-    $form->tdBox( 'text', 'Город, в котором окончено образовательное учреждение',           'edu_city',      250, 120, 'O', $apval['edu_city'] ); 
+    $form->tdBox( 'text', 'Образовательная организация', 'edu_institution', 250, 120, 'O', $apval['edu_institution'] ); 
+    $form->tdBox( 'text', 'Населенный пункт',            'edu_city',        250, 120, 'O', $apval['edu_city'] ); 
     $form->tdBox( 'text', 'Специальность, профессия',           'edu_specialty',      250, 120, 'O', $apval['edu_specialty'] ); 
     
     $form->tdRadio(   'Иностранный язык',   'language', $msl->getArrayById("SELECT id, name FROM reg_flang",'id','name'), $apval['language'], 1);
@@ -510,7 +552,8 @@ case "applicantupdate":
 
 case "showstudentdocuments":
     new FabricApplicant($appl, $msl, "r".$_REQUEST['id']);
-    
+    $mdl = new Moodle($msl);
+
     print "<H1 class=\"title\">Работа с абитуриентом \"".$appl->surname." ".$appl->name." ".$appl->second_name."\"</H1><DIV id=\"output\"></DIV>";
     print "<DIV id=\"myaccordion\">\n";   
     print "<BR>";
@@ -518,7 +561,33 @@ case "showstudentdocuments":
     print "<DIV><TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
     	
     $appl->printDocs();
-    print "<TR><TD>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.\n</TD></TR>";
+
+    if ($region_id != 3) {
+        print "<TR><TD>Для просмотра документов вам потребуется <A href=\"http://get.adobe.com/reader/\">Adobe&copy; Reader</A>.\n</TD></TR>";
+    } else {
+        print "<TR><TD>\n";
+	$email = $appl->getInfo('email','num');	
+
+	if ($mdl->searchUser($email['e-mail']) > 0) {
+	    print "<b>Система интернет-обучения Moodle: пользователь уже создан.</b><br>";
+	} else {
+            print "<script src=\"http://code.jquery.com/jquery-1.9.1.js\"></script>
+<script language=\"javascript\">
+                   function makeUser() {
+		          $.ajax({
+      type: \"POST\",
+      url: \"index.php\",
+      data: 'act=createmoodleuser&id=r".$_REQUEST['id']."&num='+$( \"#num\" ).val(),
+      success: function(msg){alert(msg);}
+		   })
+}
+	           </script>\n";
+            print "<br>Номер личного дела в БД <INPUT type=\"text\" maxlength=4 value=\"".$email['num']."\" id=\"num\" style=\"width: 40px;\"> <A onclick=\"makeUser();\">Создать пользователя в Системе интернет-обучения</A><BR>\n";  
+	}
+        print "</TD></TR>";
+
+    }
+
     print "</TBODY></TABLE></DIV>\n\n"; 
     break;
 
@@ -676,9 +745,9 @@ if ($agreed == 0) {
     print "<TR><TD>Электронная почта:</TD><TD><A href=\"mailto:".$rpval['e-mail']."\">".$rpval['e-mail']."</A>.</TD></TR>";
 
 if ($agreed == 0) {    
-    print "<TR><TD style=\"vertical-align: top;\">Замечания:</TD><TD><TEXTAREA name=\"remarks\" WRAP=\"virtual\" COLS=\"90\" ROWS=\"3\"></TEXTAREA></TD></TR>";
+    print "<FORM method=\"POST\"><TR><TD style=\"vertical-align: top;\">Замечания:</TD><TD><TEXTAREA name=\"remarks\" WRAP=\"virtual\" COLS=\"90\" ROWS=\"3\"></TEXTAREA></TD></TR>";
     print "<INPUT type=\"hidden\" name=\"act\" value=\"verified\">";
-    print "<TR><TD colspan=2 style=\"text-align: center;\"><INPUT type=submit value=\"Отправить\"></TD></TR>";
+    print "<TR><TD colspan=2 style=\"text-align: center;\"><INPUT type=submit value=\"Отправить\"></TD></TR></FORM>";
 } else {
     print "<TR><TD colspan=2>Данные подтверждены ".date( 'j.m.Y в h:i', strtotime($agreed['date'])).".";
     if ($agreed['used'] == 1) {print " Замечания выполнены. В случае изменения Ваших данных, просьба незамедлительно связаться с нами по электронной почте.";}

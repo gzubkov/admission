@@ -44,7 +44,7 @@ $(document).ready(function() {
    $("#dialog-message").dialog(
      {autoOpen: false,
       modal: true,
-      width: 600,		
+      width: 700,		
       resizable: false
    });
    

@@ -13,7 +13,7 @@ function deleteApplicant($id)
     if ($msl->deleteArray('reg_applicant', array('id'=>$id))) {
         print "ok\n";
     } else {
-        print "couldn't use query";
+        print "Ошибка при удалении поступающего ".$id."!";
     }
 }
 
@@ -38,7 +38,7 @@ function sendRequestDocs($id)
 <LI>номер телефона для связи.</LI>
 </UL></P>
         <P>Копии документов можно представить в виде фотографии, сделанной с использованием сканера, фотоаппарата или мобильного телефона (в приемлемом качестве).</P>
-        <P>По всем возникающим вопросам обращайтесь +7 (499) 1277453 доб.20, Ирина Викторовна.</P>
+        <P>По всем возникающим вопросам обращайтесь +7 (499) 1277453 доб.20, Татьяна Викторовна.</P>
         <P>С уважением, Электронная приемная комиссия</P>
    </body>
 </html>";
@@ -67,10 +67,7 @@ function changeType($id, $type)
       	$to      = $appl->surname." ".$appl->name." ".$appl->second_name."<".$rval['e-mail'].">";
         $subject = "Поступление в ".$uni['abbreviation']."";
 
-      	$message = "
-<html>
-    <head><title>Поступление ".$uni['abbreviation']."</title></head>
-    <body>
+      	$message = "<html><head><title>Поступление ".$uni['abbreviation']."</title></head><body>
         <p>Уважаем".$appl->inflection().", ".$appl->name." ".$appl->second_name."!</p>
         <p>Рассмотрев присланные Вами копии документов, предварительно сообщаем, что Вы можете быть зачислены в ".$uni['name']." на ".$appl->semestr." семестр ".ceil($appl->semestr/2)." курса на ".$spc['type']." «".$spc['name']."» заочной формы обучения с использованием дистанционных образовательных технологий.</p>
         <p>Комплект документов абитуриента Вы можете распечатать с личного кабинета, где первоначально регистрировались (<A href=\"http://admission.iitedu.ru/\">http://admission.iitedu.ru/</A>). Для входа в систему используйте адрес электронной почты в качестве логина и в качестве пароля серию и номер паспорта, написанные слитно.</p>
@@ -96,10 +93,8 @@ function changeType($id, $type)
 117152, г. Москва, Загородное шоссе, д. 7, корп. 5, строение 1,
 \"Институт информационных технологий\".</P>
         <P>После зачисления в ВУЗ, на Ваш электронный адрес будут высланы идентификационные данные для доступа в систему интернет-обучения, а также по почте будут отправлены студенческий билет, учебный план и Ваши экземпляры договоров.</P>
-<P>По всем возникающим вопросам обращайтесь +7 (499) 1277453 доб.20, Ирина Викторовна.</P>
-<P>С уважением, Электронная приемная комиссия</P>
-   </body>
-</html>";
+<P>По всем возникающим вопросам обращайтесь +7 (499) 1277453 доб.20, Татьяна Викторовна.</P>
+<P>С уважением, Электронная приемная комиссия</P></body></html>";
 
         $headers  = "Content-type: text/html; charset=utf-8 \r\n";
       	$headers .= "From: Электронная приемная комиссия <iit@ins-iit.ru>\r\n";
@@ -112,7 +107,9 @@ function changeType($id, $type)
 
     if ($mail == 1 && $msl->updateArray('reg_applicant', array('type'=>$type), array('id'=>$id))) {
         print "1";
-    } else print "Ошибка";
+    } else {
+        print "Ошибка";
+    }
 }
 
 function getSpecialties($id) {
@@ -150,11 +147,11 @@ function getSpecialties($id) {
 
       	print "<TR><TD>";
       	print "<SELECT id=\"catalog".$id."\">";
-      	$bval = $cat->getAvailableSpecialtiesByPgid(1, "%shortname% - %qualify%");
+      	$bval = $cat->getAvailableSpecialtiesByPgid(1, "%name%");
       	foreach($bval as $k => $v) {
-            print "<OPTION value=".$k;
+            print "<option value=".$k;
 	    if ($k == $appl->catalog) print " selected";
-	    print ">".$v."</OPTION>";
+	    print ">".$v."</option>";
         }
       	print "</SELECT> <SELECT id=\"profile".$id."\">";
       	$bval    = $cat->getAllProfiles();
@@ -165,21 +162,26 @@ function getSpecialties($id) {
 	    if ($k == $appl->profile) print " selected";
 	    print ">".$v."</OPTION>";
         }
-        print "</SELECT> <A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=setsemestr&id=".$id."&s='+$('#semestr".$id."').val()+'&catalog='+$('#catalog".$id." option:selected').val()+'&profile='+$('#profile".$id." option:selected').val(), beforeSend: function() {\$.blockUI({ centerY: 0, css: { top: '10px', left: '', right: '10px' }, message: 'Ваш запрос обрабатывается...' })}, success: function(msg) {\$.unblockUI(); $('#dialog-message').dialog('close'); if (msg != 1){alert(msg)}}})\">Сменить</A>"; 
+        print "</SELECT> "; /*<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=setsemestr&id=".$id."&s='+$('#semestr".$id."').val()+'&catalog='+$('#catalog".$id." option:selected').val()+'&profile='+$('#profile".$id." option:selected').val(), beforeSend: function() {\$.blockUI({ centerY: 0, css: { top: '10px', left: '', right: '10px' }, message: 'Ваш запрос обрабатывается...' })}, success: function(msg) {\$.unblockUI(); $('#dialog-message').dialog('close'); if (msg != 1){alert(msg)}}})\">Сменить</A>"; */
         print "</TD></TR>";
    
         print "<TR><TD>";
         print "<INPUT type=text id=\"semestr".$id."\" value=\"".$appl->semestr."\" maxlength=2 style=\"width: 15px;\"> ";
 
-        print "<SELECT id=\"baseedu".$id."\">";
-        $earr = $cat->getSubCatalogsByRegion($reg['region'], $appl->catalog);
-      
-        foreach($earr as $k => $v) {
-            print "<OPTION value=".$k;
-	    if ($k == $appl->catalog) print " selected";
-	    print ">".$v."</OPTION>";
-        }
-        print "</SELECT> "; 
+        $earr = $cat->getSubCatalogsByRegion($reg['region'], $appl->catalog, 0, 1);
+        if (count($earr) > 1) {
+            print "<SELECT id=\"baseedu".$id."\">";
+            foreach($earr as $k => $v) {
+                print "<OPTION value=".$k;
+	        if ($k == $appl->catalog) print " selected";
+	        print ">".$v."</OPTION>";
+            }
+            print "</SELECT> ";
+        } else {
+            foreach($earr as $k => $v) {
+	        print "<INPUT type=\"hidden\" id=\"baseedu".$id."\" value=\"".$k."\"> ".$v." ";
+            }
+	} 
 
         print "<SELECT id=\"region".$id."\">";
         $tarr = $msl->getarray("SELECT id, name FROM `partner_regions` WHERE `id` = 1 or `id` = 3 or `id` = 5",1);
@@ -192,7 +194,7 @@ function getSpecialties($id) {
       	print "</SELECT> ";
     
 
-      print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=setsemestr&id=".$id."&s='+$('#semestr".$id."').val()+'&catalog='+$('#baseedu".$id." option:selected').val()+'&region='+$('#region".$id." option:selected').val(), beforeSend: function() {\$.blockUI({ centerY: 0, css: { top: '10px', left: '', right: '10px' }, message: 'Ваш запрос обрабатывается...' })}, success: function(msg) {\$.unblockUI(); if (msg != 1){alert(msg)}}})\">Проставить семестр</A>\n";
+      print "<A onclick=\"$.ajax({url: 'get.php', type: 'POST', data:'act=setsemestr&id=".$id."&s='+$('#semestr".$id."').val()+'&catalog='+$('#catalog".$id." option:selected').val()+'&profile='+$('#profile".$id." option:selected').val()+'&region='+$('#region".$id." option:selected').val(), beforeSend: function() {\$.blockUI({ centerY: 0, css: { top: '10px', left: '', right: '10px' }, message: 'Ваш запрос обрабатывается...' })}, success: function(msg) {\$.unblockUI(); if (msg != 1){alert(msg)}}})\">Проставить семестр и регион</A>\n";
 
       print "</TD></TR>";
       
@@ -319,7 +321,9 @@ switch($_POST['act'])
     case 'savebdindex':
          if ($msl->updateArray("reg_applicant", array('num'=>$_POST['index']), array('id'=>$_POST['id']))) {
              print "ok";
-         } else print "error";
+         } else {
+             print "error";
+         }
 	 break;
 
     case 'savedosdachi':
@@ -362,22 +366,20 @@ switch($_POST['act'])
 	$to = $appl->surname." ".$appl->name." ".$appl->second_name."<".$rval['e-mail'].">";
       	$subject = "Интернет-обучение";
 
-      	$message = "
-<html>
-    <body>
+      	$message = "<html><body>
         <p>Уважаем".$appl->inflection().", ".$appl->name." ".$appl->second_name."!</p>
-        <p>Вы зачислены на ".$spc['type']." «".$spc['name']."» системы электронного обучения (<A href=\"http://moodle.ins-iit.ru/\">http://moodle.ins-iit.ru/</A>)</p>
+        <p>Вы зачислены на ".$spc['type']." «".$spc['name']."» системы электронного обучения (<a href=\"http://moodle.ins-iit.ru/\">http://moodle.ins-iit.ru/</a>)</p>
         <p>Для входа в систему используйте адрес электронной почты как логин и временный пароль \"123456\".</p>
- 	<P>По всем возникающим вопросам обращайтесь +7 (499) 1277453 доб.20, Ирина Викторовна.</P>
-	<P>С уважением, Электронная приемная комиссия</P>
-   </body>
-</html>";
+ 	<p>По всем возникающим вопросам обращайтесь +7 (499) 1277453 доб.20, Татьяна Викторовна.</p>
+	<p>С уважением, Электронная приемная комиссия</p></body></html>";
 
 	$headers  = "Content-type: text/html; charset=utf-8 \r\n";
       	$headers .= "From: Интернет-обучение <iit@ins-iit.ru>\r\n";
       	if (mail($to, $subject, $message, $headers) && $id > 0) {
 	    print "ok";
-	} else print "error";
+	} else {
+            print "error";
+        }
         break;
 
     case 'createmoodleusertest':
@@ -397,23 +399,20 @@ switch($_POST['act'])
       	$to = $appl->surname." ".$appl->name." ".$appl->second_name."<".$rval['e-mail'].">";
       	$subject = "Вступительные испытания";
 
-      	$message = "
-<html>
-    <body>
-        <p>Уважаем".$appl->inflection().", ".$appl->name." ".$appl->second_name."!</p>
+      	$message = "<html><body><p>Уважаем".$appl->inflection().", ".$appl->name." ".$appl->second_name."!</p>
         <p>Для поступления на ".$spc['type']." «".$spc['name']."» Вам необходимо пройти вступительные испытания по следующим дисциплинам: ".$subjects.". Вы можете пройти их в любое удобное для Вас время в разделе «Вступительные испытания» системы электронного обучения (<A href=\"http://moodle.ins-iit.ru/course/view.php?id=71\">http://moodle.ins-iit.ru/</A>)</p>
         <p>Для входа в систему используйте адрес электронной почты как логин и временный пароль \"123456\".</p>
-        <p>В случае неуспешной сдачи вступительных испытаний, Вам будет предложено пройти их еще раз.</P>
- 	<P>По всем возникающим вопросам обращайтесь +7 (499) 1277453 доб.20, Ирина Викторовна.</P>
-	<P>С уважением, Электронная приемная комиссия</P>
-   </body>
-</html>";
+        <p>В случае неуспешной сдачи вступительных испытаний, Вам будет предложено пройти их еще раз.</p>
+ 	<p>По всем возникающим вопросам обращайтесь +7 (499) 1277453 доб.20, Татьяна Викторовна.</p>
+	<p>С уважением, Электронная приемная комиссия</p></body></html>";
 
 	$headers  = "Content-type: text/html; charset=utf-8 \r\n";
       	$headers .= "From: Электронная приемная комиссия <iit@ins-iit.ru>\r\n";
       	if (mail($to, $subject, $message, $headers) && $id > 0) {
 	    print "ok";
-	} else print "error";
+	} else {
+            print "error";
+        }
         break;
 
     case 'deleteapplicant':

@@ -34,6 +34,7 @@ class Insertion
 	$array['second_name'] = $this->_makeTitle($array['second_name']);
 	$array['birthday']    = $this->_makeDate($array['birthday']);
 	$array['doc_date']    = $this->_makeDate($array['doc_date']);
+	$array['edu_date']    = $this->_makeDate($array['edu_date']);
 	$array['ip']          = sprintf('%u', ip2long($_SERVER['REMOTE_ADDR'])); 
 
 	$arr  = $array['homeaddress'];

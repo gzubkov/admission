@@ -26,7 +26,7 @@ unset($catalog);
 if ($r['num'] > 0) {
     $pdf->Text(99.2, 18.1, sprintf("0510%1$04d-03-13/14", $r['num']));
 } else {
-    $pdf->Text(99.2, 18.1, "0510          -03-13/14");
+    $pdf->Text(99.2, 18.1, "0504          -03-13/14z");
 }
 
 if ($rval['typen'] == 1) { 

@@ -8,7 +8,7 @@ class Catalog
         return true;
     }
 
-    public function getAvailableByPgid($pgid, $string="%abbr% - %name% (%base%)", $archivetext=NULL) 
+    public function getAvailableByPgid($pgid, $string="%abbr% - %name% (%base%)", $archivetext=NULL, $viewable=1, $applicable=1) 
     {
         $catalogs = array();
 	
@@ -19,7 +19,13 @@ class Catalog
 		  LEFT JOIN admission.`universities_departments` e ON c.department=e.id 
                   LEFT JOIN admission.`universities_faculties` f ON e.faculty=f.id 
 		  LEFT JOIN admission.`universities` g ON f.university=g.id WHERE b.id='".$pgid."' ";
-        if ($archivetext == NULL) $query .= "AND a.archive = '0' AND a.applicable = '1' ";
+        if ($archivetext == NULL) {
+	    $query .= "AND a.archive = '0' "; //AND a.applicable = '1' ";
+	    if ($applicable == 1) {
+	        $query .= "AND a.applicable = '1' ";
+	    }
+	}
+	if ($viewable == 1) $query .= "AND a.viewable = '1' "; 
 	$query.= "ORDER BY a.id ASC";
         $rval = $this->msl->getArray($query,1); 
 
@@ -42,10 +48,10 @@ class Catalog
 	return $catalogs;
     }
 
-    public function getAvailableByRegion($region, $string="%abbr% - %name% (%base%)", $archivetext=NULL) 
+    public function getAvailableByRegion($region, $string="%abbr% - %name% (%base%)", $archivetext=NULL, $viewable=1, $applicable=1) 
     {
         $pgid = $this->msl->getarray("SELECT pgid FROM partner_regions WHERE id='".$region."' LIMIT 1",0);
-	return $this->getAvailableByPgid($pgid['pgid'], $string, $archivetext);
+	return $this->getAvailableByPgid($pgid['pgid'], $string, $archivetext, $viewable, $applicable);
     }
 
     public function getInfo($catalog, $profile=0) 
@@ -54,15 +60,15 @@ class Catalog
                           FROM `admission`.`specialties` a LEFT JOIN catalogs b ON a.id=b.specialty
                           WHERE b.id='".$catalog."'");
 	switch($info['spec_code'][strlen($info['spec_code'])-1]) {
-        case 2:
-	    $info['type'] = "направление подготовки";
-	    $info['typen'] = 2;
-	    break;
+            case 2:
+	        $info['type'] = "направление подготовки";
+	        $info['typen'] = 2;
+	        break;
 
-	default:
-	    $info['type'] = "специальность";
-	    $info['typen'] = 1;
-	    break;
+	    default:
+	        $info['type'] = "специальность";
+	        $info['typen'] = 1;
+	        break;
 	}
 
 	$info['termtext'] = $info['term'];
@@ -121,7 +127,7 @@ class Catalog
         return $this->msl->getArrayById($query,'id','specialty'); 
     }
 
-    public function getSubCatalogsByRegion($region, $catalog, $archive=0) 
+    public function getSubCatalogsByRegion($region, $catalog, $archive=0, $applicable=0) 
     {
         $pgid = $this->msl->getarray("SELECT pgid FROM partner_regions WHERE id='".$region."' LIMIT 1",0);
 	$specialty = $this->msl->getarray("SELECT specialty FROM catalogs WHERE id='".$catalog."' LIMIT 1", 0);
@@ -133,6 +139,9 @@ class Catalog
         if ($archive == 0) {
 	    $query .= " AND a.archive=0";
 	}
+        if ($applicable == 1) {
+            $query .= " AND a.applicable=1";
+	} 
 	return $this->msl->getArrayById($query,'id','short'); 
     }
 
@@ -189,4 +198,3 @@ class Catalog
     }
 
 }
-?>

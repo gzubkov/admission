@@ -93,7 +93,7 @@ class Applicant
 	    $str .= $array['street'].", ";
         }
    	if ($array['home'] != 0) {
-	    $str .= "дом ".$array['home'];
+	    $str .= "д. ".$array['home'];
 	}
 	if ($array['building'] != '') {
 	    $str .= "/".$array['building'];
@@ -204,7 +204,7 @@ class Applicant
 	    
 	    $ival = $this->getRups();
             if ($ival['pay'] > 0) {
-		print "<tr><td><A href=\"".$prefix."documents/ds_ckt.php?applicant_id=".$this->_id."\">Дополнительное соглашение</A>";
+		print "<tr><td><A href=\"".$prefix."documents/ds_ckt.php?applicant=".$this->_id."\">Дополнительное соглашение</A>";
 		if ($remarks == 1) print " (2 экземпляра)";
 		print "</td></tr>\n";
 		print "<tr><td><A href=\"".$prefix."receipt/kvit.php?purpose=3&applicant_id=".$this->_id."\">Квитанция для оплаты досдач</A></td></tr>\n";
@@ -295,6 +295,12 @@ class RegApplicant extends Applicant
         return $rval;
     }
 
+    public function getRups() 
+    {
+        return $this->msl->getarray("SELECT pay FROM partner_applicant WHERE id='".$this->_id."' LIMIT 1",0);
+    }
+ 
+
     public function printDocs($prefix="../", $remarks=0) 
     {
         $rvalx = $this->getInfo('birthday', 'pay');
@@ -310,15 +316,20 @@ class RegApplicant extends Applicant
 	    print "<tr><td><A href=\"".$prefix."documents/anketa.php?applicant=r".$this->_id."\">Заявление абитуриента (на первый семестр)</A></td></tr>\n";
 
 	default:
+	    print "<tr><td><A href=\"".$prefix."documents/anketa.php?applicant=r".$this->_id."\">Заявление абитуриента (на первый семестр)</A></td></tr>\n";
 	    print "<tr><td><A href=\"".$prefix."documents/anketa2.php?applicant=r".$this->_id."\">Заявление абитуриента</A></td></tr>\n";
 	    print "<tr><td><A href=\"".$prefix."documents/perez.php?applicant_id=r".$this->_id."\">Заявление о перезачете дисциплин</A></td></tr>\n";
 	}
 	
 	if ($rvalx['pay'] > 0) {
-	    print "<tr><td><A href=\"".$prefix."documents/ds_ckt_rp.php?applicant=r".$this->_id."\">Дополнительное соглашение</A>";
+	    if ($this->region == 3) {
+	        print "<tr><td><A href=\"".$prefix."documents/ds_ckt.php?applicant=r".$this->_id."\">Дополнительное соглашение</A>";
+	    } else {
+	        print "<tr><td><A href=\"".$prefix."documents/ds_ckt_rp.php?applicant=r".$this->_id."\">Дополнительное соглашение</A>";
+	    }
 	    if ($remarks == 1) print " (3 экземпляра)";
 	    print "</td></tr>\n";
-	    print "<tr><td><A href=\"".$prefix."receipt/kvit.php?purpose=3&applicant=r".$this->_id."\">Квитанция для оплаты досдач</A></td></tr>\n";
+	    print "<tr><td><A href=\"".$prefix."receipt/kvit.php?purpose=3&applicant_id=r".$this->_id."\">Квитанция для оплаты досдач</A></td></tr>\n";
 	}
 	print "<tr><td><A href=\"".$prefix."documents/dog_ckt.php?applicant=r".$this->_id."\">Договор на оказание платных образовательных услуг</A>"; 
 	if ($remarks == 1) print " (3 экземпляра)";
@@ -347,5 +358,8 @@ class RegApplicant extends Applicant
 	}
     }
 
+    public function setNum($num) {
+        $this->msl->updateArray('partner_applicant', array('num'=>$num), array('id'=>$this->_id));
+    }
 }
 ?>
