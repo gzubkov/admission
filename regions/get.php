@@ -1,91 +1,106 @@
 <?php
-require_once('../../conf.php');
-require_once('../class/mysql.class.php');
+require_once '../../conf.php';
+require_once '../class/mysql.class.php';
+
 $mslk = new dMysql();
 
 $rus = array('Первый','Второй','Третий','Четвертый');
 
 if (!is_numeric($_POST['catalog'])) {
-    print "error";
+    echo "error";
     exit(0);
 }
 
 $gval = $mslk->getarray("SELECT specialty,internet,basicsemestr,term,termm FROM `catalogs` WHERE `id`='".$_POST['catalog']."'");
 
-print "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
+echo "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
 
 if ($gval['basicsemestr'] > 1) {
-    print "<TR><TD colspan=\"2\">С 01.01.2011 поступление на данную образовательную программу возможно только на ".$gval['basicsemestr']." и выше семестры. Для зачисления необходимо предоставить академическую справку, диплом о неполном высшем образовании, диплом о среднем профессиональном образовании или диплом о полном высшем образовании.</TD></TR>\n";
-    print "</TBODY></TABLE>"; 
+    echo "<TR><TD colspan=\"2\">С 01.01.2011 поступление на данную образовательную программу возможно только на ".$gval['basicsemestr']." и выше семестры. Для зачисления необходимо предоставить академическую справку, диплом о неполном высшем образовании, диплом о среднем профессиональном образовании или диплом о полном высшем образовании.</TD></TR>\n";
+    echo "</TBODY></TABLE>"; 
 } else {
 
 if ($gval['internet'] > 0) {
-    print "<TR><TD style=\"width: ".$_POST['width']."px;\">Обучение через Интернет<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
-    print "<TD><LABEL><INPUT type=radio name=\"internet\" value=\"1\" checked>да</LABEL><LABEL><INPUT type=radio name=\"internet\" value=\"0\">нет</LABEL></TD></TR>";    
+    echo "<TR><TD style=\"width: ".$_POST['width']."px;\">Обучение через Интернет<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
+    echo "<TD><LABEL><INPUT type=radio name=\"internet\" value=\"1\" checked>да</LABEL><LABEL><INPUT type=radio name=\"internet\" value=\"0\">нет</LABEL></TD></TR>";    
+} else {
+    echo "<INPUT type=\"hidden\" name=\"internet\" value=\"0\">";
+}
 
-    print "<TR><TD style=\"width: ".$_POST['width']."px;\">Начальный семестр обучения<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
-    print "<TD><INPUT type=text name=\"semestr\" value=\"";
+/*    echo "<TR><TD style=\"width: ".$_POST['width']."px;\">Начальный семестр обучения<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
+    echo "<TD><INPUT type=text name=\"semestr\" value=\"";
     if ($_POST['semestr'] != 0) {
-        print "1";
+        echo "1";
     } else {
-        print $_POST['semestr'];
+        echo $_POST['semestr'];
     }
-    print "\" size=2 maxlength=2> из ".($gval['term']*2+$gval['termm']/6)." (указывать 0, если неизвестно).</TD></TR>"; 
-} else {
-    print "<INPUT type=\"hidden\" name=\"internet\" value=\"0\">";
-}
+    echo "\" size=2 maxlength=2> из ".($gval['term']*2+$gval['termm']/6)." (указывать 0, если неизвестно).</TD></TR>"; */
 
-print "<INPUT type=\"hidden\" name=\"traditional_form\" value=\"1\">\n";
+echo "<INPUT type=\"hidden\" name=\"traditional_form\" value=\"1\">\n";
 
-$prval = $mslk->getarray("SELECT * FROM `specialties_profiles` WHERE `specialty` ='".$gval['specialty']."';", 1);
+$prval = $mslk->getarray("SELECT b.id,b.name,b.internet FROM `catalogs_profiles` a LEFT JOIN `specialties_profiles` b ON a.profile=b.id WHERE `catalog` ='".$_POST['catalog']."' AND applicable=1;", 1);
 if ($prval != 0) {
-    print "<TR><TD style=\"width: ".$_POST['width']."px;\">Профиль</TD>\n";
+    echo "<TR><TD style=\"width: ".$_POST['width']."px;\">Профиль</TD>\n";
     if (sizeof($prval) == 1) {
-        print "<TD>".$prval[0]['name'].".<INPUT type=\"hidden\" name=\"profile\" value=\"".$prval[0]['id']."\"></TD></TR>";
+        echo "<TD>".$prval[0]['name'].".<INPUT type=\"hidden\" name=\"profile\" value=\"".$prval[0]['id']."\"></TD></TR>";
     } else {
-        print "<TD><SELECT name=\"profile\">";
+        echo "<TD><SELECT name=\"profile\">";
 	foreach($prval as $v) {
-	    print "<OPTION value=\"".$v['id']."\">".$v['name']."</OPTION>";
+	    echo "<OPTION value=\"".$v['id']."\">".$v['name']."</OPTION>";
 	}
-	print "</SELECT></TD></TR>\n";
+	echo "</SELECT></TD></TR>\n";
     }
 }
 
+if ($_SESSION['joomlaregion'] == 3) {
+    if (isset($_POST['semestr']) === false) {
+        $_POST['semestr'] = 1;
+    }
 
-print "<TR><TD style=\"width: ".$_POST['width']."px;\">Начальный семестр обучения<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
-print "<TD><INPUT type=text name=\"semestr\" value=\"";
-if ($_POST['semestr'] != 0) {print "1";} else {print $_POST['semestr'];}
-print "\" size=2 maxlength=2> из ".($gval['term']*2+$gval['termm']/6)." (указывать 0, если неизвестно).</TD></TR>"; 
+    echo "<TR><TD style=\"width: ".$_POST['width']."px;\">Начальный семестр обучения<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
+    echo "<td><select name=\"semestr\">";
 
+    for ($i = 1; $i <= ($gval['term']*2 + $gval['termm']/6); $i++) {
+        echo "<option value=\"".$i."\"";
+        if ($i == $_POST['semestr']) {
+            echo " selected";
+        }
+        echo ">".$i."</option>";
+    }
 
-if ($_SESSION['edu_base'] == 2) {
-    print "<TR><TD style=\"width: ".$_POST['width']."px;\">Имею СПО по профилю<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
-    print "<TD><LABEL><INPUT type=radio name=\"spo\" value=\"1\">да</LABEL><LABEL><INPUT type=radio name=\"spo\" value=\"0\" checked>нет</LABEL></TD></TR>"; 
+    echo "</select> (только в порядке восстановления!)</TD></TR>"; 
 } else {
-    print "<INPUT type=\"hidden\" name=\"spo\" value=\"0\">";
+    echo "<input type=hidden name=\"semestr\" value=\"1\">"; 
 }
-print "</TBODY></TABLE>";
 
-print "<h3>Результаты ЕГЭ предыдущих годов (если имеются)</h3>";
-print "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+echo "<INPUT type=\"hidden\" name=\"spo\" value=\"0\">";
+echo "</TBODY></TABLE>";
+
+echo "<h3>Результаты ЕГЭ предыдущих годов (если имеются)</h3>";
+echo "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
 $rval = $mslk->getarray("SELECT subject,name FROM `reg_ege_minscores` LEFT JOIN `reg_subjects` ON `reg_subjects`.id = `reg_ege_minscores`.subject 
-                  WHERE specialty = '".$gval['specialty']."' LIMIT 0, 10", 1);
+                         WHERE specialty = '".$gval['specialty']."' LIMIT 3", 1);
 
 $cell = 0;
-for($i = 0; $i < count($rval); $i++) {
-    print "<TR><TD style=\"width: ".$_POST['width']."px;\">".$rus[$i]." предмет</TD><TD>".$rval[$i]['name'].".</TD></TR>";   
-    print "<INPUT type=\"hidden\" name=\"ege[".($i+1)."][subject]\" value=\"".$rval[$i]['subject']."\">";
+for ($i = 0; $i < count($rval); $i++) {
+    echo "<TR><TD style=\"width: ".$_POST['width']."px;\">".$rus[$i]." предмет</TD><TD>".$rval[$i]['name'].".</TD></TR>";   
+    echo "<INPUT type=\"hidden\" name=\"ege[".($i+1)."][subject]\" value=\"".$rval[$i]['subject']."\">";
 
-    print "<TR><TD style=\"width: ".$_POST['width']."px;\">Оценка (в 100-й шкале)</TD>";
-    print "<TD><INPUT type=\"text\" name=\"ege[".($i+1)."][score]\" maxlength=\"3\" style=\"width: 30px;\" id=\"ege[".($i+1)."][score]\" class=\"validate[optional,custom[scores]] text-input\">.</TD></TR>";
-    print "<TR><TD style=\"width: ".$_POST['width']."px;\">Номер документа</TD>";
-    print "<TD><INPUT type=\"text\" name=\"ege[".($i+1)."][document]\" maxlength=\"15\" style=\"width: 120px;\" id=\"ege[".($i+1)."][document]\" class=\"validate[optional,custom[ege]] text-input\">.</TD></TR>";   
+    echo "<TR><TD style=\"width: ".$_POST['width']."px;\">Оценка (в 100-й шкале)</TD>";
+    echo "<TD><INPUT type=\"text\" name=\"ege[".($i+1)."][score]\" maxlength=\"3\" style=\"width: 30px;\" id=\"ege[".($i+1)."][score]\" class=\"validate[optional,custom[scores]] text-input\">.</TD></TR>";
+    echo "<TR><TD style=\"width: ".$_POST['width']."px;\">Год сдачи</TD>";   
+    echo "<td><select name=\"ege[".($i+1)."][year]\" id=\"ege[".($i+1)."][year]\" class=\"validate[optional] text-input\">";
+    
+    for ($j = date('y'); $j >= 12; $j--) {
+        echo "<option value=".$j.">20".$j."</option>";
+    }
+    echo "</select></td></tr>";
 }
-print "</TBODY></TABLE>";
+echo "</TBODY></TABLE>";
 
-print "<H3>Сдача вступительных экзаменов</H3>";
-print "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
-print "<TR><LABEL><TD><input type=\"hidden\" name=\"traditional_form\" value=\"0\"> <INPUT type=\"checkbox\" id=\"traditional_form\" name=\"traditional_form\" checked=\"false\"></TD><TD>Допустить абитуриента до сдачи вступительных экзаменов в традиционно принятой форме.</LABEL></TD></TR>";
-print "</TBODY></TABLE>";
+echo "<H3>Сдача вступительных экзаменов</H3>";
+echo "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">";
+echo "<TR><LABEL><TD><input type=\"hidden\" name=\"traditional_form\" value=\"0\"> <INPUT type=\"checkbox\" id=\"traditional_form\" name=\"traditional_form\" checked=\"false\" value=\"0\"></TD><TD>Допустить абитуриента до сдачи вступительных экзаменов в традиционно принятой форме.</LABEL></TD></TR>";
+echo "</TBODY></TABLE>";
 }
 ?>

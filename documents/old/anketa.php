@@ -220,7 +220,7 @@ $pdf->useTemplate($pdf->importPage(2));
 
 // специальность
 
-$cat = new Catalog(&$msl);
+$cat = new Catalog($msl);
 $rval = $cat->getInfo($req['catalog'], $req['profile']);
 unset($cat);
 

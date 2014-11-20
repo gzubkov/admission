@@ -136,7 +136,7 @@ if ($appl->semestr != 0) {
 }
 
 // специальность
-$cat = new Catalog(&$msl);
+$cat = new Catalog($msl);
 $rval = $cat->getInfo($appl->catalog, $appl->profile);
 unset($cat);
 

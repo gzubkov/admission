@@ -49,10 +49,11 @@ class Receipt
 
         new FabricApplicant($appl, $this->_msl, $this->_id);
         
-        $k = $appl->getInfo('region');
         if ($this->_id[0] == 'r') {
-            $this->_region = array(3, $k['region']);
+            $k = $appl->getInfo('region', 'agent');
+            $this->_region = array($k['agent'], $k['region']);
         } else {
+            $k = $appl->getInfo('region');
             $this->_region = $k['region'];
         }
 
@@ -65,8 +66,18 @@ class Receipt
         $student['region']  = $this->getRegion();
 
         $price                   = new Price($this->_msl);
-        $student['price']        = $price->getPriceByPgid($this->_pgid, $appl->catalog, $purpose, $count, $this->_date, (($this->_id[0] == 'r')? 1 : 0), 1);
+        //        $student['price']        = $price->getPriceByPgid($this->_pgid, $appl->catalog, $purpose, $count, $this->_date, (($this->_id[0] == 'r')? 1 : 0), 1);
+
+        $allPrice = $price->newgetPrice($appl->catalog, $k['region']);
+
+        $student['price'] = array(($allPrice['price']-$allPrice['price_rp']), $allPrice['price_rp']);
         $student['purpose_text'] = $this->getPurposeText($purpose);
+
+        if ($this->_id == 272 && 
+            $purpose == 3) {
+            $student['price'][0] = ($student['price'][0] * 2 / 10);
+        }
+
 
         return $student;
     }
@@ -84,6 +95,7 @@ class Receipt
         $student['region']  = $this->getRegion();
 
         $price            = new Price($this->_msl);
+
         $student['price'] = $price->getPriceByPgid($this->_pgid, $catalog, $purpose, $count, $this->_date, sizeof($this->_region)-1, $_REQUEST['tpapplicant']);
         
         // temp
@@ -106,10 +118,10 @@ class Receipt
     {
         $id = $this->_region;
         if (is_array($id)) {
-            $r = $this->_msl->getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id[0]." OR partner_regions.id = ".$id[1]." ORDER BY id ASC;", 1);
+            $r = $this->_msl->getarray("SELECT pgid, firm, bik, ks, rs, inn, kpp, bank FROM admission.`partner_regions` WHERE partner_regions.id = ".$id[0]." OR partner_regions.id = ".$id[1]." ORDER BY id ASC;", 1);
             $this->_pgid = $r[1]['pgid'];
         } else {
-            $r = $this->_msl->getarray("SELECT * FROM admission.`partner_regions` WHERE partner_regions.id = ".$id." LIMIT 1;", 1);
+            $r = $this->_msl->getarray("SELECT pgid, firm, bik, ks, rs, inn, kpp, bank FROM admission.`partner_regions` WHERE partner_regions.id = ".$id." LIMIT 1;", 1);
             $this->_pgid = $r[0]['pgid'];
         }
         return $r;
@@ -135,9 +147,9 @@ class Receipt
     }
 }
 
-require_once('../../conf.php');
-require_once('../class/price.class.php');
-require_once('../class/mysql.class.php');
+require_once '../../conf.php';
+require_once '../class/price.class.php';
+require_once '../class/mysql.class.php';
 
 if (!isset($_REQUEST['format']) || ($_REQUEST['format'] != 'html' && $_REQUEST['format'] != 'HTML')) {
     $_REQUEST['format'] = 'pdf';
@@ -171,12 +183,25 @@ if (isset($_REQUEST['student'])) {
     
 } else {
     $receipt = new Receipt($_REQUEST['dn'], $_REQUEST['date']);
+
+    if (isset($_REQUEST['partner_id']) === false) {
+        $_REQUEST['partner_id'] = 0;
+    }
+
     $student = $receipt->getDefault($_REQUEST['partner_id'], $_REQUEST['region_id'], $_REQUEST['catalog'], $_REQUEST['purpose'], $_REQUEST['count']);
 }
 
 $purpose = $student['purpose_text'];
 $rval = $student['region'];
 $price = $student['price'];
+
+// доплата
+if ($_REQUEST['purpose'] == 6) {
+    if (is_numeric($_REQUEST['surcharge']) === true &&
+        $_REQUEST['surcharge'] > 0) {
+        $price = array($_REQUEST['surcharge']);
+    }
+}
 
 if (sizeof($price) == 1 || $price[1] == 0) {
     $kn = 1;
@@ -187,7 +212,7 @@ if (sizeof($price) == 1 || $price[1] == 0) {
 switch ($_REQUEST['format']) {
     case 'pdf':
     case 'PDF':
-        require_once('../class/pdf.class.php');
+        require_once '../class/pdf.class.php';
 
         $pdf = new PDF();
         $pdf->SetMargins(PDF_MARGIN_LEFT, 40, 0);
@@ -197,6 +222,10 @@ switch ($_REQUEST['format']) {
         $pdf->AddPage();
         $pdf->useTemplate($pdf->importPage(1));
         $pdf->SetFont("times", "", 10);
+
+        if (is_array($student) === true) {
+            $length = mb_strlen($student['address'], 'UTF-8');
+        }
 
         $y = 0;
 
@@ -229,12 +258,23 @@ switch ($_REQUEST['format']) {
             $pdf->Text(68, $y+46.4, $purpose);
             $pdf->Text(68, $y+112.6, $purpose);
 
-            if (is_array($student)) {
+            if (is_array($student) === true) {
                 $pdf->Text(94, $y+52.4, $student['fio']);
-                $pdf->Text(94, $y+56.2, $student['address']);
                 $pdf->Text(94, $y+120.0, $student['fio']);
-                $pdf->Text(94, $y+125.2, $student['address']);
+
+                if ($length > 70) {
+                    $pdf->SetFont("times", "", 8);
+                } elseif ($length > 60) {
+                    $pdf->SetFont("times", "", 8);
+                }
+
+                $pdf->Text(93.6, $y+56.2, $student['address']);
+                $pdf->Text(93.6, $y+125.2, $student['address']);
+                $pdf->SetFont("times", "", 10);
             }
+
+// Убрана цена!
+//$price[$i] = 0;
 
             if ($price[$i] > 1) {
                 $pdf->Text(88, $y+60.2, floor($price[$i])); //61.4
@@ -341,23 +381,26 @@ if (document.domain && document.referrer && document.referrer.search(document.do
         for ($i = 0; $i < 2*$kn; $i++) {
             $j = floor($i/2);
 
-            if (!isset($rval[$j]['rs'])) {
-                print "<div id=\"toolbox\"><p><B>Ваш региональный партнер не предоставил сведений, необходимых для формирования квитанции.</B><BR> Сумма для оплаты услуг регионального партнера составляет ".floor($price[$j])." рублей ".sprintf("%02d", $price[$j]-floor($price[$j]))." копеек.</P></div><BR>";
+            if (isset($rval[$j]['rs']) === false || 
+                $rval[$j]['rs'] == 0) {
+                echo "<div id=\"toolbox\"><p><B>Ваш региональный партнер не предоставил сведений, необходимых для формирования квитанции.</b><br>
+                      Сумма для оплаты услуг регионального партнера составляет ".floor($price[$j])." рублей ".sprintf("%02d", $price[$j]-floor($price[$j]))." копеек.</P></div><BR>";
                 break;
             }
 
-            print "<tr><td style=\"width: 50mm; height: 65mm; border-bottom: black 1.5px solid;\">
-      	           <table style=\"width: 50mm; height: 100%;\" cellspacing=\"0\">";
+            echo "<tr><td style=\"width: 50mm; height: 65mm; border-bottom: black 1.5px solid;\">
+      	          <table style=\"width: 50mm; height: 100%;\" cellspacing=\"0\">";
+
             if ($i % 2 == 0) {
-                print "<tr><td class=\"kassir\" style=\"vertical-align: top; letter-spacing: 0.2em;\">Извещение</td></tr><tr><td class=\"kassir\" style=\"vertical-align: bottom;\">Кассир</td></tr>";
+                echo "<tr><td class=\"kassir\" style=\"vertical-align: top; letter-spacing: 0.2em;\">Извещение</td></tr><tr><td class=\"kassir\" style=\"vertical-align: bottom;\">Кассир</td></tr>";
             } else {
-                print "<tr><td class=\"kassir\"  style=\"vertical-align: bottom; height: 100%;\">Квитанция<br><br>Кассир</td></tr>";
+                echo "<tr><td class=\"kassir\" style=\"vertical-align: bottom; height: 100%;\">Квитанция<br><br>Кассир</td></tr>";
             }
 
             print "</table></td>\n<td style=\"width: 130mm; height: 65mm; padding: 0mm 4mm 0mm 3mm; border-left: black 1.5px solid; border-bottom: black 1.5px solid;\"> 
                    <table cellspacing=\"0\" style=\"width: 123mm; height: 100%;\">";
 
-            if ($i%2 == 0) {
+            if ($i % 2 == 0) {
                 print "<tr><td><table width=\"100%\" cellspacing=\"0\">
                             <tr><td class=\"stext7\" style=\"text-align: right; vertical-align: middle;\"><i>Форма &#8470; ПД-4</i></td></tr>
                        </table></td></tr>";

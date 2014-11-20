@@ -23,13 +23,10 @@ class dMssql {
         return implode($sep, $arr);
     }
 
-    private function _real_escape_array($array){
-    	return array_map("mysql_real_escape_string",$array);
-    } 
-
     public function __construct() {
         $this->_link = mssql_connect ("perebros", "perebros", "126wrkg");
-	if (!$this->_link) {
+        
+	if ($this->_link === false) {
     	    die('Something went wrong while connecting to MSSQL');
 	}
 	mssql_select_db('perebros_sql', $this->_link);

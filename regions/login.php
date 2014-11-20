@@ -6,8 +6,7 @@ if (!isset($_POST['act'])) {
     $_POST['act'] = "";
 }
 
-switch($_POST['act']) 
-{
+switch($_POST['act']) {
 case "exit":
     unset($_SESSION['joomlaregion']);
     print "ok\n";
@@ -15,6 +14,13 @@ case "exit":
 
 case "openregion":
     $_SESSION['joomlaregion'] = $_REQUEST['region'];
+    break;
+
+case "selflogin":
+    $_SESSION['joomlaregion'] = $_REQUEST['region'];
+    header("HTTP/1.1 301 Moved Permanently"); 
+    header("Location: http://admission.iitedu.ru/regions/", true);
+    exit;
     break;
 
 default:

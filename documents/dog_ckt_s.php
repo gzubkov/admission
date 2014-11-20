@@ -19,7 +19,8 @@ $cat = new Catalog($msl);
 $rval = $cat->getInfo($appl->catalog, $appl->profile);
 
 $price = new Price($msl);
-$rval['price'] = $price->getPriceByRegion($r['region'],$appl->catalog, 1, 1, 0, 0, 1);
+//$rval['price'] = $price->getPriceByRegion($r['region'],$appl->catalog, 1, 1, 0, 0, 1);
+$rval['price'] = $price->newgetPrice($appl->catalog, $r['region']);
 
 unset($msl);
 unset($price);
@@ -32,7 +33,9 @@ $pdf->Text(142.2, 153.4, $rval['termtext']); // специальность - с�
 $pdf->newPage();
 $pdf->newPage();
 
-$pdf->Text(177.8, 21.3, $rval['price'][0]); // специальность - оплата
+if ($rval['price']['price'] > 1) {
+    $pdf->Text(177.8, 21.3, (int)$rval['price']['price']); // специальность - оплата
+}
 
 $pdf->newPage();
 

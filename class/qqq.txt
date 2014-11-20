@@ -1,0 +1,94 @@
+11.11.2014 17:18: 
+SELECT id FROM `education`.`edu_user` WHERE `email`='test2@ins-iit.ru'
+11.11.2014 17:19: 
+INSERT INTO `reg_applicant_edu_doc` (`applicant`, `edu_doc`, `serie`, `number`, `institution`, `date`, `specialty`, `primary`) VALUES ('') ON DUPLICATE KEY UPDATE `applicant`='2800', `edu_doc`='1', `serie`='eweew', `number`='ewe', `institution`='dd', `date`='2014-11-05', `specialty`='', `primary`='1'
+11.11.2014 17:19: 
+INSERT INTO `reg_applicant_edu_doc` (`applicant`, `edu_doc`, `serie`, `number`, `institution`, `date`, `specialty`, `primary`) VALUES ('') ON DUPLICATE KEY UPDATE `applicant`='2800', `edu_doc`='1', `serie`='eweew', `number`='ewe', `institution`='dd', `date`='2014-11-05', `specialty`='', `primary`='1'
+11.11.2014 17:21: Column count doesn't match value count at row 1
+INSERT INTO `reg_applicant_edu_doc` (`applicant`, `edu_doc`, `serie`, `number`, `institution`, `date`, `specialty`, `primary`) VALUES ('') ON DUPLICATE KEY UPDATE `applicant`='2800', `edu_doc`='1', `serie`='eweew', `number`='ewe', `institution`='dd', `date`='2014-11-05', `specialty`='', `primary`='1'
+11.11.2014 17:23: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='test2@ins-iit.ru'
+11.11.2014 17:23: Column count doesn't match value count at row 1
+INSERT INTO `reg_applicant_edu_doc` (`applicant`, `edu_doc`, `serie`, `number`, `institution`, `date`, `specialty`, `primary`) VALUES ('') ON DUPLICATE KEY UPDATE `applicant`='2800', `edu_doc`='1', `serie`='eweew', `number`='ewe', `institution`='dd', `date`='2014-11-05', `specialty`='', `primary`='1'
+11.11.2014 17:25: Column count doesn't match value count at row 1
+INSERT INTO `reg_applicant_edu_doc` (`applicant`, `edu_doc`, `serie`, `number`, `institution`, `date`, `specialty`, `primary`) VALUES ('') ON DUPLICATE KEY UPDATE `applicant`='2800', `edu_doc`='1', `serie`='eweew', `number`='ewe', `institution`='dd', `date`='2014-11-05', `specialty`='', `primary`='1'
+11.11.2014 17:25: Column count doesn't match value count at row 1
+INSERT INTO `reg_applicant_edu_doc` (`applicant`, `edu_doc`, `serie`, `number`, `institution`, `date`, `specialty`, `primary`) VALUES ('') ON DUPLICATE KEY UPDATE `applicant`='2800', `edu_doc`='1', `serie`='eweew', `number`='ewe', `institution`='dd43', `date`='2014-11-05', `specialty`='', `primary`='1'
+11.11.2014 17:27: Field 'filename' doesn't have a default value
+INSERT INTO `reg_applicant_edu_doc` (`applicant`, `edu_doc`, `serie`, `number`, `institution`, `date`, `specialty`, `primary`) VALUES ('2800', '1', 'eweew', 'ewe', 'dd432', '2014-11-05', '', '1') ON DUPLICATE KEY UPDATE `applicant`='2800', `edu_doc`='1', `serie`='eweew', `number`='ewe', `institution`='dd432', `date`='2014-11-05', `specialty`='', `primary`='1'
+11.11.2014 17:29: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='test2@ins-iit.ru'
+11.11.2014 17:29: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='test2@ins-iit.ru'
+11.11.2014 17:31: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='test2@ins-iit.ru'
+11.11.2014 17:43: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='test2@ins-iit.ru'
+11.11.2014 17:43: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='test2@ins-iit.ru'
+11.11.2014 17:46: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`=''
+11.11.2014 17:53: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='sakuranov@gmail.com'
+11.11.2014 17:54: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='Ymka-92@yandex.ru'
+11.11.2014 17:54: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='denis1993.ru@mail.ru'
+11.11.2014 17:54: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='olegg@lenta.ru'
+12.11.2014 17:30: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='pravdinaLera@mail.ru'
+12.11.2014 17:41: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='pravdinaLera@mail.ru'
+13.11.2014 10:27: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='pravdinaLera@mail.ru'
+13.11.2014 11:23: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='nabiullina93g@gmail.com'
+14.11.2014 08:35: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'LIMIT 1' at line 1
+SELECT pgid, firm, bik, ks, rs, inn, kpp, bank FROM admission.`partner_regions` WHERE partner_regions.id =  LIMIT 1;
+14.11.2014 08:35: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'LIMIT 1' at line 1
+SELECT `start_semestr`, term FROM admission.catalogs WHERE id= LIMIT 1;
+14.11.2014 15:05: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='nabiullina93g@gmail.com'
+16.11.2014 05:43: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'LIMIT 1' at line 1
+SELECT pgid, firm, bik, ks, rs, inn, kpp, bank FROM admission.`partner_regions` WHERE partner_regions.id =  LIMIT 1;
+16.11.2014 05:43: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'LIMIT 1' at line 1
+SELECT `start_semestr`, term FROM admission.catalogs WHERE id= LIMIT 1;
+17.11.2014 02:01: Incorrect integer value: '' for column 'flat' at row 1
+INSERT INTO `reg_applicant_address` (`applicant_id`, `type`, `index`, `region`, `city`, `street`, `home`, `building`, `flat`) VALUES ('2806', '1', '1042', '50', 'девять тысяч', 'А. Рзаева', '585', '', '') ON DUPLICATE KEY UPDATE `applicant_id`='2806', `type`='1', `index`='1042', `region`='50', `city`='девять тысяч', `street`='А. Рзаева', `home`='585', `building`='', `flat`=''
+17.11.2014 02:02: Incorrect integer value: '' for column 'catalog' at row 1
+UPDATE `reg_applicant` SET `catalog`='', `profile`='', `internet`='', `spo`='', `traditional_form`='' WHERE `id`='2806'
+17.11.2014 10:47: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='miss.aysel89@gmail.com'
+17.11.2014 10:48: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='miss.aysel89@gmail.com'
+17.11.2014 10:48: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='pravdinaLera@mail.ru'
+19.11.2014 12:16: Incorrect integer value: '' for column 'homephone_code' at row 1
+INSERT INTO `partner_applicant` (`region`, `agent`, `surname`, `name`, `second_name`, `sex`, `birthday`, `citizenry`, `doc_type`, `doc_serie`, `doc_number`, `doc_issued`, `doc_code`, `doc_date`, `birthplace`, `homephone_code`, `homephone`, `mobile_code`, `mobile`, `e-mail`, `catalog`, `internet`, `traditional_form`, `profile`, `semestr`, `spo`, `pay`, `edu_base`, `edu_doc`, `edu_serie`, `edu_number`, `edu_date`, `edu_institution`, `edu_city`, `edu_specialty`, `language`, `highedu`, `num`, `ip`) VALUES ('3', '1', 'Фадеев', 'Роман', 'Сергеевич', 'M', '1985-01-08', 'Российская Федерация', '1', '4614', '653798', 'тп №2', '500-139', '2014-09-23', 'дер. Первомайка', '', '', '985', '9751007', 'romfadeev@yandex.ru', '47', '1', '0', '7', '1', '0', '0', '2', '3', '50СПА', '0025834', '2013-12-26', 'Жуковский авиационный техникум имени В.А. Казакова', 'г. Жуковский Московская область', 'Вычислительные машины, комплексы, системы и сети', '1', '0', '', '3277563850') ON DUPLICATE KEY UPDATE `region`='3', `agent`='1', `surname`='Фадеев', `name`='Роман', `second_name`='Сергеевич', `sex`='M', `birthday`='1985-01-08', `citizenry`='Российская Федерация', `doc_type`='1', `doc_serie`='4614', `doc_number`='653798', `doc_issued`='тп №2', `doc_code`='500-139', `doc_date`='2014-09-23', `birthplace`='дер. Первомайка', `homephone_code`='', `homephone`='', `mobile_code`='985', `mobile`='9751007', `e-mail`='romfadeev@yandex.ru', `catalog`='47', `internet`='1', `traditional_form`='0', `profile`='7', `semestr`='1', `spo`='0', `pay`='0', `edu_base`='2', `edu_doc`='3', `edu_serie`='50СПА', `edu_number`='0025834', `edu_date`='2013-12-26', `edu_institution`='Жуковский авиационный техникум имени В.А. Казакова', `edu_city`='г. Жуковский Московская область', `edu_specialty`='Вычислительные машины, комплексы, системы и сети', `language`='1', `highedu`='0', `num`='', `ip`='3277563850'
+19.11.2014 12:16: Incorrect integer value: '' for column 'applicant_id' at row 1
+INSERT INTO `partner_applicant_address` (`index`, `region`, `city`, `street`, `home`, `building`, `flat`, `applicant_id`, `type`) VALUES ('140102', '50', 'Рамеский район, дер. Первомайка', 'Октябрьская', '11а', '', '', '', '1') ON DUPLICATE KEY UPDATE `index`='140102', `region`='50', `city`='Рамеский район, дер. Первомайка', `street`='Октябрьская', `home`='11а', `building`='', `flat`='', `applicant_id`='', `type`='1'
+19.11.2014 12:16: Incorrect integer value: '' for column 'applicant_id' at row 1
+INSERT INTO `partner_applicant_address` (`index`, `region`, `city`, `street`, `home`, `building`, `flat`, `applicant_id`, `type`) VALUES ('140102', '50', 'Раменский район, дер. Первомайка', 'Октябрьская', '11а', '', '', '', '2') ON DUPLICATE KEY UPDATE `index`='140102', `region`='50', `city`='Раменский район, дер. Первомайка', `street`='Октябрьская', `home`='11а', `building`='', `flat`='', `applicant_id`='', `type`='2'
+19.11.2014 12:22: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='romfadeev@yandex.ru'
+19.11.2014 12:23: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='romfadeev@yandex.ru'
+19.11.2014 12:29: Incorrect integer value: '' for column 'homephone_code' at row 1
+UPDATE `partner_applicant` SET `surname`='Фадеев', `name`='Роман', `second_name`='Сергеевич', `sex`='M', `birthday`='1985-01-08', `citizenry`='Российская Федерация', `doc_type`='1', `doc_serie`='4614', `doc_number`='653798', `doc_issued`='тп №2', `doc_code`='500-139', `doc_date`='2014-09-23', `birthplace`='дер. Первомайка', `homephone_code`='', `homephone`='', `mobile_code`='985', `mobile`='9751007', `e-mail`='romfadeev@yandex.ru', `catalog`='47', `internet`='1', `traditional_form`='0', `profile`='7', `semestr`='1', `spo`='0', `pay`='0', `edu_base`='2', `edu_doc`='3', `edu_serie`='50СПА', `edu_number`='0025834', `edu_date`='2013-12-26', `edu_institution`='Жуковский авиационный техникум имени В.А. Казакова', `edu_city`='г. Жуковский Московская область', `edu_specialty`='Вычислительные машины, комплексы, системы и сети', `language`='1', `highedu`='0', `num`='0' WHERE `id`='143'
+19.11.2014 12:29: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='romfadeev@yandex.ru'
+19.11.2014 12:31: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='romfadeev@yandex.ru'
+19.11.2014 12:48: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='romfadeev@yandex.ru'
+19.11.2014 12:49: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='romfadeev@yandex.ru'
+19.11.2014 12:58: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='romfadeev@yandex.ru'
+19.11.2014 12:59: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='romfadeev@yandex.ru'
+19.11.2014 13:20: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='gzubkov@ins-iit.ru'
+19.11.2014 13:20: SELECT command denied to user 'admission'@'localhost' for table 'edu_user'
+SELECT id FROM `education`.`edu_user` WHERE `email`='gzubkov@ins-iit.ru'

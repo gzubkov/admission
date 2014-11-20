@@ -1,6 +1,6 @@
 <?php
 // just require TCPDF instead of FPDF
-require_once('../../../modules/russian_date.php');
+require_once('../../modules/russian_date.php');
 require_once('../class/mysql.class.php');
 require_once('../../conf.php');
 ?>

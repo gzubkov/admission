@@ -45,10 +45,27 @@ class Moodle
         return $array['id'];
     }
 
-    public function getGrades($id)
+    public function isAssigned($id)
     {
-        return $this->_msl->getarray("SELECT b.id,a.grade,b.min,c.surname,c.name,c.second_name FROM education.`edu_quiz_grades` a 
-                                      LEFT JOIN admission.`reg_subjects` b ON a.quiz=b.mid 
-                                      LEFT JOIN admission.`reg_teachers` c ON b.`teacher_id`=c.id WHERE a.`userid`='".$id."' ORDER BY b.id;", 1);
+        $query = $this->_msl->getArray("SELECT true FROM education.`edu_role_assignments` WHERE contextid=2380 AND roleid=5 AND userid='".$id."' LIMIT 1");
+        if ($query == 0) {
+            return false;
+        }
+        return true;
+    }
+
+    public function getGrades($id, $mid, $mid_old = -1)
+    {
+        $grade = $this->_msl->getarray("SELECT a.grade FROM education.`edu_quiz_grades` a WHERE a.`userid`='".$id."' AND a.`quiz`='".$mid."'");
+
+        if ($grade == 0) {
+            if ($mid_old > 0 && 
+                $mid != $mid_old) {
+                return $this->getGrades($id, $mid_old);
+            } else {
+                return -1;
+            }
+        }
+        return round($grade['grade']);
     }
 }

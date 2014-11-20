@@ -1,5 +1,5 @@
 <?php
-require_once('../../../modules/russian_date.php');
+require_once('../../modules/russian_date.php');
 require_once('../class/mysql.class.php');
 require_once('../class/catalog.class.php');
 require_once('../class/pdf.class.php');
@@ -17,7 +17,7 @@ $pdf->SetFont("times", "", 13);
 $pdf->Text(110, 45, $appl->surname);
 $pdf->Text(110, 53.6, $appl->name." ".$appl->second_name);
 
-$cat = new Catalog(&$msl);
+$cat = new Catalog($msl);
 $spc = $cat->getInfo($appl->catalog);
 $univ = $cat->getUniversityInfo($appl->catalog);
 
@@ -45,4 +45,3 @@ $pdf->Text(160.5, 135.6, $rval['number']);
 $pdf->splitText($rval['institution'].", ".mb_strtolower(russian_date( strtotime($rval['date']), 'j F Y' ), 'UTF-8'), array(array(54,144.2),array(30,156.2)), 60, 1);
 
 $pdf->Output('zayavl.pdf', 'D');
-?>

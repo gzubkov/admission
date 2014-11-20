@@ -96,10 +96,10 @@ foreach ($rval as $v) {
 print "</select>";
 print "</td></tr>\n";
 
-print "<tr><td>Специальность:</td><td>";
+print "<tr><td>Образовательная программа:</td><td>";
 print "<select name=\"catalog\" id=\"catalog\">";
 
-$catalog = new Catalog(&$msl);
+$catalog = new Catalog($msl);
 $rval = $catalog->getAvailableByRegion($region, "%name% (%base%) %basicsemestr%", 0, 0, 0);
 unset($catalog);
 
@@ -111,11 +111,12 @@ print "</td></tr>\n";
 
 $prc = new Price($msl);
 $sessions = $prc->getSessions();
+$appDate = $prc->getApplicantDate();
 unset($prc);
 
 print "<tr><td>Назначенная сессия:</td><td><select name=\"date\">";
 foreach ($sessions as $k => $v) {
-    print "<option value=\"".$k."\">".$v."</option>\n";
+    echo "<option value=\"".$k."\">".$v."</option>\n";
 }
 print "</select></td></tr>\n";
 print "<tr><td>Договор:</td><td><input name=\"dn\" value=\"\" style=\"width: 50px;\" />.</td></tr>\n";
@@ -123,7 +124,12 @@ print "<tr><td>Семестр:</td><td><input name=\"s\" value=\"\" style=\"widt
 print "<tr><td>ФИО плательщика:</td><td><input name=\"fio\" value=\"\" style=\"width: 400px;\" />.</td></tr>\n";
 print "<tr><td>Адрес плательщика:</td><td><input name=\"address\" value=\"\" style=\"width: 400px;\" />.</td></tr>\n";
 print "<tr id=\"counttr\" style=\"display: none;\"><td>Количество пересдач/досдач:</td><td><input name=\"count\" value=\"1\" style=\"width: 20px;\" />.</td></tr>\n";
-print "<tr><td>ТП \"Абитуриент\":</td><td><label><input type=\"radio\" name=\"tpapplicant\" value=\"0\" checked=\"checked\" /> нет</label> <label><input type=\"radio\" name=\"tpapplicant\" value=\"1\" /> да</label></td></tr>";
+print "<tr><td>Зачисление студента было:</td><td><select name=\"tpapplicant\" />";
+
+foreach ($appDate as $k => $v) {
+  echo "<option value=\"".$k."\">".$v."</option>\n";
+}
+echo "</select></td></tr>";
 print "<tr><td>Формат вывода:</td><td><label><input type=\"radio\" name=\"format\" value=\"html\" checked=\"checked\" /> HTML</label> <label><input type=\"radio\" name=\"format\" value=\"pdf\" /> PDF</label></td></tr>";
 print "<tr><td colspan=\"2\" style=\"height: 50px; text-align: center; vertical-align: bottom;\"><input type=\"submit\" value=\"Распечатать квитанцию\" /></td></tr>";
 print "</tbody></table></form></div></div>";

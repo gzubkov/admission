@@ -42,6 +42,12 @@ if (!is_numeric($student_id)) exit(0);
 $msl = new dMysql();
 $mssql = new dMssql();
 $r = $mssql->getarray("SELECT surname,name,second_name,catalog,region FROM dbo.student WHERE id='".$student_id."'");
+
+if ($r == 0) {
+    print "Данный студент отсутствует в базе данных! Попробуйте зайти позднее.";
+    exit(0);
+}
+
 $cat = new Catalog($msl);
 $spec = $cat->getBaseInfo($r['catalog']);
 
@@ -49,11 +55,11 @@ switch($r['region'])
 {
     case '1':
         $region = "Москва";
-	break;
+    	break;
 
     case '176':
         $region = "Индивидуалы";
-	break;
+	    break;
 
     default:
         $reg = $msl->getarray("SELECT name FROM admission.partner_regions WHERE id='".$r['region']."'");
@@ -66,7 +72,10 @@ $k = $mssql->getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.t
                LEFT JOIN dbo.marks c ON a.mark=c.id 
                WHERE a.id='".$student_id."' ORDER BY a.semestr, b.name ASC",1);
 
-if (!isset($_REQUEST['format'])) $_REQUEST['format'] = 'PDF';
+if (isset($_REQUEST['format']) === false) {
+    $_REQUEST['format'] = 'PDF';
+}
+
 switch($_REQUEST['format']) 
 {
     case 'HTML': case 'html':
@@ -118,28 +127,31 @@ input { font-family: Arial, sans-serif; font-size: 9pt; color: black; background
 
     if (isset($k) && $k != 0) {
         foreach($k as $v) {
-    	if ($v['semestr'] != $sem) {
-            $sem = $v['semestr'];
-	    $i = 1;
-            print "<TR><TD colspan=6 style=\"padding: 3px; font-weight: bold; background-color: #d0d0d0; border:1px solid #000000;\">&nbsp;".$sem." семестр</TD></TR>"; 
-        }
+    	    if ($v['semestr'] != $sem) {
+                $sem = $v['semestr'];
+	            $i = 1;
+                print "<TR><TD colspan=6 style=\"padding: 3px; font-weight: bold; background-color: #d0d0d0; border:1px solid #000000;\">&nbsp;".$sem." семестр</TD></TR>"; 
+            }
 
-	print "<TR style=\"line-height: 150%; padding:40px; border-bottom: 1px dashed #000000; vertical-align: top;";
-    	switch($v['mark'])
-    	{
-            case -1: case 2:
-            	print " color: #ff0000;";
-	    	break;
+	        print "<TR style=\"line-height: 150%; padding:40px; border-bottom: 1px dashed #000000; vertical-align: top;";
+    	    
+            switch($v['mark'])
+    	    {
+                case -1: case 2:
+            	    print " color: #ff0000;";
+	    	        break;
 
-	    case -3:
-	        print " color: #0000ff;";
-	    	break;
-        }
-	print "\"><TD>".$i."</TD><TD>".$v['discipline']."</TD><TD>".$v['hours']."</TD><TD>".$v['control_type']."</TD><TD>";
-   	if (!is_null($v['date'])) { 
-            print date('d.m.Y', strtotime($v['date']));
-        }
-	print "</TD><TD>";
+	            case -3:
+	                print " color: #0000ff;";
+	    	        break;
+            }
+
+	        print "\"><TD>".$i."</TD><TD>".$v['discipline']."</TD><TD>".$v['hours']."</TD><TD>".$v['control_type']."</TD><TD>";
+
+   	        if (is_null($v['date']) === false) { 
+                print date('d.m.Y', strtotime($v['date']));
+            }
+	        print "</TD><TD>";
 
 	if (!is_null($v['type'])) {
             print "<I>";  

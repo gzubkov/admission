@@ -15,13 +15,21 @@ $pdf->SetFont("times", "", 12);
 $pdf->Text(52, 60.2, $appl->surname." ".$appl->name." ".$appl->second_name);
 
 $ival = $appl->getRups();
-$pdf->Text(162, 102.2, $ival['pay']);
+if ($ival['pay'] > 0) {
+    $pdf->Text(162, 102.2, $ival['pay']);
 
-$price = new Price($msl);
-$pay = $price->getPriceByRegion($r['region'], $appl->catalog, 3, $ival['pay'], 0, 0, 1);
-unset($price);
+    $price = new Price($msl);
+    $pay = $price->getPriceByRegion($r['region'], $appl->catalog, 3, $ival['pay'], 0, 0, 1);
 
-$pdf->Text(80, 138.2, $pay[0]);
+    if ($_REQUEST['applicant'] == 272) {
+        $pay = array(0 => 3700);
+    }
+    unset($price);
+
+    if ($pay[0] > 1) {
+        $pdf->Text(80, 138.2, $pay[0]);
+    }
+}
 
 $pdf->Text(160, 227, $appl->getShortR());
 

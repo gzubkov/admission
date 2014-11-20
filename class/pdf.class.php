@@ -1,6 +1,6 @@
 <?php
-require_once('../../../modules/tcpdf/tcpdf.php');
-require_once('../../../modules/fpdi/fpdi.php');
+require_once('../../modules/tcpdf/tcpdf.php');
+require_once('../../modules/fpdi/fpdi.php');
 
 class PDF extends FPDI
 {
@@ -48,7 +48,7 @@ class PDF extends FPDI
             if ($hang == 0) {
                 $position = $pos[$i];
             } else {
-                $position = mb_strrpos(mb_substr($string, 0, $pos[$i]), ' ');
+                $position = mb_strrpos(mb_substr($string, 0, $pos[$i]), ' ') + 1;
             }
             $arr[$i] = mb_substr($string, $s, $position);
             $s += $position; // +1
@@ -84,5 +84,11 @@ class PDF extends FPDI
     {
         $this->AddPage();
         $this->useTemplate($this->importPage($this->pagenum++));
+    }
+
+    public function printCenter($x, $y, $text, $border = 0, $width = 180, $height = 10)
+    {         
+        $this->WriteHtmlCell($width, $height, $x, $y, $text, $border, 0, false, true, 'C');
+//$this->Text($x, $y, $text, false, false, true, 0, 0, 'C');
     }
 }
