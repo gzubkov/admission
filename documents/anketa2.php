@@ -25,7 +25,7 @@ $pdf->Text(25.4, 39.2, $appl->name); // Имя
 $pdf->Text(30.4, 45.2, $appl->second_name); // Отчество
 
 // пол
-if ($appl->sex == 'M') {
+if ($r['sex'] == 'M') {
     $pdf->cross(37.2, 47.35);
 } else {
     $pdf->cross(74.6, 47.35);

@@ -19,7 +19,7 @@ require_once('../class/price.class.php');
 <link type="text/css" rel="stylesheet" media="all" href="../images/defaults.css"/>
 <link type="text/css" rel="stylesheet" media="all" href="../images/system.css"/>
 <link type="text/css" rel="stylesheet" media="all" href="../images/style.css"/>
-<link type="text/css" rel="stylesheet" media="all" href="../css/custom-theme/jquery-ui-1.8.custom.css"/>	
+<link type="text/css" rel="stylesheet" media="all" href="../css/custom-theme/jquery-ui-1.8.custom.css"/>
 
 <!-- Validation -->
 <link rel="stylesheet" href="../css/validationEngine.jquery.css" type="text/css" media="screen" title="no title" charset="utf-8" />
@@ -33,9 +33,9 @@ require_once('../class/price.class.php');
 <SCRIPT type="text/javascript" src="../js/jquery.form.js"></SCRIPT>
 <SCRIPT type="text/javascript" src="../js/jquery.blockUI.js"></SCRIPT>
 <SCRIPT type="text/javascript">
-	$(function() {
-		     $("input:submit, input:button").button();
-	});
+    $(function() {
+             $("input:submit, input:button").button();
+    });
 
 $.ajaxSetup({
    type: "POST", 
@@ -48,12 +48,12 @@ $.ajaxSetup({
       $.unblockUI();   
       switch(msg.replace(/\s+/, '')) {
          case "ok":
-	    window.location.reload();
-	    break;
-	 case "wrongpwd":
-	    alert('Номер паспорта абитуриента указан неверно');
-	    break;
-	 default:
+        window.location.reload();
+        break;
+     case "wrongpwd":
+        alert('Номер паспорта абитуриента указан неверно');
+        break;
+     default:
             alert('При передаче формы возникла ошибка. Пожалуйста попробуйте еще раз');
       }     
    },
@@ -83,9 +83,9 @@ class Student{
     public function isLogin() {
         if (isset($_SESSION['student_id'])) {
             if (is_numeric($_SESSION['student_id'])) {
-	        return true;
-	    } 
-	} 
+            return true;
+        }
+    }
         return false;
     }
 }
@@ -112,11 +112,11 @@ switch($r['region'])
 {
     case '1':
         print "Москва";
-	break;
+    break;
 
     case '176':
         print "Индивидуалы";
-	break;
+    break;
 
     default:
         $reg = $msl->getarray("SELECT name,physicaladdress,inn FROM admission.partner_regions WHERE id='".$r['region']."'");
@@ -178,8 +178,8 @@ if ($student->isLogin()) {
     unset($price);
 
     if (isset($pdate['date_end'])) {
-        $days = floor((strtotime($pdate['date_end'])-mktime())/84600);
-    	if ($days < 80 && $pdate['date_end'] != 0 ) {
+        $days = floor((strtotime($pdate['date_end']) - time())/84600);
+        if ($days < 80 && $pdate['date_end'] != 0 ) {
             print "<P style=\"color: #ff0000; font-weight: bold;\">Внимание! Расценки действительны только до ".date('d.m.Y',strtotime($pdate['date_end'])).". Дальнейшая стоимость услуг может изменяться.</P>";
         }
     }
@@ -191,14 +191,14 @@ if ($student->isLogin()) {
     $rval = $msl->getarrayById("SELECT id,text FROM `receipt_purpose` WHERE `student`='1'", 'id', 'text');
     foreach($rval as $k=>$v) {
         $replace = array("%dn%" => $_SESSION['student_id'],
-	                 "%s%" => $r['semestr']+1);
-	$rval[$k] = strtr($v, $replace);
+                     "%s%" => $r['semestr']+1);
+        $rval[$k] = strtr($v, $replace);
     }
-    $form->tdSelect(  'Назначение платежа', 'purpose', $rval, 0, 1);
+    $form->selectInput(  'Назначение платежа', 'purpose', $rval, 0, 1);
 
-    $form->tdSelect(  'Сессия', 'date', $sessions, 0, 1);
+    $form->selectInput(  'Сессия', 'date', $sessions, 0, 1);
 
-    $form->tdBox( 'text', 'Количество пересдач',        'count', 20, 2, 'O', 1 ); 
+    $form->textInput('Количество пересдач',        'count', 20, 2, 'O', 1 );
     $form->hidden( 'student', $student_id );
 
     unset($form);
@@ -211,11 +211,11 @@ if ($student->isLogin()) {
         print "117152, г.Москва, Загородное шоссе, д.7, корп.5, стр.1.</TD></TR><TR><TD>Телефон:</TD><TD>+7 (499) 1277453.</TD></TR>";
     } else {
         if ($reg['inn'] != 0) {
-	    print "<TR><TD>Адрес:</TD><TD>";
+        print "<TR><TD>Адрес:</TD><TD>";
             print $reg['physicaladdress'].".</TD></TR>";
-	} else {
-	    print "<TR><TD colspan=2><FONT color=red><B>Ваш региональный представитель не предоставил данные.</B></FONT> В связи с этим, при печати квитанции не будут указаны реквезиты регионального партнера.</TD></TR>";
-	}
+    } else {
+        print "<TR><TD colspan=2><FONT color=red><B>Ваш региональный представитель не предоставил данные.</B></FONT> В связи с этим, при печати квитанции не будут указаны реквезиты регионального партнера.</TD></TR>";
+    }
     }
 // добавить телефон и факс!
     print "</TBODY></TABLE></DIV>\n\n";

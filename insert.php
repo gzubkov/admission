@@ -68,7 +68,7 @@ class Insertion
     {
         global $msl;
         if (isset($request[$uid.'profile']) === false) {
-            $request[$uid.'profile'] = "";
+            $request[$uid.'profile'] = 0;
         }
 
         if (isset($request[$uid.'spo']) === false) {

@@ -9,11 +9,11 @@ class Verification
 {
     private $_id;
     private $_type;
-	
+
     public function __construct($id, $type) {
         $this->_id   = $id;
-	$this->_type = $type;
-	return true;
+    $this->_type = $type;
+    return true;
     }
 
     public function verify($method) {
@@ -24,20 +24,22 @@ class Verification
 if (isset($_REQUEST['mid'])) {
     if ($_REQUEST['mhash'] == md5(md5('moodle.ins-iit.rudddddsdsd'.$_REQUEST['mid']))) {
         $student_id = $_REQUEST['mid'];
-    }	
+    }
 } else {
     if (isset($_SESSION['rights']) && isset($_SESSION['md_rights'])) {
         if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.$_SESSION['rights'])) {
             if (isset($_REQUEST['student'])) {
-	        $student_id = $_REQUEST['student'];
-	    } else $student_id = $_SESSION['student_id'];
+            $student_id = $_REQUEST['student'];
+        } else $student_id = $_SESSION['student_id'];
         }
     } else {
         $student_id = $_SESSION['student_id'];
     }
 }
 
-if (!is_numeric($student_id)) exit(0);
+if (is_numeric($student_id) === false) {
+	exit(0);
+}
 
 $msl = new dMysql();
 $mssql = new dMssql();
@@ -55,18 +57,18 @@ switch($r['region'])
 {
     case '1':
         $region = "Москва";
-    	break;
+        break;
 
     case '176':
         $region = "Индивидуалы";
-	    break;
+        break;
 
     default:
         $reg = $msl->getarray("SELECT name FROM admission.partner_regions WHERE id='".$r['region']."'");
         $region = $reg['name'];
 }
 
-$k = $mssql->getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.type,b.name as discipline,c.name as markname 
+$k = $mssql->getarray("SELECT a.control_type,a.mark,a.date,a.hours,a.semestr,a.type,b.id,b.name as discipline,c.name as markname
                FROM dbo.journal a 
                LEFT JOIN dbo.disciplines b ON a.discipline=b.id 
                LEFT JOIN dbo.marks c ON a.mark=c.id 
@@ -86,8 +88,8 @@ switch($_REQUEST['format'])
 
 <head>
 <title>Печать сводной ведомости успеваемости</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
-	<meta http-equiv="Content-Language" content="ru">
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+    <meta http-equiv="Content-Language" content="ru">
 
 <style type="text/css">
 body { background-color: white; margin: 0px; text-align: center; font-family: verdana; font-size: 9pt; }
@@ -127,46 +129,60 @@ input { font-family: Arial, sans-serif; font-size: 9pt; color: black; background
 
     if (isset($k) && $k != 0) {
         foreach($k as $v) {
-    	    if ($v['semestr'] != $sem) {
+            if ($v['semestr'] != $sem) {
                 $sem = $v['semestr'];
-	            $i = 1;
+                $i = 1;
                 print "<TR><TD colspan=6 style=\"padding: 3px; font-weight: bold; background-color: #d0d0d0; border:1px solid #000000;\">&nbsp;".$sem." семестр</TD></TR>"; 
             }
 
-	        print "<TR style=\"line-height: 150%; padding:40px; border-bottom: 1px dashed #000000; vertical-align: top;";
-    	    
-            switch($v['mark'])
-    	    {
-                case -1: case 2:
-            	    print " color: #ff0000;";
-	    	        break;
+            print "<TR style=\"line-height: 150%; padding:40px; border-bottom: 1px dashed #000000; vertical-align: top;";
 
-	            case -3:
-	                print " color: #0000ff;";
-	    	        break;
+            switch($v['mark'])
+            {
+                case -1: case 2:
+                    print " color: #ff0000;";
+                    break;
+
+                case -3:
+                    print " color: #0000ff;";
+                    break;
             }
 
-	        print "\"><TD>".$i."</TD><TD>".$v['discipline']."</TD><TD>".$v['hours']."</TD><TD>".$v['control_type']."</TD><TD>";
+            $moduleid = $r['catalog']."-".$v['semestr']."-".$v['id'];
+            if (strcmp($v['control_type'], 'курсовая работа') == 0) {
+                $moduleid .= "c";
+            }
+            print "\"><TD>".$i."</TD><TD>";
+            if (isset($_REQUEST['admin']) === true) {
+		if ($_REQUEST['admin'] == $student_id) {
+			echo "<a href=\"http://moodle.ins-iit.ru/admin/addon/router.php?moduleid=".$moduleid."\" style=\"text-decoration: none; text-decoration-color: black;\">".$v['discipline']."</a>";
+                }
+            } else {
+                echo $v['discipline'];
+            }
+            echo "</TD><TD>".$v['hours']."</TD><TD>".$v['control_type']."</TD><TD>";
 
-   	        if (is_null($v['date']) === false) { 
+            if (is_null($v['date']) === false) {
                 print date('d.m.Y', strtotime($v['date']));
             }
-	        print "</TD><TD>";
+            print "</TD><TD>";
 
-	if (!is_null($v['type'])) {
-            print "<I>";  
-            if (!is_null($v['markname'])) {
-                print $v['markname']." (".$v['type'].")";
-	    } else {
-                print $v['type'];	     
-	    }
-	    print "</I>";
-	} else {
-            print $v['markname'];
-        }
+            if (is_null($v['type']) === false) {
+                echo "<I>";
 
-	print "</TD></TR>\n";
-    	$i++; 
+                if (is_null($v['markname']) === false) {
+                    echo $v['markname']." (".$v['type'].")";
+                } else {
+                    echo $v['type'];
+                }
+
+                echo "</I>";
+            } else {
+                echo $v['markname'];
+            }
+
+            echo "</TD></TR>\n";
+            $i++;
         }
     } else {
         print "<TR><TD colspan=6 style=\"font-size: 14px; text-align: center;\"><b>Данные не могут быть сформированы, попробуйте позднее</b></td></tr>";
@@ -179,8 +195,8 @@ case 'PDF': case 'pdf': default:
         function Footer() {
             $this->SetY(-12);
             $this->SetFont('verdana', '', 8);
-	    $this->Cell(0, 10, date('d.m.Y'), 0, 0, 'C');
-	    $this->Cell(0, 10, 'Страница '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, 0, 'R');
+        $this->Cell(0, 10, date('d.m.Y'), 0, 0, 'C');
+        $this->Cell(0, 10, 'Страница '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, 0, 'R');
         }
     }
 
@@ -218,55 +234,55 @@ case 'PDF': case 'pdf': default:
     $sem = 0;
     if (isset($k) && $k != 0) {
         foreach($k as $v) {
-    	    if ($v['semestr'] != $sem) {
+            if ($v['semestr'] != $sem) {
                 $sem = $v['semestr'];
-		$i = 1;
-        	$pdf->SetXY(10, $y);
-		$pdf->SetTextColor(0);
-		$pdf->SetLineStyle(array('width' => 0.1, 'dash' => 0));
-		$pdf->Cell(25, 4, $sem." семестр", 1, 1, 'C', 1, 0); 
-		$y += 8;
+        $i = 1;
+            $pdf->SetXY(10, $y);
+        $pdf->SetTextColor(0);
+        $pdf->SetLineStyle(array('width' => 0.1, 'dash' => 0));
+        $pdf->Cell(25, 4, $sem." семестр", 1, 1, 'C', 1, 0);
+        $y += 8;
             }
 
-    	    switch($v['mark'])
-    	    {
+            switch($v['mark'])
+            {
                 case -1: case 2:
-            	    $pdf->SetTextColor(255,0,0);
-	    	    break;
+                    $pdf->SetTextColor(255,0,0);
+                break;
 
-	        case -3:
-	    	    $pdf->SetTextColor(0,255,0);
-	    	    break;
+            case -3:
+                $pdf->SetTextColor(0,255,0);
+                break;
 
-		default:
-	    	    $pdf->SetTextColor(0);
-    	    }
-    	    $pdf->Text(10, $y, $i);
-    	    $pdf->Text(15, $y, mb_substr($v['discipline'], 0, 90));
-    	    $pdf->Text(100, $y, $v['hours']);
-    	    $pdf->Text(110, $y, $v['control_type']);
-    	    if (!is_null($v['date'])) { 
+        default:
+                $pdf->SetTextColor(0);
+            }
+            $pdf->Text(10, $y, $i);
+            $pdf->Text(15, $y, mb_substr($v['discipline'], 0, 90));
+            $pdf->Text(100, $y, $v['hours']);
+            $pdf->Text(110, $y, $v['control_type']);
+            if (!is_null($v['date'])) {
                 $pdf->Text(140, $y, date('d.m.Y', strtotime($v['date'])));
             }
     
-	    if (!is_null($v['type'])) {
+        if (!is_null($v['type'])) {
                 $pdf->SetFont("times", "I", 10);
-        	if (!is_null($v['markname'])) {
+            if (!is_null($v['markname'])) {
                     $pdf->Text(160, $y, $v['markname']." (".$v['type'].")");
-	        } else {
-             	    $pdf->Text(160, $y, $v['type']);	     
-		}
-		$pdf->SetFont("times", "", 10);
+            } else {
+                    $pdf->Text(160, $y, $v['type']);
+        }
+        $pdf->SetFont("times", "", 10);
             } else {
                 $pdf->Text(160, $y, $v['markname']);
-    	    }
-    	    $pdf->Line(10, $y+0.9, 197.5, $y+0.9, array('width' => '0.01', 'dash' => '1,4'));
-    	    $i++;
-    	    $y += 3.8;
+            }
+            $pdf->Line(10, $y+0.9, 197.5, $y+0.9, array('width' => '0.01', 'dash' => '1,4'));
+            $i++;
+            $y += 3.8;
 
-    	    if ($y >= 280) {
+            if ($y >= 280) {
                 $y = 10;
-        	$pdf->AddPage();
+            $pdf->AddPage();
             } 
         }
     } else {

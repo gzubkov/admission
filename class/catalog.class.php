@@ -47,35 +47,38 @@ class Catalog
         return $this->getAvailableByPgid($pgid, $string, $archivetext, 1,1,1); // проверить!
     }
 
-    public function getAvailableByPgid($pgid, $string="%abbr% - %name% (%base%)", $archivetext=NULL, $viewable=1, $applicable=1, $groupcat=0) 
+    public function getAvailableByPgid($pgid = 0, $string="%abbr% - %name% (%base%)", $archivetext=NULL, $viewable=1, $applicable=1, $groupcat=0)
     {
         $catalogs = array();
-	
+
 	    $query = "SELECT g.abbreviation, g.abbreviation2, a.id, a.basicsemestr, c.name, d.short, c.code, c.qualify, c.spec_code FROM catalogs a 
-                  LEFT JOIN price b ON a.id=b.catalog
                   LEFT JOIN specialties c ON a.specialty=c.id 
 		          LEFT JOIN education_type d ON a.baseedu=d.id 
-		          LEFT JOIN admission.`universities_departments` e ON c.department=e.id 
-                  LEFT JOIN admission.`universities_faculties` f ON e.faculty=f.id 
-		          LEFT JOIN admission.`universities` g ON f.university=g.id WHERE b.group='".$pgid."'";
+		          LEFT JOIN admission.`universities` g ON c.university=g.id";
+
+        if ($pgid > 0) {
+            $query .= " LEFT JOIN price b ON a.id=b.catalog WHERE b.group='".$pgid."'";
+        } else {
+            $query .= " WHERE 1";
+        }
         
         if ($archivetext == NULL) {
-	        $query .= "AND a.archive = '0' "; //AND a.applicable = '1' ";
+	        $query .= " AND a.archive = '0'"; //AND a.applicable = '1' ";
 	        if ($applicable == 1) {
-	            $query .= "AND a.applicable = '1' ";
+	            $query .= " AND a.applicable = '1'";
 	        }
 	    }
 	
 	    if ($viewable == 1) {
-	    	$query .= "AND a.viewable = '1' "; 
+		$query .= " AND a.viewable = '1'";
 	    }
 
 	    if ($groupcat == 1) {
-	    	$query .= "GROUP BY a.specialty ";
+		$query .= " GROUP BY a.specialty";
 	    }
-	    $query .= "ORDER BY a.id ASC";
-        $rval = $this->msl->getArray($query,1); 
+	    $query .= " ORDER BY a.id ASC";
 
+        $rval = $this->msl->getArray($query,1);
 	    return $this->_getCatalogName($rval, $string, $archivetext);
     }
 
@@ -94,7 +97,7 @@ class Catalog
 
         // Переход от старых к новым кодам, если новый код не указан, то разбираем старый.
 
-        if ($info['code'] == NULL) {
+        if (is_null($info['code']) === true) {
 	        switch($info['spec_code'][strlen($info['spec_code'])-1]) {
                 case 2:
 	                $info['type'] = "направление подготовки";
@@ -108,6 +111,9 @@ class Catalog
 	        $info['code'] = $info['spec_code'];
         } else {
             switch($info['code'][4]) {
+                case 5:
+                    $info['type'] = "специальность";
+                    $info['normterm'] = 5;
                 case 3:
                 default:
                     $info['type'] = "направление подготовки";
@@ -176,9 +182,7 @@ class Catalog
 	    }
         $spec = $this->msl->getarray("SELECT f.abbreviation, b.name FROM admission.catalogs a 
                                       LEFT JOIN admission.specialties b ON a.specialty=b.id 
-                                      LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
-                                      LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
-		                              LEFT JOIN admission.`universities` f ON d.university=f.id 		  
+                                      LEFT JOIN admission.`universities` f ON b.university=f.id
                                       WHERE ".$cond." LIMIT 1");
 	    return $spec;
     }
@@ -205,9 +209,7 @@ class Catalog
     {
         return $this->msl->getarray("SELECT f.* FROM admission.catalogs a 
                   LEFT JOIN admission.specialties b ON a.specialty=b.id 
-                  LEFT JOIN admission.`universities_departments` c ON b.department=c.id 
-                  LEFT JOIN admission.`universities_faculties` d ON c.faculty=d.id 
-		          LEFT JOIN admission.`universities` f ON d.university=f.id 		  
+                  LEFT JOIN admission.`universities` f ON b.university=f.id
                   WHERE a.".(($base == 0)?"id":"base_id")."='".$catalog."' LIMIT 1", 0);
     }   
 
@@ -225,7 +227,7 @@ class Catalog
 
     public function getSubjects($catalog)
     {
-        return $this->msl->getArray("SELECT a.subject as id, c.name as subject, c.min, c.mid, c.mid_old, d.surname,d.name,d.second_name FROM `reg_ege_minscores` a 
+        return $this->msl->getArray("SELECT a.subject as id, c.name as subject, c.min, c.mid, c.mid_old, d.surname,d.name,d.second_name FROM `specialties_subjects` a
                                      LEFT JOIN `catalogs` b ON a.specialty=b.specialty
                                      LEFT JOIN `reg_subjects` c ON a.subject=c.id
                                      LEFT JOIN `teachers` d ON c.teacher=d.id

@@ -11,7 +11,7 @@ $mdl = new Moodle($msl);
 function sendRequestDocs($id) 
 {
     global $msl;
-    $appl = new Applicant($msl, $id);
+    new FabricApplicant($appl, $msl, $id);
     $rval = $appl->getInfo('email');
      
     $to      = $appl->surname." ".$appl->name." ".$appl->second_name."<".$rval['e-mail'].">";
@@ -42,7 +42,7 @@ function changeType($id, $type)
     global $msl;
     $mail = 0;
     if ($type == 1) {
-        $appl = new Applicant($msl, $id);
+        new FabricApplicant($appl, $msl, $id);
 
         $rval = $appl->getInfo('email');
 
@@ -120,7 +120,8 @@ function getSpecialties($id)
     global $mdl;
     global $CFG_uploaddir;
 
-    $appl = new Applicant($msl, $id);
+    new FabricApplicant($appl, $msl, $id);
+
     $reg  = $appl->getInfo();
 
     echo "<script language=\"javascript\">
@@ -172,7 +173,7 @@ function getSpecialties($id)
         $appl->printDocs('../');
 
         echo "</td></tr><tr><td>";
-        printSelect('catalog'.$id, $cat->getAvailableSpecialtiesByPgid(1, "%name%"), $appl->catalog);
+        printSelect('catalog'.$id, $cat->getAvailableSpecialtiesByPgid(0, "%name%"), $appl->catalog);
 
         $bval    = $cat->getAllProfiles(0);
         $bval[0] = "---";
@@ -183,8 +184,9 @@ function getSpecialties($id)
         if ($spc['indterm'][1] == 6) {
             $maxSemestr++;
         }
-        $semArray = array();
-        for ($i = 1; $i <= $maxSemestr; $i++) {
+        $semArray = array(1 => 1);
+
+        for ($i = 2; $i <= $maxSemestr; $i++) {
             $semArray[$i] = $i;
         }
 
@@ -426,7 +428,8 @@ if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.
         break;
 
     case 'createmoodleuser':
-        $appl = new Applicant($msl, $_POST['id']);
+        new FabricApplicant($appl, $msl, $_POST['id']);
+
         $addr = end($appl->getAddress());   
         $rval = $appl->getInfo('email','num');
 
@@ -456,7 +459,8 @@ if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.
         break;
 
     case 'createmoodleusertest':
-        $appl = new Applicant($msl, $_POST['id']);
+        new FabricApplicant($appl, $msl, $_POST['id']);
+
         $addr = end($appl->getAddress());   
         $rval = $appl->getInfo('email');
 
@@ -467,8 +471,8 @@ if ($_SESSION['rights'] == 'admin' && $_SESSION['md_rights'] == md5($CFG_salted.
         $spc = $cat->getInfo($appl->catalog);
         unset($cat);
 
-        $subjects = implode(", ", $msl->getarrayById("SELECT id, name FROM `reg_ege_minscores` 
-                                                      LEFT JOIN `reg_subjects` ON `reg_subjects`.id = `reg_ege_minscores`.subject 
+        $subjects = implode(", ", $msl->getarrayById("SELECT b.id, b.name FROM `specialties_subjects` a
+                                                      LEFT JOIN `reg_subjects` b ON b.id = a.subject
                                                       WHERE specialty = '".$spc['id']."' LIMIT 0, 10", "id", "name"));
         $to = $appl->surname." ".$appl->name." ".$appl->second_name."<".$rval['e-mail'].">";
         

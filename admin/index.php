@@ -253,18 +253,19 @@ if (isset($_SESSION['rights']) === true &&
           return false;});</script>";
 
     $form = new FormFields('get.php', 'dialog-message2form', 250, 0, 'Добавить документ');
-    echo "<div><table style=\"border: 0px;\"><tbody style=\"border: 0px;\">\n";
     $msl = new dMysql();
     $bdoc = $msl->getarrayById("SELECT id,name FROM `reg_edu_doc`", 'id', 'name');
 
-    $form->hidden('act', 'attachdoc');
-    $form->hidden('aid',  '');
-    $form->tdSelect('Документ', 'doctype', $bdoc, 0, 1);
+    $form->beginBlock()
+         ->hidden('act', 'attachdoc')
+         ->hidden('aid',  '')
+         ->selectInput('Документ', 'doctype', $bdoc, 0, 1);
 
-    $form->tdBox('text', array('Серия', '№'), array('docserie', 'docnumber'), array(45, 65), array(10, 10), array('A', 'N'));
-    $form->tdDateBox('Дата выдачи', 'docdate', 1990, date('Y'), 'D');
-    $form->tdBox('text', 'Кем выдан', 'docinstitution', 150, 300, 'A');
-    $form->tdBox('text', 'Специальность', 'docspecialty', 150, 60, 0);
+    $form->textInput(array('Серия', '№'), array('docserie', 'docnumber'), array(45, 65), array(10, 10), array('A', 'N'));
+    $form->dateInput('Дата выдачи', 'docdate', 1990, date('Y'), 'D');
+    $form->textInput('Кем выдан', 'docinstitution', 150, 300, 'A');
+    $form->textInput('Специальность', 'docspecialty', 150, 60, 0);
+    unset($form);
     echo "</div>";
 
     echo "<div id=\"deleteall\" style=\"display:none; cursor: default; width: 275px; height: 125px; align: center;\"> 
@@ -272,15 +273,28 @@ if (isset($_SESSION['rights']) === true &&
           <input type=\"button\" class=\"yes\" value=\"Да\" /><input type=\"button\" class=\"no\" value=\"Нет\" /></div>";
 } else {
     ?>
-    <div style="border: 1px solid #d3d3d3; width: 250px; height: 140px; background-color: #ffffff; margin:20px auto 0pt;"><form id="login" action="">
-    <table style="border: none;"><tbody style="border: none;">
-    <tr><td colspan="2" style="text-align: center;"><b>Вход в систему</b></td></tr>
-    <tr><td style="width: 70px;">Логин:</td>
-    <td style="width: 100px;"><input type="text" name="login" />.</td></tr>
-    <tr><td style="width: 70px;">Пароль:</td>
-    <td style="width: 100px;"><input type="password" name="password" />.</td></tr>
-    <tr><td colspan="2" style="text-align: center;"><input type="submit" value="Войти" onclick="javascript: loginA(); return false;" /></td></tr>
-    </tbody></table></form></div>
+    <div style="border: 1px solid #d3d3d3; width: 280px; height: 140px; background-color: #ffffff; margin:20px auto 0pt;">
+      <form id="login" action="">
+        <table style="border: none; width: 270px;">
+          <tbody style="border: none;">
+            <tr>
+              <td colspan="2" style="text-align: center;"><b>Вход в систему</b></td>
+            </tr>
+            <tr>
+              <td style="width: 90px;">Логин:</td>
+              <td style="width: 180px;"><input type="text" name="login" style="width: 160px;" />.</td>
+            </tr>
+            <tr>
+              <td style="width: 90px;">Пароль:</td>
+              <td style="width: 180px;"><input type="password" name="password" style="width: 160px;" />.</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="text-align: center;"><input type="submit" value="Войти" onclick="javascript: loginA(); return false;" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
     <?php
 }
 ?>

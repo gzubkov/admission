@@ -11,7 +11,7 @@ new FabricApplicant($appl, $msl, $applicant_id);
 
 $r = $appl->getInfo();
 
-$arr = $msl->getarrayById("SELECT id, subject FROM `reg_ege_minscores` a LEFT JOIN `catalogs` b ON a.specialty=b.specialty WHERE b.id = '".$r['catalog']."' LIMIT 0, 10", 'subject', 'subject');
+$arr = $msl->getarrayById("SELECT id, subject FROM `specialties_subjects` a LEFT JOIN `catalogs` b ON a.specialty=b.specialty WHERE b.id = '".$r['catalog']."' LIMIT 0, 10", 'subject', 'subject');
 
 $pdf = new PDF();
 $pdf->SetFont("times", "", 12);

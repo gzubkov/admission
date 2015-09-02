@@ -9,7 +9,7 @@ require_once('../../conf.php');
 $msl = new dMysql();
 
 new FabricApplicant($appl, $msl, $_REQUEST['applicant']);
-$r = $appl->getInfo('passport','email');
+$r = $appl->getInfo('sex','passport','email');
 
 $catalog = new Catalog($msl);
 $rval = $catalog->getInfo($appl->catalog);
@@ -66,7 +66,7 @@ foreach($subjects as $value) {
 }
 
     $pdf->SetFont("times", "I", 12);
-    if ($appl->sex == 'M') {
+    if ($r['sex'] == 'M') {
         $text = "прошел";
     } else {
         $text = "прошла";

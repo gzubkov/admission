@@ -148,7 +148,7 @@ class FormFields
         echo "</div></div>";
     }
 
-    function tdBox($type, $colname, $name = '', $size = 10, $maxlength = 10, $r = 0, $placeholder = '', $val = '')
+    function textinput2($type, $colname, $name = '', $size = 10, $maxlength = 10, $r = 0, $placeholder = '', $val = '')
     {
         $this->leftColumn($colname);
 
@@ -167,8 +167,8 @@ class FormFields
 
 $form = new FormFields();
 
-$form->tdBox('text', 'Имя', 'name', 20, 20, 'R');
-$form->tdBox('date', 'Дата', 'date', 20, 20, 'D');
+$form->textinput2('text', 'Имя', 'name', 20, 20, 'R');
+$form->textinput2('date', 'Дата', 'date', 20, 20, 'D');
 
  ?>
    

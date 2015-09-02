@@ -78,13 +78,14 @@ echo "</TBODY></TABLE>";
 
 echo "<h3>Результаты ЕГЭ предыдущих годов (если имеются)</h3>";
 echo "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-$rval = $mslk->getarray("SELECT subject,name FROM `reg_ege_minscores` LEFT JOIN `reg_subjects` ON `reg_subjects`.id = `reg_ege_minscores`.subject 
-                         WHERE specialty = '".$gval['specialty']."' LIMIT 3", 1);
+$rval = $mslk->getarray("SELECT b.id,b.name FROM `specialties_subjects` a
+                         LEFT JOIN `reg_subjects` b ON b.id = a.subject
+                         WHERE a.specialty = '".$gval['specialty']."' LIMIT 3", 1);
 
 $cell = 0;
 for ($i = 0; $i < count($rval); $i++) {
     echo "<TR><TD style=\"width: ".$_POST['width']."px;\">".$rus[$i]." предмет</TD><TD>".$rval[$i]['name'].".</TD></TR>";   
-    echo "<INPUT type=\"hidden\" name=\"ege[".($i+1)."][subject]\" value=\"".$rval[$i]['subject']."\">";
+    echo "<INPUT type=\"hidden\" name=\"ege[".($i+1)."][subject]\" value=\"".$rval[$i]['id']."\">";
 
     echo "<TR><TD style=\"width: ".$_POST['width']."px;\">Оценка (в 100-й шкале)</TD>";
     echo "<TD><INPUT type=\"text\" name=\"ege[".($i+1)."][score]\" maxlength=\"3\" style=\"width: 30px;\" id=\"ege[".($i+1)."][score]\" class=\"validate[optional,custom[scores]] text-input\">.</TD></TR>";

@@ -119,7 +119,7 @@ class Price
         $sessions_t = array(2 => 'зима', 6 => 'лето', 10 => 'осень');
         $tyear = date('Y');
         foreach ($sessions_t as $k => $v) {
-            if (date('m') <= $k) {
+            if (date('m') <= $k + 2) {
                 $sessions[$tyear."-".sprintf("%02d", $k)."-01"] = $v." ".$tyear;
             } else {
                 $sessions[($tyear+1)."-".sprintf("%02d", $k)."-01"] = $v." ".($tyear+1);
@@ -145,7 +145,7 @@ class Price
         }
 
         $date['20'.$i.'-09-01'] = "с 01.09.20".$i;
-        $date['20'.$i.'-09-02'] = "с 02.09.20".$i." (обновленный тариф)";
+        $date['2014-09-02'] = "с 02.09.2014 (обновленный тариф)";
         return $date;
     }
 

@@ -27,7 +27,7 @@ $pdf->Text(33, 131.6, $appl->surname);
 $pdf->Text(33, 138.8, $appl->name);
 $pdf->Text(33, 146.4, $appl->second_name);
 
-if ($appl->sex == 'M') {
+if ($r['sex'] == 'M') {
     $pdf->cross(35.45, 147.75, 4.2);
 } else {
     $pdf->cross(60.45, 147.75, 4.2);

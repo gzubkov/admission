@@ -1,7 +1,10 @@
 <?php
 require_once('../conf.php');
 require_once('class/mysql.class.php');
+require_once('class/catalog.class.php');
+
 $mslk = new dMysql();
+$cat = new Catalog($mslk);
 
 $rus = array('Первый','Второй','Третий','Четвертый');
 
@@ -10,14 +13,19 @@ if (!is_numeric($_POST['catalog'])) {
    exit(0);
 }
 
-$gval = $mslk->getarray("SELECT specialty,internet,basicsemestr FROM `catalogs` WHERE `id`='".$_POST['catalog']."'");
+$catalogId = $_POST['catalog'];
+$spc = $cat->getInfo($catalogId);
+
+$gval = $mslk->getarray("SELECT a.*, b.medicine FROM `catalogs` a LEFT JOIN `specialties` b ON a.specialty=b.id WHERE a.id='".$catalogId."'");
+
+$specialtyId = $gval['specialty'];
 
 echo "<table style=\"display: block;\"><tbody style=\"border: none;\">";
 
-// для эксплуатации и электротехники требуются справки из медучреждения
-if ($_POST['catalog'] == 53 ||
-    $_POST['catalog'] == 54 ||
-    $_POST['catalog'] == 61) {
+//echo "<tr><TD<TD colspan=\"2\">".mb_convert_case($spc['type'], MB_CASE_TITLE).", срок обучения ".$spc['termtext'].".</TD></TR>";
+
+// требуются справки из медучреждения
+if ($gval['medicine'] == 1) {
     echo "<tr><TD colspan=\"2\" style=\"color: red;\">При приёме на обучение по данному направлению подготовки, Вам необходимо пройти обязательные предварительные медицинские осмотры согласно <a href=\"http://admission.iitedu.ru/documents/pdf/pr_2_4.pdf\">приложению к приказу</a>.</TD></TR>\n";
 }
 
@@ -32,7 +40,7 @@ if ($gval['basicsemestr'] > 1) {
 
     echo "<INPUT type=\"hidden\" name=\"traditional_form\" value=\"1\"></TBODY></TABLE>\n";
 } else {
-    $prval = $mslk->getarray("SELECT * FROM `catalogs_profiles` a LEFT JOIN `specialties_profiles` b ON a.profile=b.id WHERE a.catalog ='".$_POST['catalog']."' AND applicable=1;", 1);
+    $prval = $mslk->getarray("SELECT * FROM `catalogs_profiles` a LEFT JOIN `specialties_profiles` b ON a.profile=b.id WHERE a.catalog ='".$catalogId."' AND applicable=1;", 1);
     if ($prval != 0) {
         echo "<tr><TD style=\"width: ".$_POST['width']."px;\">Профиль</TD>\n";
         if (sizeof($prval) == 1) {
@@ -57,15 +65,17 @@ if ($gval['basicsemestr'] > 1) {
         echo "<tr><TD style=\"width: ".$_POST['width']."px;\">Обучение через Интернет<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>\n";
         echo "<TD><LABEL><INPUT type=radio name=\"internet\" value=\"1\" checked>да</LABEL><LABEL><INPUT type=radio name=\"internet\" value=\"0\">нет</LABEL></TD></TR>";    
     } else {
-        echo "<tr><TD colspan=2 style=\"font-weight: bold; text-align: center; color: black;\">Обучение через Интернет по данному направлению подготовки невозможно!</TD></TR>\n";
+        echo "<tr><td colspan=2 style=\"font-weight: bold; text-align: center; color: black;\">Обучение через Интернет по данному направлению подготовки невозможно!</td></tr>\n";
         echo "<INPUT type=\"hidden\" name=\"internet\" value=\"0\">";
     }
     echo "</TBODY></TABLE>";
 
     echo "<h3>Результаты ЕГЭ предыдущих годов (если имеются)</h3>";
     echo "<TABLE style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-    $rval = $mslk->getarray("SELECT subject,name FROM `reg_ege_minscores` LEFT JOIN `reg_subjects` ON `reg_subjects`.id = `reg_ege_minscores`.subject 
-                             WHERE specialty = '".$gval['specialty']."' LIMIT 0, 10", 1);
+    $rval = $mslk->getarray("SELECT b.id, b.name FROM `specialties_subjects` a
+                             LEFT JOIN `reg_subjects` b
+                             ON a.subject = b.id
+                             WHERE a.specialty = '".$specialtyId."' ORDER BY b.id ASC LIMIT 3", 1);
 
     $cell = 0;
     for ($i = 0; $i < count($rval); $i++) {
@@ -73,11 +83,11 @@ if ($gval['basicsemestr'] > 1) {
         echo "<INPUT type=\"hidden\" name=\"ege[".($i+1)."][subject]\" value=\"".$rval[$i]['subject']."\">";
 
         $kval = $mslk->getarray("SELECT score,document FROM `reg_applicant_scores` 
-                                 WHERE `subject` = ".$rval[$i]['subject']." AND `ege`=1 AND applicant_id=".$_SESSION['applicant_id']." LIMIT 1");
+                                 WHERE `subject` = ".$rval[$i]['id']." AND `ege`=1 AND applicant_id=".$_SESSION['applicant_id']." LIMIT 1");
         if ($kval == 0) {
             echo "<tr><TD style=\"width: ".$_POST['width']."px;\">Оценка (в 100-й шкале)</TD>"; //<SPAN class=\"form-required\" title=\"Данное поле обязательно для заполнения.\">*</SPAN></TD>";
             echo "<TD><INPUT type=\"text\" name=\"ege[".($i+1)."][scores]\" maxlength=\"3\" style=\"width: 30px;\" id=\"ege[".($i+1)."][scores]\" class=\"validate[optional,custom[scores]] text-input\">.</TD></TR>";
-            echo "<tr><TD style=\"width: ".$_POST['width']."px;\">Номер документа</TD>";
+            echo "<tr><TD style=\"width: ".$_POST['width']."px;\">Год сдачи ЕГЭ</TD>";
             echo "<td><select name=\"ege[".($i+1)."][document]\" id=\"ege[".($i+1)."][document]\" class=\"validate[optional] text-input\">";
         
             for ($j = date('y'); $j >= 12; $j--) {

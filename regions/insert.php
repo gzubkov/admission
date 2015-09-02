@@ -39,7 +39,7 @@ class Insertion
         $arr2 = $array['regaddress'];
         $arr3 = $array['ege'];
 
-        if ($array['homephone_code'] == '') {
+        if (is_numeric($array['homephone_code']) === false) {
             $array['homephone_code'] = NULL;
         }
         if ($array['num'] == '') {
@@ -77,6 +77,13 @@ class Insertion
         $arr  = $array['homeaddress'];
         $arr2 = $array['regaddress'];
         $arr3 = $array['ege'];
+
+        if (is_numeric($array['homephone_code']) === false) {
+            $array['homephone_code'] = NULL;
+        }
+        if ($array['num'] == '') {
+            $array['num'] = 0;
+        }
 
         unset($array['homeaddress']);
         unset($array['regaddress']);

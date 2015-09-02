@@ -6,7 +6,13 @@ require_once 'class/catalog.class.php';
 require_once 'class/documents.class.php';
 $msl = new dMysql();
 
-//$_SESSION['step_num'] = 2;
+if (isset($_SESSION['step_num']) === true) {
+    $stepNumber = 0 + $_SESSION['step_num'];
+} else {
+    $stepNumber = 0;
+}
+
+//$stepNumber = 1;
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -23,8 +29,7 @@ $msl = new dMysql();
 <link type="text/css" rel="stylesheet" media="all" href="images/style.css" />
 <link type="text/css" rel="stylesheet" media="all" href="css/smoothness/jquery-ui-1.8.7.custom.css" />  
 
-
-<link href="css/jquery.alerts.css" rel="stylesheet" type="text/css" media="screen" />
+<link type="text/css" rel="stylesheet" media="screen" href="css/jquery.alerts.css" />
 
 <!-- Validation -->
 <link rel="stylesheet" href="css/validationEngine.jquery.css" type="text/css" media="screen" title="no title" charset="utf-8" />
@@ -180,9 +185,9 @@ function setPassport()
 <?php
 
 if (isset($_SESSION['applicant_id']) === false) {
-   echo "<h2>Вход в систему</h2>";
+    echo "<h2>Вход в систему</h2>";
 } else {
-   echo "<h2></h2>";
+    echo "<h2></h2>";
 }
 ?>
   <div class="content"><form accept-charset="UTF-8" method="post" id="user-login-form">
@@ -200,7 +205,7 @@ if (isset($_SESSION['applicant_id']) === false) {
     echo "<div class=\"form-item\" id=\"edit-name-wrapper\">";
     echo "Вы вошли как ".$rvalx['surname']." ".$rvalx['name']." ".$rvalx['second_name'];
     echo "</div>";
-    if ($_SESSION['step_num'] > 1) {
+    if ($stepNumber > 1) {
         echo "<div class=\"form-item\" id=\"edit-name-wrapper\"><input type=\"button\" onclick=\"javascript: $.ajax({url: 'login.php', data: 'act=exit'});\" value=\"Выйти\" /></div>";
     }
 }
@@ -223,155 +228,126 @@ if (isset($_SESSION['applicant_id']) === false) {
             <div id="first-time">
 
 <?php
-if (isset($_SESSION['step_num']) === true) {
-    $step_num = 0 + $_SESSION['step_num'];
-} else {
-    $step_num = 0;
-}
    
 class FormFields2 extends FormFields 
 {
-    public function __construct($action, $fid, $tdwidth, $border, $submit_name="Отправить", $charset="UTF-8", $method="post") {
-        parent::__construct($action, $fid, $tdwidth, $border, $submit_name, $charset, $method);
+    public function __construct($action, $fid, $tdwidth, $border, $submitName="Отправить", $charset="UTF-8", $method="post") {
+        parent::__construct($action, $fid, $tdwidth, $border, $submitName, $charset, $method);
     }
 
     public function __destruct() {
-        if (isset($_SESSION['step_num']) === false) {
-            $_SESSION['step_num'] = 0;
-        }
+        global $stepNumber;
 
-        switch($_SESSION['step_num']) {
-            case 0:
-                echo "<input type=\"submit\" value=\"Я согласен\" class=\"submit\" /></div>";
-                break;
+        switch($stepNumber) {
             case 3:
+                echo "<tr><td colspan=2><input type=\"button\" value=\"Перейти на следующий шаг\" onclick=\"nextStep();\"></td></tr>";
+                $this->endBlock();
                 break;
             case 2:
                 echo "<tr><td align=\"center\" width=\"100%\">";
-                echo "<input type=\"hidden\" name=\"act\" value=\"\" id=\"act\" />";
                 echo "<input type=\"button\" class=\"submit\" value=\"Перейти на следующий шаг\" onclick=\"javascript: $('#act').val(''); $('#formular').submit();\" /></td></tr>\n";
                 break;
             default:
-                echo "<tr><td align=\"center\" width=\"100%\"><input type=\"submit\" class=\"submit\" value=\"Отправить\"></td></tr>\n";
+                $this->common("<input type=\"submit\" class=\"submit\" value=\"".$this->submitName."\">");
+                $this->endBlock();
+                echo "</div>";
         }
         echo "</form>\n";
     }
 }
 
-echo '<h1 class="title">Шаг '.($step_num+1).' из 5</h1><div id="output"></div>';
+echo '<h1 class="title">Шаг '.($stepNumber+1).' из 5</h1><div id="output"></div>';
 
-if ($step_num == 0) {
+if ($stepNumber == 0) {
     if (isset($_REQUEST['global_sid'])) {
         $_SESSION['global_sid'] = $_REQUEST['global_sid'];
     }
 
     echo "<div id=\"myaccordion\">";
 
-    $form = new FormFields2('insert.php','formular', 93, 0);
+    $form = new FormFields2('insert.php','formular', 93, 0, 'Я согласен');
 
-    echo "<div><table style=\"display: block;\"><tbody style=\"border: none;\">"; 
-    $form->tdBox( 'text', 'Фамилия',          'surname',  200, 60, 'K' ); 
-    $form->tdBox( 'text', 'Имя',              'name',     200, 60, 'K' ); 
-    $form->tdBox( 'text', 'Отчество (при наличии)',         'second_name', 200, 60, 0 ); 
-    $form->tdBox( 'text', 'e-mail',           'e-mail',      200, 90, 'E' ); 
-
-    echo "</tbody></table></div>\n\n"; 
-    echo "<p><b>Адрес и наименование оператора, получающего разрешение на обработку ПД:</b> 107023, г. Москва, Б. Семеновская ул., д. 38; Федеральное государственное бюджетное образовательное учреждение высшего профессионального образования «Московский государственный машиностроительный университет (МАМИ)».</p>
-<p><b>Цель обработки ПД:</b> обеспечение соблюдения законов и иных нормативных правовых актов, обеспечении личной безопасности, обеспечение сохранности имущества оператора, Субъекта ПД и третьих лиц, статистические или иные научные цели при условии полного обезличивания ПД.</p>
-<p><b>Перечень ПД, на обработку которых даю согласие:</b> фамилия, имя, отчество; пол; число, месяц и год рождения; место рождения; адрес; сведения об образовании; номера телефонов; реквизиты документа, удостоверяющего личность и гражданство; результаты ЕГЭ или вступительных испытаний; реквизиты документа об образовании; иные данные, предусмотренные законодательством РФ.</p>
-<p><b>Перечень действий с ПД, на совершение которых даю согласие:</b> сбор, систематизация, накопление, распространение, хранение, уточнение, передача, обезличивание, блокирование, уничтожение.</p>
-<p><b>Способы обработки ПД:</b> на бумажных носителях, с помощью информационной системы ПД.</p>
-<p><b>Порядок отзыва согласия по инициативе Субъекта ПД:</b> субъект ПД в любой момент имеет право отозвать свое согласие в необходимом объеме на основании письменного заявления.</p>";
+    $form->beginBlock()
+         ->textInput('Фамилия',          'surname',  200, 60, 'K' )
+         ->textInput('Имя',              'name',     200, 60, 'K' )
+         ->textInput('Отчество (при наличии)',         'second_name', 200, 60, 0 )
+         ->textInput('e-mail',           'e-mail',      200, 90, 'E' )
+         ->common('<b>Адрес и наименование оператора, получающего разрешение на обработку ПД:</b> 107023, г. Москва, Б. Семеновская ул., д. 38; Федеральное государственное бюджетное образовательное учреждение высшего профессионального образования «Московский государственный машиностроительный университет (МАМИ)».')
+         ->common('<b>Цель обработки ПД:</b> обеспечение соблюдения законов и иных нормативных правовых актов, обеспечении личной безопасности, обеспечение сохранности имущества оператора, Субъекта ПД и третьих лиц, статистические или иные научные цели при условии полного обезличивания ПД.')
+         ->common('<b>Перечень ПД, на обработку которых даю согласие:</b> фамилия, имя, отчество; пол; число, месяц и год рождения; место рождения; адрес; сведения об образовании; номера телефонов; реквизиты документа, удостоверяющего личность и гражданство; результаты ЕГЭ или вступительных испытаний; реквизиты документа об образовании; иные данные, предусмотренные законодательством РФ.')
+         ->common('<b>Перечень действий с ПД, на совершение которых даю согласие:</b> сбор, систематизация, накопление, распространение, хранение, уточнение, передача, обезличивание, блокирование, уничтожение.')
+         ->common('<b>Способы обработки ПД:</b> на бумажных носителях, с помощью информационной системы ПД.')
+         ->common('<b>Порядок отзыва согласия по инициативе Субъекта ПД:</b> субъект ПД в любой момент имеет право отозвать свое согласие в необходимом объеме на основании письменного заявления.');
     unset($form);
 }
 
-if ($step_num == 1) {
+if ($stepNumber == 1) {
     $form = new FormFields2('insert.php','formular', 180, 0);
 
     echo "<P>Пожалуйста заполните следующие поля (поля отмеченные * обязательны для заполнения):</P>\n\n";
     echo "<div id=\"myaccordion\">\n";   
 
     // ------ 1 ------
-    echo "<h3>Общие сведения</h3>";
-    echo "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-
-    $form->tdRadio(   'Пол',              'sex',         array('M'=>'Мужской','F'=>'Женский'), 0, 1);
-    $form->tdDateBox( 'Дата рождения',    'birthday',        1950, date('Y')-16, 'D' );
-
-    $form->tdRadio(   'Гражданство',      'citizenry',   array('Российская Федерация'=>'Российская Федерация','other'=>'Другое'), 0, 1);
-
-    echo "</tbody></table></div>\n\n";
+    $form->hidden('region', '1')
+         ->beginBlock("Общие сведения")
+         ->radioInput(   'Пол',              'sex',         array('M'=>'Мужской','F'=>'Женский'), 0, 1)
+         ->dateInput( 'Дата рождения',    'birthday',        1950, date('Y')-16, 'D' )
+         ->radioInput(   'Гражданство',      'citizenry',   array('Российская Федерация'=>'Российская Федерация','other'=>'Другое'), 0, 1);
 
     // ------ 2 ------
-    echo '<h3>Паспортные данные</h3>';
-    echo "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">";
-
-    $form->hidden('doc_type', 1);
-    $form->tdBox('text', array('Серия','Номер'), array('doc_serie','doc_number'),    array(45,70), array(4,6), array('N','N') ); 
-    $form->tdBox('text', 'Кем выдан',         'doc_issued',  200, 200, 'A' ); 
-    $form->tdBox('text', 'Код подразделения', 'doc_code',    100, 8, 'Okodp' ); 
-    $form->tdDateBox('Дата выдачи',           'doc_date',    1990, date('Y'), 'D' );
-    $form->tdBox('text', 'Место рождения',    'birthplace',  200, 100, 'A' ); 
-  
-    echo "</TBODY></table></div>";
+    $form->beginBlock("Паспортные данные")
+         ->hidden('doc_type', 1)
+         ->textInput(array('Серия','Номер'), array('doc_serie','doc_number'),    array(45,70), array(4,6), array('N','N') )
+         ->textInput('Кем выдан',         'doc_issued',  200, 200, 'A' )
+         ->textInput('Код подразделения', 'doc_code',    100, 8, 'Okodp' )
+         ->dateInput('Дата выдачи',           'doc_date',    1990, date('Y'), 'D' )
+         ->textInput('Место рождения',    'birthplace',  200, 100, 'A' );
 
     // ------ 3 ------
-    echo "<h3>Адрес проживания</h3>";
-    echo "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-
-    $form->tdBox( 'text', 'Почтовый индекс',  'homeaddress-index', 100, 6, 'N' );
-
     $aspec = $msl->getArrayById("SELECT id,CONCAT(id,' - ',name) as name FROM `reg_rf_subject` ORDER BY id ASC",'id','name');
-    $form->tdSelect('Субъект РФ', 'homeaddress-region', $aspec, 77, 1);
 
-    $form->tdBox('text', 'Населенный пункт',  'homeaddress-city', 200, 50, 'K' );
-    $form->tdBox('text', 'Улица (квартал)',  'homeaddress-street', 200, 60, 0 );
-    $form->tdBox('text', array('Дом','корпус','квартира'),  array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array('A',0,0) );
+    $form->beginBlock("Адрес проживания")
+         ->textInput('Почтовый индекс',  'homeaddress-index', 100, 6, 'N' )
+         ->selectInput('Субъект РФ', 'homeaddress-region', $aspec, 77, 1)
+         ->textInput('Населенный пункт',  'homeaddress-city', 200, 50, 'K' )
+         ->textInput('Улица (квартал)',  'homeaddress-street', 200, 60, 0 )
+         ->textInput(array('Дом','корпус','квартира'),  array('homeaddress-home','homeaddress-building','homeaddress-flat'), array(25,25,25), array(5,4,4), array('A',0,0) );
 
-    echo "<tr><TD colspan=\"2\"><LABEL><input type=\"checkbox\" id=\"regaddressashome\" name=\"regaddressashome\" value=\"1\" checked onclick=\"javascript: $('#regaddress_form').toggle();\">Совпадает с адресом регистрации.</LABEL>";
-    echo "</TBODY></table></div>";
+    echo "<tr><td colspan=\"2\">
+            <label>
+               <input type=\"checkbox\" id=\"regaddressashome\" name=\"regaddressashome\" value=\"1\" checked onclick=\"javascript: $('#regaddress_form').toggle();\">Совпадает с адресом регистрации.
+            </label>
+          </td></tr>";
 
     // ------ 3 ------
-    echo "<div id=\"regaddress_form\" style=\"display:none;\">";
-    echo "<h3>Адрес регистрации</h3>";
-    echo "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
-
-    $form->tdBox('text', 'Почтовый индекс',  'regaddress-index', 100, 6, 'ON' ); 
-
-    $form->tdSelect('Субъект РФ', 'regaddress-region', $aspec, 77, 0);
-
-    $form->tdBox( 'text', 'Населенный пункт',  'regaddress-city', 200, 50, 'OK' );
-    $form->tdBox( 'text', 'Улица (квартал)',  'regaddress-street', 200, 60, 0 );
-    $form->tdBox( 'text', array('Дом','корпус','квартира'),  array('regaddress-home','regaddress-building','regaddress-flat'), array(25,25,25), array(5,4,4), array(0,0,0) );
-    echo "</TBODY></table></div></div>";
+    $form->beginHiddenDiv('regaddress_form')
+         ->beginBlock("Адрес регистрации")
+         ->textInput('Почтовый индекс',  'regaddress-index', 100, 6, 'ON' )
+         ->selectInput('Субъект РФ', 'regaddress-region', $aspec, 77, 0)
+         ->textInput('Населенный пункт',  'regaddress-city', 200, 50, 'OK' )
+         ->textInput('Улица (квартал)',  'regaddress-street', 200, 60, 0 )
+         ->textInput(array('Дом','корпус','квартира'),  array('regaddress-home','regaddress-building','regaddress-flat'), array(25,25,25), array(5,4,4), array(0,0,0) )
+         ->endHiddenDiv();
 
     // ------ 4   ------
-    echo "<h3>Контактные данные</h3>";
-    echo "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
+    $form->beginBlock("Контактные данные")
+         ->phoneInput('Домашний телефон',         'homephone', array(40,70), array(5,7), 1 )
+         ->phoneInput('Мобильный телефон',        'mobile',    array(40,70), array(3,7), 1 );
 
-    $form->tdBox( 'phone', 'Домашний телефон',         'homephone', array(40,70), array(5,10), 1 );
-    $form->tdBox( 'phone', 'Мобильный телефон',        'mobile',    array(40,70), array(3,7), 1 );
- 
-    echo "</TBODY></table></div>";
-   
     // ------ 5 ------
-    echo "<h3>Сведения об имеющемся образовании</h3>";
-    echo "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">"; 
     $kval = $msl->getarrayById("SELECT id, name FROM reg_education", 'id','name');
-    $form->tdSelect(   'Тип учебного заведения', 'edu_base', $kval, 0, 1);
-
     $sval = $msl->getarrayById("SELECT id, name FROM reg_flang",'id','name');
-    $form->tdRadio('Изучаемый иностранный язык', 'language', $sval, 0, 1);
-    $form->tdRadio('Высшее образование получаю', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), 0, 1);
-    echo "</TBODY></table></div>\n";
 
-    $form->hidden('region', '1'); // id региона статичное (1 - интернет)
-    echo "</TBODY></table></div>\n";
+    $form->beginBlock("Сведения об имеющемся образовании")
+         ->selectInput('Тип учебного заведения', 'edu_base', $kval, 0, 1)
+         ->radioInput('Изучаемый иностранный язык', 'language', $sval, 0, 1)
+         ->radioInput('Высшее образование получаю', 'highedu',  array('0'=>'впервые','1'=>'не впервые'), 0, 1);
+
     unset($form);
     echo "</div>";
 }
 
-if ($step_num == 3) {
+if ($stepNumber == 3) {
     echo "<P>Пожалуйста загрузите документы об образовании (поля отмеченные * обязательны для заполнения):</P>";
     echo "<script type=\"text/javascript\">
            $(document).ready(function(){
@@ -425,22 +401,22 @@ function nextStep() {
 }
 </script>";
 
-        
-    $form = new FormFields2('insert.php','fileupload', 250, 0);
-    echo "<div><table style=\"border: 0px;\"><TBODY style=\"border: 0px;\">\n";
-   
     $bdoc = $msl->getarrayById("SELECT id,name FROM `reg_edu_doc`",'id','name');
-    $form->tdSelect('Тип загружаемого документа', 'doctype', $bdoc, 0, 1);
 
-    $form->tdBox('text', array('Серия','№'),  array('docserie','docnumber'), array(45,65), array(10,10), array('A','N'));
-    $form->tdDateBox('Дата выдачи', 'docdate', 1990, date('Y'), 'D');
-    $form->tdBox('text', 'Наименование учреждения, выдавшего документ', 'docinstitution', 150, 300, 'A');
-    $form->tdBox('text', 'Специальность', 'docspecialty', 150, 60, 0);
+    $form = new FormFields2('insert.php','fileupload', 250, 0);
+    $form->beginBlock()
+         ->selectInput('Тип загружаемого документа', 'doctype', $bdoc, 0, 1)
+         ->textInput(array('Серия','№'),  array('docserie','docnumber'), array(45,65), array(10,10), array('A','N'))
+         ->dateInput('Дата выдачи', 'docdate', 1990, date('Y'), 'D')
+         ->textInput('Наименование учреждения, выдавшего документ', 'docinstitution', 150, 300, 'A')
+         ->textInput('Специальность', 'docspecialty', 150, 60, 0);
 
-    echo "<tr><td><input type=\"button\" id=\"button1\" class=\"button\" value=\"Загрузить файлы\"></td></tr>";
+    echo "<tr><td><input type=\"button\" id=\"button1\" class=\"button\" value=\"Выбрать файл\"></td></tr>";
     echo "<tr><td colspan=2><div id=\"filemode\"";
    
-    $rval = $msl->getarray("SELECT name,serie,number,date,filename FROM `reg_applicant_edu_doc` a LEFT JOIN `reg_edu_doc` b ON a.edu_doc = b.id WHERE a.applicant = '".$_SESSION['applicant_id']."'", 1);
+    $rval = $msl->getarray("SELECT name,serie,number,date,filename FROM `reg_applicant_edu_doc` a
+                            LEFT JOIN `reg_edu_doc` b ON a.edu_doc = b.id
+                            WHERE a.applicant = '".$_SESSION['applicant_id']."'", 1);
     if ($rval == 0) {
         echo " style=\"display: none;\"";
     }
@@ -453,24 +429,23 @@ function nextStep() {
     }
 
     echo "</ol></div></div></td></tr>";
-    echo "<tr><td colspan=2><input type=\"button\" value=\"Перейти на следующий шаг\" onclick=\"nextStep();\"></td></tr>";
-    echo "</tbody></table></div>";
     unset($form);
 }
 
-if ($step_num == 2) {
+if ($stepNumber == 2) {
     $form = new FormFields2('insert.php','formular', 210, 0);
 
     echo "<P>Пожалуйста заполните следующие поля (поля отмеченные * обязательны для заполнения):</P>\n\n";
-    echo "<div id=\"myaccordion\"><h3>Выбор образовательной программы</h3>";
-    echo "<div><table style=\"display: block;\"><TBODY style=\"border: none;\">";
+    echo "<div id=\"myaccordion\">";
 
     $cat = new Catalog($msl);
+    $bval = $cat->getAvailableSpecialtiesByPgid();
 
-    $bval = $cat->getAvailableSpecialtiesByPgid(1);
-    $form->tdSelect('Выбранная образовательная программа', 'catalog', $bval, (isset($_SESSION['global_sid']) ? $_SESSION['global_sid'] : 0), 1);
+    $form->beginBlock("Выбор образовательной программы")
+         ->selectInput('Выбранная образовательная программа', 'catalog', $bval, (isset($_SESSION['global_sid']) ? $_SESSION['global_sid'] : 0), 1)
+         ->hidden('act', '')
+         ->endBlock();
    
-    echo "</tbody></table></div>";
     echo "<div id=\"ege_fields\">";
 
     if (isset($_SESSION['global_sid'])) {
@@ -493,11 +468,11 @@ if ($step_num == 2) {
           Для входа используется адрес электронной почты и данные паспорта (серия и номер слитно).</p>";   
 }
 
-if ($step_num == 4) {
+if ($stepNumber == 4) {
     echo "<P>Распечатайте и подпишите следующие документы:</P>";
     echo "<div id=\"myaccordion\">\n";   
 
-    $appl = new Applicant($msl, $_SESSION['applicant_id']);
+    new FabricApplicant($appl, $msl, $_SESSION['applicant_id']);
     $cat  = new Catalog($msl);
 
     $spc = $cat->getInfo($appl->catalog);

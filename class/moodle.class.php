@@ -28,12 +28,28 @@ class Moodle
 
     public function assignTest($id)
     {
-        $user = array("roleid" => "5",
-                      "userid" => $id,
-                      "contextid" => "2380",
-                      "timestart" => time());
+        $userEnrolment = array("enrolid" => "59",
+                               "status"  => "0",
+                               "userid"  => $id,
+                               "timestart" => time(),
+                               "timeend" => "0",
+                               "modifierid" => "309",
+                               "timecreated" => time(),
+                               "timemodified" => time());
+        $result1 = $this->_msl->insertArray("education`.`edu_user_enrolments", $userEnrolment, 0);
 
-        return $this->_msl->insertArray("education`.`edu_role_assignments", $user, 0);
+        // INSERT INTO edu_role_assignments (roleid,contextid,userid,component,itemid,timemodified,modifierid,sortorder) VALUES('5','2380','368','','0','1440491249','309','0')
+        $userAssignment = array("roleid" => "5",
+							"contextid" => "2380",
+							"userid" => $id,
+							"component" => "",
+							"itemid" => "0",
+							"timemodified" => time(),
+							"modifierid" => "309",
+							"sortorder" => "0");
+        $result2 = $this->_msl->insertArray("education`.`edu_role_assignments", $userAssignment, 0);
+        // INSERT INTO edu_user_enrolments (enrolid,status,userid,timestart,timeend,modifierid,timecreated,timemodified) VALUES('59','0','367','1439931600','0','2','1439973265','1439973265')
+        return ($result1 && $result2);
     }
 
     public function searchUser($email)
@@ -47,7 +63,7 @@ class Moodle
 
     public function isAssigned($id)
     {
-        $query = $this->_msl->getArray("SELECT true FROM education.`edu_role_assignments` WHERE contextid=2380 AND roleid=5 AND userid='".$id."' LIMIT 1");
+        $query = $this->_msl->getArray("SELECT true FROM education.`edu_user_enrolments` WHERE enrolid=59 AND userid='".$id."' LIMIT 1");
         if ($query == 0) {
             return false;
         }

@@ -27,7 +27,6 @@ class Applicant
     public $surname;
     public $name;
     public $second_name;
-    public $sex;
     public $region;
 
     public $catalog;
@@ -41,22 +40,14 @@ class Applicant
         $this->msl = $msl;
         $this->_id  = $id;
         
-        if ($id[0] == 'r') {
-            $this->_id  = substr($id, 1);
-            $this->tbl_prefix = "partner_";
-            $this->connum = 3;
-            //return new RegApplicant($msl, substr($id, 1));
-        } else {
-            if ($this->_checkSecurity() === false) {
-                exit(0);
-            }
+        if ($this->_checkSecurity() === false) {
+            exit(0);
         }
 
-        $r = $this->msl->getarray("SELECT surname,name,second_name,sex,type,catalog,profile,semestr,region,internet FROM ".$this->tbl_prefix."applicant WHERE id = ".$this->_id." LIMIT 1;");
+        $r = $this->msl->getarray("SELECT surname,name,second_name,type,catalog,profile,semestr,region,internet FROM ".$this->tbl_prefix."applicant WHERE id = ".$this->_id." LIMIT 1;");
         $this->surname     = $r['surname'];
         $this->name        = $r['name'];
         $this->second_name = $r['second_name'];
-        $this->sex         = $r['sex'];
         $this->region      = $r['region'];
         $this->type        = $r['type'];
 
@@ -170,7 +161,8 @@ class Applicant
 
     public function inflection()
     {
-        switch ($this->sex) {
+        $info = $this->getInfo('sex');
+        switch ($info['sex']) {
         case 'M':
             return "ый";
         case 'F':
@@ -270,7 +262,8 @@ class Applicant
                 print "<tr><td><A href=\"".$prefix."receipt/kvit.php?purpose=3&applicant_id=".$this->_id."\">Квитанция для оплаты досдач</A></td></tr>\n";
             }
         }
-
+        print "<tr><td>Вы прошли вступительные испытания. Ваши документы находятся на обработке. Будет сообщено дополнительно.</td></tr>";
+/*
         print "<tr><td><A href=\"".$prefix."documents/dog_mami.php?applicant=".$this->_id."\">Договор на оказание платных образовательных услуг</A>";
         if ($remarks == 1) {
             print " (3 экземпляра)";
@@ -289,7 +282,7 @@ class Applicant
             echo "<tr><td><A href=\"".$prefix."documents/ekz_list.php?applicant=".$this->_id."\">Экзаменационный лист</a></td></tr>\n";
         }
         print "<tr><td><A href=\"".$prefix."receipt/kvit.php?applicant_id=".$this->_id."\">Квитанция на оплату обучения</a></td></tr>\n";
-
+*/
         // If applicant's age is less than 18
         if ($this->isAdult() === false) {
             echo "<TR><TD><A href=\"".$prefix."documents/pdf/dop_net_18.pdf\" target=\"_blank\">Дополнение к договору</a> (2 экземпляра, если нет 18 лет)</TD></TR>\n";
@@ -316,11 +309,10 @@ class RegApplicant extends Applicant
             exit(0);
         }
 
-        $r = $this->msl->getarray("SELECT surname,name,second_name,sex,type,catalog,profile,semestr,region,agent FROM ".$this->tbl_prefix."applicant WHERE id = ".$this->_id." LIMIT 1;");
+        $r = $this->msl->getarray("SELECT surname,name,second_name,type,catalog,profile,semestr,region,agent FROM ".$this->tbl_prefix."applicant WHERE id = ".$this->_id." LIMIT 1;");
         $this->surname     = $r['surname'];
         $this->name        = $r['name'];
         $this->second_name = $r['second_name'];
-        $this->sex         = $r['sex'];
         $this->type        = $r['type'];
 
         $this->catalog     = $r['catalog'];

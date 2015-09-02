@@ -6,7 +6,7 @@ require_once('../class/pdf.class.php');
 require_once('../class/documents.class.php');
 
 $msl = new dMysql();
-$appl = new Applicant($msl, $_REQUEST['applicant']);
+new FabricApplicant($appl, $msl, $_REQUEST['applicant']);
 
 $r = $appl->getInfo();
 

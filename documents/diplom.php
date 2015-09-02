@@ -7,9 +7,9 @@ require_once('../class/documents.class.php');
 require_once('../../conf.php');
 
 $msl = new dMysql();
-$appl = new Applicant($msl, $_REQUEST['applicant_id']);
 
-$applicant_id = $_REQUEST['applicant_id'];
+$applicantId = $_REQUEST['applicant_id'];
+new FabricApplicant($appl, $msl, $applicantId);
 
 $pdf = new PDF('pdf/diplom.pdf');
 
@@ -33,7 +33,7 @@ $pdf->SetFont("times", "", 13);
 
 $pdf->splitText($spc['name'], array(array(110,69.4),array(110,76.4)), 50, 1);
 
-$rval = $msl->getarray("SELECT b.name_rp,serie,number,institution,date FROM reg_applicant_edu_doc a LEFT JOIN reg_edu_doc b ON a.edu_doc=b.id WHERE applicant='".$applicant_id."' AND `primary`='1'");
+$rval = $msl->getarray("SELECT b.name_rp,serie,number,institution,date FROM reg_applicant_edu_doc a LEFT JOIN reg_edu_doc b ON a.edu_doc=b.id WHERE applicant='".$applicantId."' AND `primary`='1'");
 
 $pdf->SetFont("times", "", 14);
 

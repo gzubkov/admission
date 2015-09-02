@@ -7,7 +7,7 @@ require_once('../../conf.php');
 $msl = new dMysql();
 
 $pdf = new PDF('pdf/opd.pdf');
-$appl = new Applicant($msl, $_REQUEST['applicant_id']);
+new FabricApplicant($appl, $msl, $_REQUEST['applicant_id']);
 
 $r = $appl->getInfo('passport');
 $addr = $appl->getAddress();
